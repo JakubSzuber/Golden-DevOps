@@ -70,7 +70,7 @@ recusandae alias error harum maxime adipisci amet laborum.
 
 # How to use the repo
 > **Note**
-> Exampl enote...
+> Example note...
 
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
@@ -90,6 +90,18 @@ recusandae alias error harum maxime adipisci amet laborum.
 https://user-images.githubusercontent.com/90647840/213922371-848ff6b3-60a8-4db2-94fb-7b11dbf41b42.mov
 </details>
 -->
+
+# Reuirements
+
+XX AWS account, dockerhub account?, etc
+Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum.
+
+# Reuired modifications
+
+XXAdd right environment variables, secrets, dockerhub repository, etc
+Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum.
 
 # Development setup
 
