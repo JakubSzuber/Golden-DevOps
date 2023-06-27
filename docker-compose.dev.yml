@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./healthchecks:/healthchecks
+    healthcheck:
+      test: /healthchecks/postgres-healthcheck
+      interval: "5s"
+  frontend:
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    build:
+      context: .
+      target: dev-envs
+    container_name: frontend
+    ports:
+      - "80:3000"
+      - "3000:3000"
+      - "9229:9229"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_started  # TODO change to "service_healthy" after fixing the bug
+
+# volumes:
+#   postgres_data: {}

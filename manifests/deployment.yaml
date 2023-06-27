@@ -1,0 +1,24 @@
+# kubernetes deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: myapp
+          image: jakubszuber/testing_image:sha-3a32d04b5fe2e65e2f8693b63ba99e19b6a1062a
+          imagePullPolicy: IfNotPresent

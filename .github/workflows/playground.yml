@@ -1,0 +1,38 @@
+---
+
+# TODO Temporary workflow for testing purposes (delete later)
+
+name: Features
+
+on:
+  workflow_dispatch:
+    inputs:
+      somechoice:
+        description: 'Some choice'
+        required: true
+        default: 'one'
+        type: choice
+        options:
+          - one
+          - two
+          - three
+      print_tags:
+        description: 'True to print to STDOUT'
+        required: true
+        type: boolean
+      tags:
+        description: 'Test scenario tags'
+        required: true
+        type: string
+      environment:
+        description: 'Environment to run tests against'
+        type: environment
+        required: true
+
+jobs:
+  print-tag:
+    runs-on: ubuntu-latest
+    if:  ${{ inputs.print_tags }} 
+    steps:
+      - name: Print the input tag to STDOUT
+        run: echo  The tags are ${{ inputs.tags }} and some choice is ${{ inputs.somechoice }}

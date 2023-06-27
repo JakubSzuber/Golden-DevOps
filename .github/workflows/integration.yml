@@ -1,0 +1,456 @@
+---
+# Complete workflow reponsible for the integration in our CI/CD pipeline
+
+name: CI
+
+concurrency: development
+
+on:  # TODO Change the trigger events' logic (or leave if you are sure it's ok (but it's probably not)). Meybe do that branch have to start with "dev_" or branch main but only for /src
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '!src/**/README.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '!src/**/README.md'
+
+env:
+  AWS_REGION: us-east-2
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    steps:
+#       - name: Echo Working
+#         run: echo "Working!"
+    
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run Super-Linter
+        uses: super-linter/super-linter/slim@v5
+        env:
+          DEFAULT_BRANCH: master
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false  # TODO This line should be set only if the repository is first properly linted before first usage of this line
+          #FILTER_REGEX_INCLUDE: .*src/.*  # Uncomment to inlude only files within /src
+          #FILTER_REGEX_EXCLUDE: .*/.github/workflows/.*  # Uncomment to exclude workflow files
+
+  # This job could be executed through the ubuntu, windows, and macOS hosted runners but it require additional changes
+  build-test-image:  
+#    runs-on: ${{ matrix.os }}
+#    strategy:
+#      matrix:
+#        os: [ubuntu-latest, windows-latest, macOS-latest]
+    runs-on: ubuntu-22.04
+    
+    permissions:
+      packages: write  # Obtain permission needed to push docker image to ghcr.io
+
+    steps:    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Login to ghcr.io registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Use GHCR as a register for test images
+    - name: Build and Push to GHCR
+      uses: docker/build-push-action@v4
+      with:
+        push: true
+        tags: ghcr.io/jakubszuber/testing_image:${{ github.run_id }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+  test-unit:
+    name: Unit tests in Docker
+    needs: [build-test-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: read  # Obtain permission needed to pull docker image to ghcr.io
+
+    steps:
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Unit Testing in Docker
+        run: |
+          docker run --rm ghcr.io/jakubszuber/testing_image:"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
+
+  test-integration:
+    name: Integration tests in Compose
+    needs: [build-test-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: read  # Obtain permission needed to pull docker image to ghcr.io
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test healthcheck in Docker Compose
+        run: |
+          export TESTING_IMAGE=ghcr.io/jakubszuber/testing_image:"$GITHUB_RUN_ID"
+          echo Testing image: "$TESTING_IMAGE"
+          docker compose -f docker-compose.test.yml up --exit-code-from service1
+
+  test-k3d:
+    name: Test Deployment in Kubernetes
+    needs: [build-test-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: read  # Obtain permission needed to pull docker image to ghcr.io
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run micro Kubernetes cluster for testing purposes
+      - uses: AbsaOSS/k3d-action@v2
+        with:
+          cluster-name: "test-cluster-1"
+          args: >-
+            --agents 1
+            --no-lb
+            --k3s-arg "--no-deploy=traefik,servicelb,metrics-server@server:*"
+
+      - name: Smoke test deployment in k3d Kubernetes  # We use here the testing image from GitHub registry
+        run: |
+          kubectl create secret docker-registry regcred \
+            --docker-server=https://ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }}
+          sed -i "s/jakubszuber\/testing_image:sha-.*/ghcr.io\/jakubszuber\/testing_image:$GITHUB_RUN_ID/" manifests/deployment.yaml
+          cat manifests/deployment.yaml
+          kubectl apply -f manifests/deployment.yaml
+          kubectl rollout status deployment myapp
+          sleep 20
+          kubectl get all
+
+      - name: Test deployment
+        run: |
+          kubectl exec deploy/myapp -- curl --fail localhost
+
+#   #TODO you can add CodeGuru but this will require cosme configuration like e.g. s3 bucket creating, further permission scope, etc
+#   #TODO If you want to add this part write a notes in github_actions.md 
+#   #TODO tutorial https://www.youtube.com/watch?v=czlx4iixe0Y
+#   scan-artifact-AWS-CodeGuru:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read    # This is required for actions/checkout
+#       id-token: write   # This is required for requesting the JWT
+#       packages: read  # Obtain permission needed to push docker image to ghcr.io
+#       security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v2
+#       with:
+#         fetch-depth: 0
+
+#     - uses: actions/setup-node@v3
+#       with:
+#         node-version: 18
+
+#     - run: npm build
+
+#     # TODO change the scope of permission to ise OpenID
+#     - name: Configure AWS credentials
+#       uses: aws-actions/configure-aws-credentials@v2
+#       with:
+#         role-to-assume: arn:aws:iam::152691795422:role/gh-action-role
+#         role-session-name: samplerolesession
+#         aws-region: ${{ env.AWS_REGION }}
+
+#     - name: CodeGuru Reviewer
+#       uses: aws-actions/codeguru-reviewer@v1.1
+#       with:
+#         build_path: build  # Build artifact(s) directory
+#         s3_bucket: SPECIFY S3 BUCKET WITH RIGHT PREFIX  # S3 Bucket with "codeguru-reviewer-*" prefix
+
+#     - name: Upload review result
+#       uses: github/codeql-action/upload-sarif@v1
+#       with:
+#         sarif_file: codeguru-results.sarif.json
+
+  scan-image-Trivy:
+    name: Scan Image with Trivy
+    needs: [build-test-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read  # Obtain permission needed for actions/checkout to fetch code
+      packages: read  # Obtain permission needed to push docker image to ghcr.io
+      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image to scan
+        run: docker pull ghcr.io/jakubszuber/testing_image:"$GITHUB_RUN_ID"
+        
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Trivy for all CVEs (non-blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/jakubszuber/testing_image:${{ github.run_id }}
+          exit-code: 0
+          format: table 
+
+      - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/jakubszuber/testing_image:${{ github.run_id }}
+          exit-code: 1
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'HIGH,CRITICAL'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  scan-image-Snyk:
+    name: Scan Image with Snyk
+    needs: [build-test-image]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image to scan
+        run: docker pull ghcr.io/jakubszuber/testing_image:"$GITHUB_RUN_ID"
+
+      - name: Run Snyk to check Docker image for vulnerabilities
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ghcr.io/jakubszuber/testing_image:${{ github.run_id }}
+          args: --file=Dockerfile --severity-threshold=high
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
+
+# TODO Uncomment below and move the below two lines, uncomment and configure rest of below part and setup datree on teh datree website when you will have implemented helm
+# env:
+#   DATREE_TOKEN: ${{ secrets.DATREE_TOKEN }}
+
+#   Datreek8sPolicyCheck:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v2
+
+#       - name: Run Datree Policy Check
+#         uses: datreeio/action-datree@main
+#         with:
+#           path: 'RELATIVE PATH TO ChartDirectory'
+#           cliArguments: ''
+#           isHelmChart: true
+#           helmArguments: '--values values.yaml'
+
+#       - name: Upload analysis results to GitHub
+#         uses: github/codeql-action/upload-sarif@v2
+#         with:
+#           sarif_file: datree.sarif
+#           wait-for-processing: true
+
+  build-final-image:
+    name: Build Final Image
+    # TODO later add "Datreek8sPolicyCheck" and "scan-artifact-AWS-CodeGuru"
+    needs: [lint, test-unit, test-integration, test-k3d, scan-image-Trivy, scan-image-Snyk]
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write  # Obtain permission needed to push docker image to ghcr.io
+      pull-requests: write  # Obtain permission needed to create and update comments in PRs
+
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta for the final image  # Add multiple tags to the image
+        id: docker_meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/jakubszuber/testing_image,JakubSzuber/testing_image
+          flavor: |
+            latest=true
+          tags: |
+            type=semver,pattern={{version}},value=v1.0.0
+            type=semver,pattern={{major}}.{{minor}},value=v1.0.0
+            type=ref,event=pr
+            type=sha,format=long
+            type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
+
+      # TODO Make sure that below part is fully logical
+      - name: Build Docker image and push it to GHCR and Docker Hub if the event is direct push or merged pull request
+        uses: docker/build-push-action@v4
+        with:
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha  # Use cached image layers to reduce image building time
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64  # You can change to "linux/amd64,linux/arm/v7,linux/arm64"
+
+      # If PR, put image tags in the PR comments
+      # from https://github.com/marketplace/actions/create-or-update-comment
+      - name: Find comment for image tags
+        uses: peter-evans/find-comment@v2
+        if: github.event_name == 'pull_request'
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: Docker image tag(s) pushed
+
+      # If PR, put image tags in the PR comments
+      - name: Create or update comment for image tags
+        uses: peter-evans/create-or-update-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Docker image tag(s) pushed:
+            ```text
+            ${{ steps.docker_meta.outputs.tags }}
+            ```
+            Labels added to images:
+            ```text
+            ${{ steps.docker_meta.outputs.labels }}
+            ```
+          edit-mode: replace
+
+  notify-slack:
+    # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
+    name: Notify Slack
+    needs: [build-final-image]
+    if: always()
+    runs-on: ubuntu-latest
+    env: 
+      STAT: ${{ needs.build-final-image.result }}
+    steps:
+      - name: TEST1
+        run: |
+          if [[ "$STAT" == "skipped" ]]; then
+            echo "STAT=failure" >> "$GITHUB_ENV"
+          fi
+      - name: TEST
+        run: |
+          echo "$STAT"
+          echo ${{ env.STAT }}
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ env.STAT }}
+          fields: repo,message,author,commit,action,eventName,ref,workflow,job,took,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always() # Pick up events even if the job fails or is canceled.

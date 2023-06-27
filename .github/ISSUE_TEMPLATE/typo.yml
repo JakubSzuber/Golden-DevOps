@@ -1,0 +1,48 @@
+name: Typo Report
+description: File a typo report
+title: "[Typo]: "
+labels: ["documentation", "triage"]
+assignees:
+  - JakubSzuber
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this typo report!
+  - type: textarea
+    id: typo-location
+    attributes:
+      label: Specify which file has one or multiple typos
+      description: In form of list, specify the paths of files on the repo that have typos?
+      placeholder: "- /path/to/file\n- /path/to/file"
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: fixed-typo
+    attributes:
+      label: Paste the fixed content that was containing the typos
+      description: Paste here the fixed content of the changed by you file with code, markdown, etc.
+      placeholder: I do not have any typos now!
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: |
+        Are there any other open or closed GitHub issues related to the problem or solution you described? If so, list them below. For example:
+        ```
+          - #6017
+        ```
+      placeholder:
+      value:
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** If the submit button is disabled and you have filled out all required fields, please check that you did not forget a **Title** for the issue.

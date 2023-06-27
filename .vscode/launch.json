@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug Docker-React",
+        "type": "chrome",
+        "request": "launch",
+        "url": "http://localhost",
+        "webRoot": "${workspaceFolder}/src",
+        "sourceMapPathOverrides": {
+          "/app/src/*": "${webRoot}/*"
+        }
+      }
+    ]
+}
