@@ -46,7 +46,6 @@ body:
       label: Expected Behavior
       description: What should have happened?
       placeholder: What should have happened?
-      value:
     validations:
       required: true
 
@@ -56,7 +55,6 @@ body:
       label: Actual Behavior
       description: What actually happened?
       placeholder: What actually happened?
-      value:
     validations:
       required: true
 
@@ -66,7 +64,6 @@ body:
       label: Steps to Reproduce
       description: |
         Please list the full steps required to reproduce the issue
-      value:
     validations:
       required: true
 
@@ -77,8 +74,7 @@ body:
       description: |
         Are there anything atypical about your situation that we should know?
         For example: is Terraform running in a wrapper script or in a CI system? Are you passing any unusual command line options or environment variables to opt-in to non-default behavior?
-      placeholder: Additional context...
-      value:
+      placeholder: "Additional context..."
     validations:
       required: false
 
@@ -91,8 +87,7 @@ body:
         ```
           - #6017
         ```
-      placeholder:
-      value:
+      placeholder: "Optional reference here..."
     validations:
       required: false
 

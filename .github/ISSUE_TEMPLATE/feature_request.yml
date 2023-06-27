@@ -34,8 +34,7 @@ body:
         ```
           - #6017
         ```
-      placeholder:
-      value:
+      placeholder: "Optional reference here..."
     validations:
       required: false
   - type: dropdown
