@@ -15,7 +15,7 @@ body:
       label: Specify which file has one or multiple typos
       description: In form of list, specify the paths of files on the repo that have typos?
       placeholder: "- /path/to/file\n- /path/to/file"
-      render: markdown
+      render: Markdown
     validations:
       required: true
 
