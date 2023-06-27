@@ -1,9 +1,7 @@
-<h1>Development setup</h1>
+# Contributing to Golden-DevOps
 
-To dev work after cloning the repo use `docker compose -f docker-compose.dev.yml up -d --build` for the initial setup and fixing temporary errors, after executing this 
-command you can just start coding (the changes will be applied after each save) and you will see the website on [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000). 
-In order to debug code in VSC make sure that you have [.vscode/launch.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.vscode/launch.json) from that project. 
-Note that the initial start, compiling and automatic reload of the website's content can take a little more time than usual. If you encounter any problems with dev 
-work try to restart the container, your whole Docker and eventually WSL2.
+Repo is currently only under my development, and I am not planning to work with some other contributors for more serious development, but I you want to contribute in some small functionality, add some not core feature, or fix something with repo feel free to fork this repo and do a Pull Request.
 
-***Furthermore: a pull request with the prefix "dev_" is highly recommended.***
+I recommended going to [Discussions](https://github.com/JakubSzuber/Golden-DevOps/discussions) or [Issues](https://github.com/JakubSzuber/Golden-DevOps/issues/new/choose) section in order to tell me about some tiny fixes, but if you want to collaborate with me for more serious development enhancement first contact me on [jszuber06@gmail.com](https://jszuber06@gmail.com) and I can add you as the repository's collaborator.
+
+**Furthermore: a development branch with the prefix "dev_" is highly recommended.**
