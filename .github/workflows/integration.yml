@@ -291,6 +291,8 @@ jobs:
     name: Scan Image with Snyk
     needs: [build-test-image]
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
 
     steps:
       - name: Checkout git repo
