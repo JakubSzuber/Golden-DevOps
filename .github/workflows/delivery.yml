@@ -22,13 +22,13 @@ env:
 
 jobs:
   # Only trigger if the previous workflow run was successful and the event was not a pull request
-  deploy-to-ecs:
+  change-staging-manifest:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
-      contents: read    # This is required for actions/checkout
+      contents: write    # This is required for actions/checkout
       id-token: write   # This is required for requesting the JWT
     environment: 
       name: Staging
@@ -37,13 +37,25 @@ jobs:
 
     steps:
       - name: Print the used tag
-        run: echo "To staging environmnet is deployed container with image tag  sha-${{ env.IMAGE_TAG }}"
-    
+        run: echo "To staging environmnet will deploy container with image tag  sha-${{ env.IMAGE_TAG }}"
+
+      - name: Print the used tag
+        run: echo "Changing the image's tag in the manifest to sha-${{ env.IMAGE_TAG }}"
+
       - name: Checkout
         uses: actions/checkout@v3
-        
-      - name: test
-        run: echo "Here was aws ecs"
+
+      # TODO change later the manifest file to helm chart and use "helm upgrade" instead of "sed"
+      - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
+        run: |
+          echo "Menifest before change:" && cat manifests/deployment.yaml
+          sed -i 's/sha-.*/sha-${{ env.IMAGE_TAG }}/' manifests/deployment.yaml
+          echo "Menifest after change:" && cat manifests/deployment.yaml
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add manifests/deployment.yaml
+          git commit -m "Update the image's tag in the manifest [skip actions]"
+          git push
 
 #       - name: Configure AWS credentials
 #         uses: aws-actions/configure-aws-credentials@v2
@@ -87,7 +99,7 @@ jobs:
 #           wait-for-service-stability: true
 
   # TODO add some smoke test maybe by codeguru or just simply use some command that will check the status of the task or do "curl" on container
-  change-manifests:
+  change-production-manifests:
     runs-on: ubuntu-latest
     permissions:
       contents: write
