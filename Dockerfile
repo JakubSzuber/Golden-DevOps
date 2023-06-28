@@ -47,7 +47,7 @@ CMD [ "nodemon", "--inspect=0.0.0.0:9229"]
 
 
 ## Nginx lightweight alpine image
-FROM nginx:1.23-alpine-slim
+FROM nginx:1.24-alpine-slim
 
 ## Update apk and add curl
 RUN apk update; \
