@@ -114,17 +114,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       # TODO change later the manifest file to helm chart and use "helm upgrade" instead of "sed"
-      - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git pull
-          echo "Menifest before change:" && cat manifests/deployment.yaml
-          sed -i 's/sha-.*/sha-${{ env.IMAGE_TAG }}/' manifests/deployment.yaml
-          echo "Menifest after change:" && cat manifests/deployment.yaml
-          git add manifests/deployment.yaml
-          git commit -m "Update the image's tag in the manifest [skip actions]"
-          git push
+      # TODO of course later use different file for each job
+#      - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
+#        run: |
+#          git config user.name github-actions
+#          git config user.email github-actions@github.com
+#          git pull
+#          echo "Menifest before change:" && cat manifests/deployment.yaml
+#          sed -i 's/sha-.*/sha-${{ env.IMAGE_TAG }}/' manifests/deployment.yaml
+#          echo "Menifest after change:" && cat manifests/deployment.yaml
+#          git add manifests/deployment.yaml
+#          git commit -m "Update the image's tag in the manifest [skip actions]"
+#          git push
 
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
