@@ -89,6 +89,8 @@ jobs:
   # TODO add some smoke test maybe by codeguru or just simply use some command that will check the status of the task or do "curl" on container
   change-manifests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: [deploy-to-ecs]
     environment: 
       name: Production
