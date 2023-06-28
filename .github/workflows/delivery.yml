@@ -7,10 +7,10 @@ concurrency: staging
 
 on:  # Trigger automatically on integration.yml success (merged pull request or direct push)
   workflow_dispatch:
-#  workflow_run:
-#    workflows: [CI]
-#    types: [completed]
-#     branches: [main]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
 
 env:
   AWS_REGION: us-east-2
@@ -41,13 +41,16 @@ jobs:
     
       - name: Checkout
         uses: actions/checkout@v3
+        
+      - name: test
+        run: echo "Here was aws ecs"
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::152691795422:role/gh-action-role
-          role-session-name: samplerolesession
-          aws-region: ${{ env.AWS_REGION }}
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::152691795422:role/gh-action-role
+#           role-session-name: samplerolesession
+#           aws-region: ${{ env.AWS_REGION }}
 
 #  Optionally you can use ECR instead of Docker Hub (then you will have to change a lot in CI and CD workflow)
 #       - name: Login to Amazon ECR
@@ -67,23 +70,23 @@ jobs:
 #           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 #           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: docker.io/jakubszuber/testing_image:sha-${{ env.IMAGE_TAG }}  # Use just created image by the CI workflow
+#       - name: Fill in the new image ID in the Amazon ECS task definition
+#         id: task-def
+#         uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+#         with:
+#           task-definition: ${{ env.ECS_TASK_DEFINITION }}
+#           container-name: ${{ env.CONTAINER_NAME }}
+#           image: docker.io/jakubszuber/testing_image:sha-${{ env.IMAGE_TAG }}  # Use just created image by the CI workflow
 
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1.4.11
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-          
-          # TODO add some smoke test maybe by codeguru or just simply use some command that will check the status of the task or do "curl" on container
+#       - name: Deploy Amazon ECS task definition
+#         uses: aws-actions/amazon-ecs-deploy-task-definition@v1.4.11
+#         with:
+#           task-definition: ${{ steps.task-def.outputs.task-definition }}
+#           service: ${{ env.ECS_SERVICE }}
+#           cluster: ${{ env.ECS_CLUSTER }}
+#           wait-for-service-stability: true
+
+  # TODO add some smoke test maybe by codeguru or just simply use some command that will check the status of the task or do "curl" on container
   change-manifests:
     runs-on: ubuntu-latest
     needs: [deploy-to-ecs]
