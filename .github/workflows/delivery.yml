@@ -32,7 +32,8 @@ jobs:
       id-token: write   # This is required for requesting the JWT
     environment: 
       name: Staging
-      url: https://m.wsj.net/video/20180907/090718muskpot1/090718muskpot1_1920x1080.jpg  # You can add here public IPv4 of your task
+      # You can add here public IPv4 of your task
+      url: https://opengitops.dev/
 
     steps:
       - name: Print the used tag
