@@ -72,6 +72,13 @@ recusandae alias error harum maxime adipisci amet laborum.
 > **Note**
 > Example note...
 
+XXXDOCKERHUB_TOKEN, DOCKERHUB_USERNAME, SNYK_TOKEN, SLACK_WEBHOOK_URL, SLACK_WEBHOOK_URL2
+Do https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
+Change all occurrences of "jakubszuber/react-nginx-image" and "react-nginx-image" to your image
+Setup OpenID Connect between GitHub and AWS
+Configure Snyk account with repo
+Create "Staging" and "Production" GitHub environments and then add a protection role for "Production" so this environment will require reviewers (add some reviews that will be able to allow for changes deployment)
+
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
 numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
