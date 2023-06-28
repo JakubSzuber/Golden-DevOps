@@ -124,3 +124,29 @@ jobs:
           git add manifests/deployment.yaml
           git commit -m "Update the image's tag in the manifest [skip actions]"
           git push
+
+  notify-slack:
+    # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
+    name: Notify Slack
+    needs: [change-production-manifests]
+    if: always()
+    runs-on: ubuntu-latest
+    env: 
+      STAT: ${{ needs.change-production-manifests.result }}
+    steps:
+      - name: TEST1
+        run: |
+          if [[ "$STAT" == "skipped" ]]; then
+            echo "STAT=failure" >> "$GITHUB_ENV"
+          fi
+      - name: TEST
+        run: |
+          echo "$STAT"
+          echo ${{ env.STAT }}
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ env.STAT }}
+          fields: repo,message,author,commit,action,eventName,ref,workflow,job,took,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL2 }}
+        if: always() # Pick up events even if the job fails or is canceled.
