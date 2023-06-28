@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [deploy-to-ecs]
+    needs: [change-staging-manifest]
     environment: 
       name: Production
       url: https://pl.wikipedia.org/wiki  # You can add here public IPv4 of your app (production link)
