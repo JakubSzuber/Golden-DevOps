@@ -320,7 +320,7 @@ jobs:
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: snyk.sarif
+          sarif_file: 'snyk.sarif'
 
 # TODO Uncomment below and move the below two lines, uncomment and configure rest of below part and setup datree on teh datree website when you will have implemented helm
 # env:
