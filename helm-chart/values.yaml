@@ -4,5 +4,5 @@ configmap:
   name: golden-devops-helm-release-configmap-v1
   data:
     CUSTOM_HEADER: "This app was deployed with helm!"
-    BG_COLOR: '#12181b'
-    FONT_COLOR: '#FFFFFF'
+    BG_COLOR: "#12181b"
+    FONT_COLOR: "#FFFFFF"
