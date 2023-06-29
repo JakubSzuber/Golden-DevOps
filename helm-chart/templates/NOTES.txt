@@ -1,0 +1,3 @@
+Successfully applied Golden-DevOps release!
+Remember that you have two Helm value files, 
+one for each environment: values-staging.yaml and values-prod.yaml

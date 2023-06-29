@@ -1,0 +1,17 @@
+# TODO this should work for CI/CD because there firewall rules are right configured in GHA
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Values.appName }}-connection-test"
+  labels:
+    app.kubernetes.io/name: {{ .Values.appName }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['localhost:80']
+  restartPolicy: Never

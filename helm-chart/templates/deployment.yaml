@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.appName }}
+spec:
+  replicas: {{ .Values.replicasCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+    spec:
+#      imagePullSecrets:
+#        - name: regcred
+      containers:
+        - name: {{ .Values.appName }}
+          image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 80
+          envFrom:
+          - configMapRef:
+              name: {{ .Values.configmap.name }}
+          resources:
+            requests:
+              memory: "16Mi" 
+              cpu: "50m"    # 500milliCPUs (1/2 CPU)
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

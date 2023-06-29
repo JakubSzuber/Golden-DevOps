@@ -1,0 +1,7 @@
+namespace: prod-namespace
+
+replicasCount: 3
+
+image:
+  name: jakubszuber/react-nginx-image
+  tag: sha-692b34f99c385d0db1aae2b9045166fbf212eed9
