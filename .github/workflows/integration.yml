@@ -151,6 +151,9 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -179,16 +182,22 @@ jobs:
             --docker-server=https://ghcr.io \
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
-          sed -i "s/jakubszuber\/react-nginx-image:sha-.*/ghcr.io\/jakubszuber\/react-nginx-image:$GITHUB_RUN_ID/" manifests/deployment.yaml
-          cat manifests/deployment.yaml
-          kubectl apply -f manifests/deployment.yaml
-          kubectl rollout status deployment myapp
-          sleep 20
-          kubectl get all
+          sed -i "s/jakubszuber\/react-nginx-image/ghcr.io\/jakubszuber\/react-nginx-image/" helm-chart/values-staging.yaml
+          sed -i "s/sha-.*/$GITHUB_RUN_ID/" helm-chart/values-staging.yaml
+          cat helm-chart/values-staging.yaml
+          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-staging.yaml
+          kubectl rollout status deployment golden-devops-helm-release --namespace=staging-namespace
+          sleep 30
+          kubectl get all --namespace=staging-namespace
 
+      #TODO add later:
+      #helm lint helm-chart --values helm-chart/values.yaml --values helm-chart/values-staging.yaml
+      #helm test golden-devops-helm-release
+
+      # TODO enhance this test
       - name: Test deployment
         run: |
-          kubectl exec deploy/myapp -- curl --fail localhost
+          kubectl exec deploy/golden-devops-helm-release --namespace=staging-namespace -- curl --fail localhost
 
 #   #TODO you can add CodeGuru but this will require cosme configuration like e.g. s3 bucket creating, further permission scope, etc
 #   #TODO If you want to add this part write a notes in github_actions.md 
