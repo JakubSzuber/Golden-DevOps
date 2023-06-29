@@ -106,7 +106,7 @@ jobs:
       
       - name: Unit Testing in Docker
         run: |
-          docker run --rm ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID" sh -c "cd /src && npm test"
+          docker run --rm ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID" sh -c "cd src && npm test"
 
   test-integration:
     name: Integration tests in Compose
