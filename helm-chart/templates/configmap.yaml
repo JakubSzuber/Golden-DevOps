@@ -8,6 +8,6 @@ metadata:
     name: {{ .Values.configmap.name }}
     namespace: {{ .Values.namespace }}
 data:
-    BG_COLOR: {{ .Values.configmap.data.BG_COLOR }}
-    FONT_COLOR: {{ .Values.configmap.data.FONT_COLOR }}
-    CUSTOM_HEADER: {{ .Values.configmap.data.CUSTOM_HEADER }}
+    BG_COLOR: "{{ .Values.configmap.data.BG_COLOR }}"
+    FONT_COLOR: "{{ .Values.configmap.data.FONT_COLOR }}"
+    CUSTOM_HEADER: "{{ .Values.configmap.data.CUSTOM_HEADER }}"
