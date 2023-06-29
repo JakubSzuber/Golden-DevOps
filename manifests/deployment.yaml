@@ -20,5 +20,5 @@ spec:
         - name: regcred
       containers:
         - name: myapp
-          image: jakubszuber/react-nginx-image:sha-692b34f99c385d0db1aae2b9045166fbf212eed9
+          image: jakubszuber/react-nginx-image:sha-8fef41c067e1bef41c1f62320b4e883a1acbc6de
           imagePullPolicy: IfNotPresent
