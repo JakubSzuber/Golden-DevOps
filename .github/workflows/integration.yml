@@ -201,7 +201,7 @@ jobs:
         run: |
           kubectl exec deploy/golden-devops-helm-release --namespace=staging-namespace -- curl --fail localhost
           helm test golden-devops-helm-release || helm
-          docker logs golden-devops-helm-release-connection-test --namespace=staging-namespace
+          kubectl logs golden-devops-helm-release-connection-test --namespace=staging-namespace
           echo "siemaa
 
 #   #TODO you can add CodeGuru but this will require cosme configuration like e.g. s3 bucket creating, further permission scope, etc
