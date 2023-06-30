@@ -14,5 +14,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['localhost:80']
+      args: ['{{ .Values.namespace }}:80']
   restartPolicy: Never
