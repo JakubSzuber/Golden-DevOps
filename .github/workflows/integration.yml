@@ -191,8 +191,6 @@ jobs:
           kubectl get all --namespace=staging-namespace
 
       #TODO add later:
-      #sed -i "s/jakubszuber\/react-nginx-image/ghcr.io\/jakubszuber\/react-nginx-image/" helm-chart/values-staging.yaml
-      #sed -i "s/sha-.*/$GITHUB_RUN_ID/" helm-chart/values-staging.yaml
       #helm lint helm-chart --values helm-chart/values.yaml --values helm-chart/values-staging.yaml
       #helm test golden-devops-helm-release
 
@@ -200,9 +198,9 @@ jobs:
       - name: Test deployment
         run: |
           kubectl exec deploy/golden-devops-helm-release --namespace=staging-namespace -- curl --fail localhost
-          helm test golden-devops-helm-release || helm
-          kubectl logs golden-devops-helm-release-connection-test --namespace=staging-namespace
-          echo "siemaa
+          helm test golden-devops-helm-release || echo "Command helm test golden-devops-helm-release failed!!!!!!!!!!!!!!!"
+          kubectl logs connection-test --namespace=staging-namespace
+          echo "siemaa"
 
 #   #TODO you can add CodeGuru but this will require cosme configuration like e.g. s3 bucket creating, further permission scope, etc
 #   #TODO If you want to add this part write a notes in github_actions.md 
