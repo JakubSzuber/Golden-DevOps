@@ -186,6 +186,9 @@ jobs:
           sed -i "s/sha-.*/$GITHUB_RUN_ID/" helm-chart/values-staging.yaml
           cat helm-chart/values-staging.yaml
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-staging.yaml
+          sleep 200
+          kubectl describe deployment golden-devops-helm-release --namespace=staging-namespace
+          kubectl logs -l app=golden-devops-helm-release --namespace=staging-namespace
           kubectl rollout status deployment golden-devops-helm-release --namespace=staging-namespace
           sleep 40
           kubectl get all --namespace=staging-namespace
