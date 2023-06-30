@@ -185,6 +185,7 @@ jobs:
           sed -i "s/jakubszuber\/react-nginx-image/ghcr.io\/jakubszuber\/react-nginx-image/" helm-chart/values-staging.yaml
           sed -i "s/sha-.*/$GITHUB_RUN_ID/" helm-chart/values-staging.yaml
           cat helm-chart/values-staging.yaml
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u $ --password-stdin
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-staging.yaml
           sleep 200
           kubectl describe deployment golden-devops-helm-release --namespace=staging-namespace
