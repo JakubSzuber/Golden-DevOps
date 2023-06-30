@@ -182,6 +182,8 @@ jobs:
             --docker-server=ghcr.io \
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
+          sed -i "s/jakubszuber\/react-nginx-image/ghcr.io\/jakubszuber\/react-nginx-image/" helm-chart/values-staging.yaml
+          sed -i "s/sha-.*/$GITHUB_RUN_ID/" helm-chart/values-staging.yam
           cat helm-chart/values-staging.yaml
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-staging.yaml
           sleep 200
