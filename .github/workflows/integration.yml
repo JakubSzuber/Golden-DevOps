@@ -192,15 +192,12 @@ jobs:
 
       #TODO add later:
       #helm lint helm-chart --values helm-chart/values.yaml --values helm-chart/values-staging.yaml
-      #helm test golden-devops-helm-release
 
-      # TODO enhance this test
       - name: Test deployment
         run: |
           kubectl exec deploy/golden-devops-helm-release --namespace=staging-namespace -- curl --fail localhost
-          helm test golden-devops-helm-release || echo "Command helm test golden-devops-helm-release failed!!!!!!!!!!!!!!!"
+          helm test golden-devops-helm-release || echo "Testing of Helm golden-devops-helm-release failed!"
           kubectl logs golden-devops-helm-release-connection-test --namespace=staging-namespace
-          echo "siemaa"
 
 #   #TODO you can add CodeGuru but this will require cosme configuration like e.g. s3 bucket creating, further permission scope, etc
 #   #TODO If you want to add this part write a notes in github_actions.md 
