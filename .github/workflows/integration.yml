@@ -173,8 +173,7 @@ jobs:
           cluster-name: "test-cluster-1"
           args: >-
             --agents 1
-            --no-lb
-            --k3s-arg "--no-deploy=traefik,servicelb,metrics-server@server:*"
+            --k3s-arg "--no-deploy=traefik,metrics-server@server:*"
 
       - name: Smoke test deployment in k3d Kubernetes  # We use here the testing image from GitHub registry
         run: |
