@@ -176,9 +176,6 @@ jobs:
 
       - name: Smoke test deployment in k3d Kubernetes  # We use here the testing image from GitHub registry
         run: |
-          kubectl create secret docker-registry regcred \
-            --docker-server=https://ghcr.io \
-            --docker-password=${{ secrets.GITHUB_TOKEN }}
           sed -i "s/jakubszuber\/react-nginx-image/ghcr.io\/jakubszuber\/react-nginx-image/" helm-chart/values-staging.yaml
           sed -i "s/sha-.*/$GITHUB_RUN_ID/" helm-chart/values-staging.yaml
           cat helm-chart/values-staging.yaml
