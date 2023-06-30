@@ -4,4 +4,4 @@ replicasCount: 2
 
 image:
   name: jakubszuber/react-nginx-image
-  tag: sha-1d26703a8fb847b499692fef3130be1545d34cf2
+  tag: sha-b8f4d5fca5f3ed61a252c71f867947bcea6b57b9
