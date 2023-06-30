@@ -175,6 +175,8 @@ jobs:
             --agents 1
 
       - name: Smoke test deployment in k3d Kubernetes  # We use here the testing image from GitHub registry
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml --set image.name=ghcr.io/jakubszuber/react-nginx-image,image.tag=$GITHUB_RUN_ID
           sleep 30
