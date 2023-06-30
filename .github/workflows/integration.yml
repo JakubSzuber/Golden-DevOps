@@ -190,9 +190,6 @@ jobs:
           kubectl rollout status deployment golden-devops-helm-release --namespace=staging-namespace
           kubectl get all --namespace=staging-namespace
 
-      #TODO add later:
-      #helm lint helm-chart --values helm-chart/values.yaml --values helm-chart/values-staging.yaml
-
       - name: Test deployment
         run: |
           kubectl exec deploy/golden-devops-helm-release --namespace=staging-namespace -- curl --fail localhost
