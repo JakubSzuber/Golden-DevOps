@@ -199,7 +199,6 @@ jobs:
         run: |
           kubectl exec deploy/golden-devops-helm-release --namespace=staging-namespace -- curl --fail localhost
           helm test golden-devops-helm-release || echo "Command helm test golden-devops-helm-release failed!!!!!!!!!!!!!!!"
-          kubectl logs golden-devops-helm-release-connection-test
           kubectl logs golden-devops-helm-release-connection-test --namespace=staging-namespace
           echo "siemaa"
 
