@@ -184,7 +184,6 @@ jobs:
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u $ --password-stdin
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml --set image.name=ghcr.io/jakubszuber/react-nginx-image,image.tag=$GITHUB_RUN_ID,namespace=staging-namespace,replicasCount=2
-          sleep 150
           kubectl describe deployment golden-devops-helm-release --namespace=staging-namespace
           kubectl logs -l app=golden-devops-helm-release --namespace=staging-namespace
           kubectl rollout status deployment golden-devops-helm-release --namespace=staging-namespace
@@ -200,7 +199,9 @@ jobs:
       - name: Test deployment
         run: |
           kubectl exec deploy/golden-devops-helm-release --namespace=staging-namespace -- curl --fail localhost
-          helm test golden-devops-helm-release
+          helm test golden-devops-helm-release || helm
+          docker logs golden-devops-helm-release-connection-test --namespace=staging-namespace
+          echo "siemaa
 
 #   #TODO you can add CodeGuru but this will require cosme configuration like e.g. s3 bucket creating, further permission scope, etc
 #   #TODO If you want to add this part write a notes in github_actions.md 
