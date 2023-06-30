@@ -66,7 +66,7 @@ jobs:
           sleep 30
           kubectl get all --namespace=prod-namespace
           echo "-----------------------------------------------------------------------"
-          kubectl logs -l app=golden-devops-helm-release --namespace=staging-namespace
+          kubectl logs -l app=golden-devops-helm-release --namespace=prod-namespace
           echo "-----------------------------------------------------------------------"
           kubectl exec deploy/golden-devops-helm-release --namespace=prod-namespace -- curl --fail localhost || echo "nie1"
           helm test golden-devops-helm-release || echo "Testing of Helm golden-devops-helm-release failed!"
