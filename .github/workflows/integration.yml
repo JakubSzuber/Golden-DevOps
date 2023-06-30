@@ -183,7 +183,8 @@ jobs:
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           cat helm-chart/values-staging.yaml
-          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-staging.yaml          sleep 200
+          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-staging.yaml
+          sleep 200
           kubectl describe deployment golden-devops-helm-release --namespace=staging-namespace
           kubectl logs -l app=golden-devops-helm-release --namespace=staging-namespace
           kubectl rollout status deployment golden-devops-helm-release --namespace=staging-namespace
