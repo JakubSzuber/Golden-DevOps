@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ .Values.appName }}-connection-test"
+  namespace: {{ .Values.namespace }}
   labels:
     app.kubernetes.io/name: {{ .Values.appName }}
     app.kubernetes.io/instance: {{ .Release.Name }}
