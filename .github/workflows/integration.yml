@@ -179,7 +179,7 @@ jobs:
       - name: Smoke test deployment in k3d Kubernetes  # We use here the testing image from GitHub registry
         run: |
           kubectl create secret docker-registry regcred \
-            --docker-server=https://ghcr.io \
+            --docker-server=ghcr.io \
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           cat helm-chart/values-staging.yaml
