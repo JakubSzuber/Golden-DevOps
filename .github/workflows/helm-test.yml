@@ -53,6 +53,7 @@ jobs:
 #        if: steps.list-changed.outputs.changed == 'true'
         run: |
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-prod.yaml
+          sleep 30
           kubectl exec deploy/golden-devops-helm-release --namespace=prod-namespace -- curl --fail localhost || echo "nie1"
           helm test golden-devops-helm-release || echo "Testing of Helm golden-devops-helm-release failed!"
           kubectl logs golden-devops-helm-release-connection-test --namespace=prod-namespace
