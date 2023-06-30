@@ -182,7 +182,7 @@ jobs:
             --docker-server=https://ghcr.io \
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
-          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml --set image.name=ghcr.io/jakubszuber/react-nginx-image,image.tag=$GITHUB_RUN_ID
+          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml --set "image.name=ghcr.io/jakubszuber/react-nginx-image,image.tag=$GITHUB_RUN_ID"
           sleep 30
           kubectl describe deployment golden-devops-helm-release --namespace=staging-namespace
           kubectl logs -l app=golden-devops-helm-release --namespace=staging-namespace
