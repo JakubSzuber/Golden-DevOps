@@ -64,7 +64,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+      - name: Run Helm resources
 #        if: steps.list-changed.outputs.changed == 'true'
         run: |
           kubectl create secret docker-registry regcred \
@@ -73,10 +73,16 @@ jobs:
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-prod.yaml
           sleep 30
+
+      - name: Test Helm resources
+#        if: steps.list-changed.outputs.changed == 'true'
+        run: |
           kubectl get all --namespace=prod-namespace
-          echo "-----------------------------------------------------------------------"
+          echo "---------------------------Main container logs--------------------------"
           kubectl logs -l app=golden-devops-helm-release --namespace=prod-namespace
-          echo "-----------------------------------------------------------------------"
-          kubectl exec deploy/golden-devops-helm-release --namespace=prod-namespace -- curl --fail localhost || echo "nie1"
+          echo "------------------------------------------------------------------------"
+          kubectl exec deploy/golden-devops-helm-release --namespace=prod-namespace -- curl --fail localhost || echo "Successfully retrieved data from localhost!"
           helm test golden-devops-helm-release || echo "Testing of Helm golden-devops-helm-release failed!"
+          echo "---------------------------Testing container logs--------------------------"
           kubectl logs golden-devops-helm-release-connection-test --namespace=prod-namespace
+          echo "---------------------------------------------------------------------------"
