@@ -74,7 +74,7 @@ jobs:
             --docker-server=ghcr.io \
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
-          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-prod.yaml
+          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-prod.yaml --set disableTLS=true
           echo "Waiting to startup containers..."
           sleep 30
           kubectl get all --namespace=prod-namespace
