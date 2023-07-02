@@ -22,7 +22,7 @@ env:
 
 jobs:
   # Only trigger if the previous workflow run was successful and the event was not a pull request
-  change-staging-manifest:
+  change-tag-staging:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event != 'pull_request'
@@ -99,11 +99,11 @@ jobs:
 #           wait-for-service-stability: true
 
   # TODO add some smoke test maybe by codeguru or just simply use some command that will check the status of the task or do "curl" on container
-  change-production-manifests:
+  change-tag-production:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [change-staging-manifest]
+    needs: [change-tag-staging]
     environment: 
       name: Production
       url: https://pl.wikipedia.org/wiki  # You can add here public IPv4 of your app (production link)
@@ -128,13 +128,13 @@ jobs:
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
     name: Notify Slack
-    needs: [change-production-manifests]
+    needs: [change-tag-production]
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event != 'pull_request'
     runs-on: ubuntu-latest
     env: 
-      STAT: ${{ needs.change-production-manifests.result }}
+      STAT: ${{ needs.change-tag-production.result }}
     steps:
       - name: TEST1
         run: |
