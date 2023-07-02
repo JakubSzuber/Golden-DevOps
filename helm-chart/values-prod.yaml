@@ -2,4 +2,4 @@ namespace: prod-namespace
 
 image:
   name: jakubszuber/react-nginx-image
-  tag: sha-312fcbb682a18dc5e7b6655756c88158aeda56ca
+  tag: sha-d858a2675961377630e0fd47857ce9953ed89f73
