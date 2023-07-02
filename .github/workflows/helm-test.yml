@@ -1,3 +1,8 @@
+---
+# Note:
+# You can uncomment "if" statements in all steps but by leaving that comments we ensure that each time this workflow will run we will test the Helm 
+# chart even if the chart itself hasn't changed. By doing this we ensure that the potentially changed source code still works along with the Helm chart.
+
 name: Helm-Test
 
 on:
@@ -40,9 +45,10 @@ jobs:
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --target-branch ${{ github.event.repository.default_branch }}
-        
-      # Run micro Kubernetes cluster for testing purposes
-      - uses: AbsaOSS/k3d-action@v2
+
+      - name: Run micro Kubernetes cluster for testing purposes
+        uses: AbsaOSS/k3d-action@v2
+#        if: steps.list-changed.outputs.changed == 'true'
         with:
           cluster-name: "test-cluster-1"
           args: >-
