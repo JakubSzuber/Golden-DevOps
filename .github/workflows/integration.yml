@@ -190,7 +190,8 @@ jobs:
           kubectl describe deployment golden-devops-helm-release --namespace=staging-namespace
           kubectl logs -l app=golden-devops-helm-release --namespace=staging-namespace
           kubectl rollout status deployment golden-devops-helm-release --namespace=staging-namespace
-#          kubectl get all --namespace=staging-namespace
+          kubectl get all --namespace=staging-namespace
+          echo "Finished setting up"
 
       - name: Test deployment
         run: |
