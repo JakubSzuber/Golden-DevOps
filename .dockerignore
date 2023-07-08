@@ -8,5 +8,4 @@ build
 output.png
 *.md
 *.yml
-.nginx
 .vscode

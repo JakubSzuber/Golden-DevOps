@@ -5,7 +5,7 @@
         "name": "Debug Docker-React",
         "type": "chrome",
         "request": "launch",
-        "url": "http://localhost",
+        "url": "http://localhost:8080",
         "webRoot": "${workspaceFolder}/src",
         "sourceMapPathOverrides": {
           "/app/src/*": "${webRoot}/*"

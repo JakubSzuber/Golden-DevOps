@@ -46,13 +46,17 @@ RUN npm install -g nodemon
 CMD [ "nodemon", "--inspect=0.0.0.0:9229"]
 
 
-## Nginx lightweight alpine image
-FROM nginx:1.24-alpine-slim
+## Nginx unprivileged debian image
+FROM nginxinc/nginx-unprivileged:1.25
+
+## Switch to root user for setup
+USER root
 
 ## Update apk and add curl
-RUN apk update; \
-    apk add --no-cache curl; \
-    apk add nodejs npm;
+RUN apt-get update; \
+    apt-get install -y curl;
+# \
+#    apt-get install -y nodejs npm;
 
 # Copy config nginx
 COPY --from=build /app/.nginx/nginx.conf /etc/nginx/conf.d/default.conf
@@ -68,17 +72,12 @@ COPY --from=build /app/build .
 # Copy the /app dir from builder stage in order to be able to do the unit tests
 COPY --from=build /app /test-app
 
-## Add permissions
-RUN chown -R nginx:nginx /usr/share/nginx && \
-        chown -R nginx:nginx /var/cache/nginx && \
-        chown -R nginx:nginx /var/log/nginx && \
-        chown -R nginx:nginx /etc/nginx/conf.d
-RUN touch /var/run/nginx.pid && \
-        chown -R nginx:nginx /var/run/nginx.pid
+## Expose port 8080
+EXPOSE 8080
 
 ## Switch to non-root user
 USER nginx
 
 ## Healthchecks
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
+    CMD curl -f http://localhost:8080 || exit 1

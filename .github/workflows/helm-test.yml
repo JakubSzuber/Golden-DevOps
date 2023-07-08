@@ -85,7 +85,7 @@ jobs:
       - name: Test Helm resources (curl command)
 #        if: steps.list-changed.outputs.changed == 'true'
         run: |
-          if ! kubectl exec deploy/golden-devops-helm-release --namespace=prod-namespace -- curl --fail localhost; then
+          if ! kubectl exec deploy/golden-devops-helm-release --namespace=prod-namespace -- curl --fail localhost:8080; then
             echo "Failed to retrieve data from localhost!"
             exit 1
           fi

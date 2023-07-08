@@ -2,7 +2,7 @@ services:
   todo:
     image: "${TESTING_IMAGE}"
 #     ports:
-#       - "80:80"
+#       - "8080:8080"
 
   postgres:
     image: postgres
@@ -18,13 +18,13 @@ services:
   service1:
     image: "${TESTING_IMAGE}"
 #     ports:
-#       - "80:80"
+#       - "8080:8080"
     depends_on:
       todo:
         condition: service_healthy
       postgres:
         condition: service_started  # TODO change to "service_healthy" after fixing the bug
-    command: curl --fail http://todo:80 || exit 1
+    command: curl --fail http://todo:8080 || exit 1
 
 # volumes:
 #   postgres_data: {}
