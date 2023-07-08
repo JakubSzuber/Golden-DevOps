@@ -76,7 +76,7 @@ jobs:
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-prod.yaml --set disableTLS=true
           echo "Waiting to startup containers..."
-          sleep 30
+          sleep 40
           kubectl get all --namespace=prod-namespace
           echo "---------------------------Main container logs--------------------------"
           kubectl logs -l app=golden-devops-helm-release --namespace=prod-namespace
