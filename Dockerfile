@@ -54,9 +54,8 @@ USER root
 
 ## Update apk and add curl
 RUN apt-get update; \
-    apt-get install -y curl;
-# \
-#    apt-get install -y nodejs npm;
+    apt-get install -y curl; \
+    apt-get install -y npm;
 
 # Copy config nginx
 COPY --from=build /app/.nginx/nginx.conf /etc/nginx/conf.d/default.conf
