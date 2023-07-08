@@ -72,6 +72,21 @@ recusandae alias error harum maxime adipisci amet laborum.
 > **Note**
 > Example note...
 
+If you don't have any internet domain then register one manually e.g. in the AWS console from Route 53 interface and create a hosted zone for in Route 53 (if you register a domain through Route 53 then the hosted zone is automatically created for that domain)
+Create an ACM cert issued for yourdomain.com and *.yourdomain.com (you can do this e.g. in the AWS console from ACM 53 interface).
+Create an S3 Bucket for a Terraform remote state.
+XXSetup Terrafom infra
+XXXAdd an alias record with the Ingress Load Balancer URL. AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
+XXXThen make sure you have right configured ~/.aws/credentials file on XXX so you have configured a default IAM user and IAM user that is used to access Argo CD (in this repo jakubszuber-admin). Both can be the same IAM user with the same AWS Access Key. MAYBE JUST OPENID SO THE BELOW LINE WON'T BE NEEDED.
+Then Add your IAM user (eksadmin in my case) to the AWS configuration. Then update the kubeconfig to get access to your brand new EKS cluster and grab the ArgoCD default password from the argocd-initial-admin-secret.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
+export AWS_DEFAULT_PROFILE=jakubszuber-admin ALBO set AWS_DEFAULT_PROFILE=jakubszuber-admin
+aws sts get-caller-identity
+aws eks update-kubeconfig --name eks-demo --region us-east-1 --profile jakubszuber-admin
+kubectl get secrets -n argocd
+kubectl get secret argocd-initial-admin-secret -n argocd --template={{.data.password}} | base64 -d
+Now you can log in as "admin" to argo.yourdomain.com
+
+
 XXXDOCKERHUB_TOKEN, DOCKERHUB_USERNAME, SNYK_TOKEN, SLACK_WEBHOOK_URL, SLACK_WEBHOOK_URL2
 Do https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
 Change all occurrences of "jakubszuber/react-nginx-image" and "react-nginx-image" to your image
@@ -98,7 +113,7 @@ https://user-images.githubusercontent.com/90647840/213922371-848ff6b3-60a8-4db2-
 </details>
 -->
 
-# Reuirements
+# Requirements
 
 XX AWS account, dockerhub account?, etc
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
