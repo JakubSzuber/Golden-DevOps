@@ -184,7 +184,9 @@ jobs:
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u $ --password-stdin
           helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml --set image.name=ghcr.io/jakubszuber/react-nginx-image,image.tag=$GITHUB_RUN_ID,namespace=staging-namespace,disableTLS=true
-          sleep 50
+          sleep 25
+          echo "Spinning containers in progress, please wait..."
+          sleep 25
           kubectl describe deployment golden-devops-helm-release --namespace=staging-namespace
           kubectl logs -l app=golden-devops-helm-release --namespace=staging-namespace
           kubectl rollout status deployment golden-devops-helm-release --namespace=staging-namespace
