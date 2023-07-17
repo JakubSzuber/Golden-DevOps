@@ -193,8 +193,10 @@ jobs:
           kubectl describe deployment golden-devops-helm-release --namespace=argocd
           kubectl logs -l app=golden-devops-helm-release --namespace=argocd
           kubectl get all --all-namespaces
-          kubectl logs --namespace=argocd $(kubectl get pods --namespace=argocd | head -n 1)
-          kubectl logs --namespace=argocd $(kubectl get pods --namespace=argocd | head -n 1)
+          POD1=$(kubectl get pods --namespace=argocd | head -n 1)
+          POD2=$(kubectl get pods --namespace=argocd | head -n 2 | tail -n 1)
+          kubectl logs --namespace=argocd $POD1
+          kubectl logs --namespace=argocd $POD2
           kubectl rollout status deployment golden-devops-helm-release --namespace=argocd
           echo "Finished setting up"
 
