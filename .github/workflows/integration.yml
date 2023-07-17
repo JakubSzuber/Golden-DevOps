@@ -205,7 +205,7 @@ jobs:
       - name: Test deployment
         run: |
           sleep 3
-          kubectl exec deploy/golden-devops-helm-release --namespace=argocd -- curl --fail localhost:8080
+          kubectl exec deploy/golden-devops-helm-release --namespace=argocd -- curl -k --fail https://localhost:8080
           helm test golden-devops-helm-release || echo "Testing of Helm golden-devops-helm-release failed!"
           kubectl logs golden-devops-helm-release-connection-test --namespace=argocd
 
