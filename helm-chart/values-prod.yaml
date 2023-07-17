@@ -1,4 +1,4 @@
-namespace: prod-namespace
+namespace: argocd  # TODO meybe change
 
 image:
   name: jakubszuber/react-nginx-image
