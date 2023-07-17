@@ -184,7 +184,7 @@ jobs:
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u $ --password-stdin
-          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml --set image.name=ghcr.io/jakubszuber/react-nginx-image,image.tag=$GITHUB_RUN_ID,namespace=argocd,disableTLS=true
+          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml --set image.name=ghcr.io/jakubszuber/react-nginx-image,image.tag=$GITHUB_RUN_ID,namespace=argocd,disableTLS=false
           sleep 25
           echo "Spinning containers in progress, please wait..."
           sleep 25
@@ -193,7 +193,8 @@ jobs:
           kubectl describe deployment golden-devops-helm-release --namespace=argocd
           kubectl logs -l app=golden-devops-helm-release --namespace=argocd
           kubectl get all --all-namespaces
-          kubectl logs $(kubectl get pods --namespace=argocd | head -n 1)
+          kubectl logs --namespace=argocd $(kubectl get pods --namespace=argocd | head -n 1)
+          kubectl logs --namespace=argocd $(kubectl get pods --namespace=argocd | head -n 1)
           kubectl rollout status deployment golden-devops-helm-release --namespace=argocd
           echo "Finished setting up"
 
