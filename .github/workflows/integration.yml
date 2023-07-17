@@ -133,7 +133,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-# TODO you have to add secret for proper container's work
+# You can also do Integration Testing with usage of Docker Compose if you would like to use multiple types of container for the application logic
 #      - name: Test healthcheck in Docker Compose
 #        run: |
 #          export TESTING_IMAGE=ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
@@ -191,12 +191,12 @@ jobs:
           kubectl describe deployment golden-devops-helm-release --namespace=argocd
           kubectl logs -l app=golden-devops-helm-release --namespace=argocd
           kubectl get all --all-namespaces
-          echo "Troubleshooting--------"
+          echo "------- Eventual Troubleshooting --------"
           sudo apt-get install jq
           POD1=$(kubectl get pods -o json --namespace=argocd | jq -r '.items[0].metadata.name')
           POD2=$(kubectl get pods -o json --namespace=argocd | jq -r '.items[1].metadata.name')
-          echo $POD1
-          echo $POD2
+          echo "First pod: $POD1"
+          echo "Second pod: $POD2"
           kubectl logs --namespace=argocd $POD1
           kubectl logs --namespace=argocd $POD2
           kubectl rollout status deployment golden-devops-helm-release --namespace=argocd
@@ -206,8 +206,12 @@ jobs:
         run: |
           sleep 3
           kubectl exec deploy/golden-devops-helm-release --namespace=argocd -- curl -k --fail https://localhost:8080
-          helm test golden-devops-helm-release || echo "Testing of Helm golden-devops-helm-release failed!"
-          kubectl logs golden-devops-helm-release-connection-test --namespace=argocd
+          helm test golden-devops-helm-release
+          if [ $? -ne 0 ]; then 
+            echo "Testing of Helm golden-devops-helm-release failed!"
+            kubectl logs golden-devops-helm-release-connection-test --namespace=argocd
+            exit 1
+          fi
 
 #   #TODO you can add CodeGuru but this will require cosme configuration like e.g. s3 bucket creating, further permission scope, etc
 #   #TODO If you want to add this part write a notes in github_actions.md 
