@@ -188,22 +188,17 @@ jobs:
           sleep 25
           echo "Spinning containers in progress, please wait..."
           sleep 25
-          echo "Spinning containers in progress, please wait..."
-          sleep 25
           kubectl describe deployment golden-devops-helm-release --namespace=argocd
           kubectl logs -l app=golden-devops-helm-release --namespace=argocd
           kubectl get all --all-namespaces
           echo "Troubleshooting--------"
           sudo apt-get install jq
-          POD1=$(kubectl get pods --namespace=argocd | grep golden-devops-helm-release | head -n 1 | cut -d' ' -f2 | cut -d'/' -f2)
-          POD2=$(kubectl get pods -o json --namespace=argocd | jq -r '.items[0].metadata.name')
-          test=`kubectl get pods --namespace=argocd | grep golden-devops-helm-release | head -n 1 | cut -d -f2 | cut -d'/' -f2`
+          POD1=$(kubectl get pods -o json --namespace=argocd | jq -r '.items[0].metadata.name')
+          POD2=$(kubectl get pods -o json --namespace=argocd | jq -r '.items[1].metadata.name')
           echo $POD1
           echo $POD2
-          echo $test
-          kubectl logs --namespace=argocd $POD2
           kubectl logs --namespace=argocd $POD1
-          kubectl logs --namespace=argocd $test
+          kubectl logs --namespace=argocd $POD2
           kubectl rollout status deployment golden-devops-helm-release --namespace=argocd
           echo "Finished setting up"
 
