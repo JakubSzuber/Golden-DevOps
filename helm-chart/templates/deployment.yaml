@@ -5,24 +5,25 @@ metadata:
   name: {{ .Values.appName }}
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.appName }}
+    app.kubernetes.io/name: {{ .Values.appName }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      app.kubernetes.io/name: {{ .Values.appName }}
   template:
     metadata:
       labels:
-        app: {{ .Values.appName }}
+        app.kubernetes.io/name: {{ .Values.appName }}
     spec:
       imagePullSecrets:
         - name: regcred
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          #image: nginx
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8080
@@ -36,3 +37,11 @@ spec:
             limits:
               memory: "2Gi"
               cpu: "1"
+          volumeMounts:
+          - name: tls
+            mountPath: /etc/nginx/tls
+            readOnly: true
+      volumes:
+      - name: tls
+        secret:
+          secretName: nginx-tls-secret
