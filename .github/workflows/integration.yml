@@ -133,11 +133,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Test healthcheck in Docker Compose
-        run: |
-          export TESTING_IMAGE=ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
-          echo Testing image: "$TESTING_IMAGE"
-          docker compose -f docker-compose.test.yml up --exit-code-from service1
+# TODO you have to add secret for proper container's work
+#      - name: Test healthcheck in Docker Compose
+#        run: |
+#          export TESTING_IMAGE=ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
+#          echo Testing image: "$TESTING_IMAGE"
+#          docker compose -f docker-compose.test.yml up --exit-code-from service1
 
   test-k3d:
     name: Test Deployment in Kubernetes
