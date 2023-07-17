@@ -188,6 +188,8 @@ jobs:
           sleep 25
           echo "Spinning containers in progress, please wait..."
           sleep 25
+          echo "Spinning containers in progress, please wait..."
+          sleep 25
           kubectl describe deployment golden-devops-helm-release --namespace=argocd
           kubectl logs -l app=golden-devops-helm-release --namespace=argocd
           kubectl rollout status deployment golden-devops-helm-release --namespace=argocd
