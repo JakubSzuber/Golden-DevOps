@@ -78,5 +78,6 @@ EXPOSE 8080
 USER nginx
 
 ## Healthchecks
+# TODO Later, when you move from the self-signed certificates delete "-k" flag
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080 || exit 1
+    CMD curl -k -f https://localhost:8080 || exit 1
