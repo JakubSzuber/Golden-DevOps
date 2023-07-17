@@ -196,7 +196,7 @@ jobs:
           POD1=$(kubectl get pods --namespace=argocd | head -n 1)
           POD2=$(kubectl get pods --namespace=argocd | head -n 2 | tail -n 1)
           echo $POD1
-          test=`kubectl get pods --namepsace=argocd | head -n 1 | awk '{print $2}' | cut -d '/' -f 2
+          test=`kubectl get pods --namepsace=argocd | head -n 1 | awk '{print $2}' | cut -d '/' -f 2`
           echo $test
           kubectl logs --namespace=argocd $test
           kubectl logs --namespace=argocd $POD1
