@@ -14,5 +14,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['https://{{ .Values.appName }}:443']
+      args: ['--no-check-certificate', 'https://{{ .Values.appName }}:443']
   restartPolicy: Never
