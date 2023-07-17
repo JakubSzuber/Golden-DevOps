@@ -87,6 +87,7 @@ kubectl get secret argocd-initial-admin-secret -n argocd --template={{.data.pass
 Now you can log in as "admin" to argo.yourdomain.com
 
 
+generate your own "cert.pem" and "key.pem" by command `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 750 -nodes`. Then you can print them by `cat cert.pem | base64 -w 0` and `cat key.pem | base64 -w 0` so you are able to copy them from the terminal and insert as values to secret.yaml file that is in Helm chart. **Currently this method of using self-signed certificates is temporary and it would be better to use some other TLS certificate approach but if you are ok with then remember to not expose the values of "cert.pem" and "key.pem" in GitHub repo (this repo is showcase example and self-signed certificates will be removed in progress for this repo). Making the better and more secure approach is in progress for that repo!**
 XXXDOCKERHUB_TOKEN, DOCKERHUB_USERNAME, SNYK_TOKEN, SLACK_WEBHOOK_URL, SLACK_WEBHOOK_URL2
 Do https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
 Change all occurrences of "jakubszuber/react-nginx-image" and "react-nginx-image" to your image
