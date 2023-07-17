@@ -194,15 +194,16 @@ jobs:
           kubectl logs -l app=golden-devops-helm-release --namespace=argocd
           kubectl get all --all-namespaces
           echo "Troubleshooting--------"
-          POD1=$(kubectl get pods --namespace=argocd | head -n 2 | tail -n 1 | awk '{print $2}' | cut -d '/' -f 2)
-          POD2=$(kubectl get pods --namespace=argocd | head -n 3 | tail -n 1 | awk '{print $2}' | cut -d '/' -f 2)
-          test=`kubectl get pods --namespace=argocd | head -n 2 | tail -n 1 | awk '{print $2}' | cut -d '/' -f 2`
+          sudo apt-get install jq
+          POD1=$(kubectl get pods --namespace=argocd | grep golden-devops-helm-release | head -n 1 | awk '{print \$1}')
+          POD2=$(kubectl get pods -o json --namespace=argocd | jq -r '.items[0].metadata.name')
+          test=`kubectl get pods --namespace=argocd | awk '/argocd.*Running/{print $2}'`
           echo $POD1
           echo $POD2
           echo $test
-          kubectl logs --namespace=argocd $test
           kubectl logs --namespace=argocd $POD1
           kubectl logs --namespace=argocd $POD2
+          kubectl logs --namespace=argocd $test
           kubectl rollout status deployment golden-devops-helm-release --namespace=argocd
           echo "Finished setting up"
 
