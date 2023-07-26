@@ -60,6 +60,9 @@ RUN apt-get update; \
 # Copy config nginx
 COPY --from=build /app/.nginx/nginx.conf /etc/nginx/nginx.conf
 
+# Copy mime.types from nginx image
+COPY --from=nginx:alpine /etc/nginx/mime.types /etc/nginx/mime.types
+
 WORKDIR /usr/share/nginx/html
 
 # Remove default nginx static assets
