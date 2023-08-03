@@ -1,11 +1,11 @@
 ---
-# Complete workflow reponsible for the integration in our CI/CD pipeline
+# Complete workflow responsible for the integration in our CI/CD pipeline
 
 name: CI
 
-concurrency: development
+concurrency: integration
 
-on:  # TODO Change the trigger events' logic (or leave if you are sure it's ok (but it's probably not)). Meybe do that branch have to start with "dev_" or branch main but only for /src
+on:  # TODO Change the trigger events' logic (or leave if you are sure it's ok (but it's probably not)). Maybe do that branch have to start with "dev_" or branch main but only for /src
   workflow_dispatch:
   push:
     branches: [main]
@@ -133,7 +133,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-# You can also do Integration Testing with usage of Docker Compose if you would like to use multiple types of container for the application logic
+# You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
 #      - name: Test healthcheck in Docker Compose
 #        run: |
 #          export TESTING_IMAGE=ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
@@ -345,7 +345,7 @@ jobs:
         with:
           sarif_file: 'snyk.sarif'
 
-# TODO Uncomment below and move the below two lines, uncomment and configure rest of below part and setup datree on teh datree website when you will have implemented helm
+# TODO Uncomment below and move the below two lines, uncomment and configure the rest of the below part, and setup Datree on the Datree website when you will have implemented Helm
 # env:
 #   DATREE_TOKEN: ${{ secrets.DATREE_TOKEN }}
 
@@ -415,7 +415,7 @@ jobs:
             type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
 
       # TODO Make sure that below part is fully logical
-      - name: Build Docker image and push it to GHCR and Docker Hub if the event is direct push or merged pull request
+      - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push or merged pull request
         uses: docker/build-push-action@v4
         with:
           push: ${{ github.event_name != 'pull_request' }}
