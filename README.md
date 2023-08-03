@@ -219,6 +219,7 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 
 <!--TODO give somewhere link to docker hub project-->
 <!--TODO write somewhere that the website for the project may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to ;). But every relevant website's appearance should be available to see in this README.md-->
+<!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
 <!--TODO do all TODOs from each file on repo-->
 
 
