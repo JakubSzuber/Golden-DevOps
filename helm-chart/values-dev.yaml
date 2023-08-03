@@ -1,0 +1,5 @@
+namespace: argocd  # TODO meybe change
+
+image:
+  name: jakubszuber/react-nginx-image
+  tag: sha-02054a86fd8dfc692762cf01c7c461787f5f1244
