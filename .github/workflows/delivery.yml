@@ -1,9 +1,9 @@
 ---
-# Deploy to staging environment and do smoke tests
+# Deploy to every environment
 
 name: CD
 
-concurrency: staging
+concurrency: delivery
 
 on:  # Trigger automatically on integration.yml success (merged pull request or direct push)
   workflow_dispatch:
@@ -21,7 +21,42 @@ env:
   IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
 
 jobs:
+  # TODO use reusable workflow for the change-tag-dev and change-tag-staging jobs
   # Only trigger if the previous workflow run was successful and the event was not a pull request
+  change-tag-dev:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write    # This is required for actions/checkout
+      id-token: write   # This is required for requesting the JWT
+    environment: 
+      name: Development
+      url: https://dev.goldendevops.com/
+
+    steps:
+      - name: Print the used tag
+        run: echo "To development environment will deploy a container with image tag  sha-${{ env.IMAGE_TAG }}"
+
+      - name: Print the used tag
+        run: echo "Changing the image's tag in the manifest to sha-${{ env.IMAGE_TAG }}"
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
+        run: |
+          echo "Helm values-dev.yaml file before change:" && cat helm-chart/values-dev.yaml
+          sed -i "s/sha-.*/sha-${{ env.IMAGE_TAG }}/" helm-chart/values-dev.yaml
+          echo "Helm values-dev.yaml file after change:" && cat helm-chart/values-dev.yaml
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git pull
+          git add helm-chart/values-dev.yaml
+          git commit -m "Update the image's tag in the Helm values-dev.yaml file [skip actions]"
+          git push
+
   change-tag-staging:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
@@ -32,12 +67,11 @@ jobs:
       id-token: write   # This is required for requesting the JWT
     environment: 
       name: Staging
-      # You can add here public IPv4 of your task
-      url: https://opengitops.dev/
+      url: https://staging.goldendevops.com/
 
     steps:
       - name: Print the used tag
-        run: echo "To staging environmnet will deploy container with image tag  sha-${{ env.IMAGE_TAG }}"
+        run: echo "To staging environment will deploy a container with image tag  sha-${{ env.IMAGE_TAG }}"
 
       - name: Print the used tag
         run: echo "Changing the image's tag in the manifest to sha-${{ env.IMAGE_TAG }}"
@@ -106,7 +140,7 @@ jobs:
     needs: [change-tag-staging]
     environment: 
       name: Production
-      url: https://pl.wikipedia.org/wiki  # You can add here public IPv4 of your app (production link)
+      url: https://goldendevops.com/
 
     steps:
       - name: Print the used tag
