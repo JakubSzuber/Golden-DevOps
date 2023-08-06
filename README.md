@@ -73,7 +73,7 @@ recusandae alias error harum maxime adipisci amet laborum.
 > Example note...
 
 If you don't have any internet domain then register one manually e.g. in the AWS console from Route 53 interface and create a hosted zone for in Route 53 (if you register a domain through Route 53 then the hosted zone is automatically created for that domain)
-Create an ACM cert issued for yourdomain.com and *.yourdomain.com (you can do this e.g. in the AWS console from ACM 53 interface).
+Create an ACM cert issued for yourdomain.com, *.yourdomain.com, and *.argo.yourdomain.com (you can do this e.g. in the AWS console from ACM 53 interface).
 Create an S3 Bucket for a Terraform remote state.
 XXSetup Terrafom infra
 XXXAdd an alias record with the Ingress Load Balancer URL. AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
