@@ -203,6 +203,7 @@ tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
 quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
+XXXUse the destroy workflow...and then manually destroy records of your hosted zone, and then you can delete the TLS certificate, xxx
 
 ## Contributing
 
