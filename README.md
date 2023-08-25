@@ -76,15 +76,15 @@ If you don't have any internet domain then register one manually e.g. in the AWS
 Create an ACM cert issued for yourdomain.com, *.yourdomain.com, and *.argo.yourdomain.com (you can do this e.g. in the AWS console from ACM 53 interface).
 Create an S3 Bucket for a Terraform remote state.
 XXSetup Terrafom infra
-XXXAdd an alias record with the Ingress Load Balancer URL. AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
+XXXAdd 6 A type aliases records with the right Ingress Load Balancer URL (each pair of aliases for the specific environment should have the right specific Load Balancer URL assigned). AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
 XXXThen make sure you have right configured ~/.aws/credentials file on XXX so you have configured a default IAM user and IAM user that is used to access Argo CD (in this repo jakubszuber-admin). Both can be the same IAM user with the same AWS Access Key. MAYBE JUST OPENID SO THE BELOW LINE WON'T BE NEEDED.
 Then Add your IAM user (eksadmin in my case) to the AWS configuration. Then update the kubeconfig to get access to your brand new EKS cluster and grab the ArgoCD default password from the argocd-initial-admin-secret.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
 export AWS_DEFAULT_PROFILE=jakubszuber-admin ALBO set AWS_DEFAULT_PROFILE=jakubszuber-admin
 aws sts get-caller-identity
-aws eks update-kubeconfig --name eks-demo --region us-east-1 --profile jakubszuber-admin
+aws eks update-kubeconfig --name \<name of one of the clusters> --region us-east-1 --profile jakubszuber-admin
 kubectl get secrets -n argocd
 kubectl get secret argocd-initial-admin-secret -n argocd --template={{.data.password}} | base64 -d
-Now you can log in as "admin" to argo.yourdomain.com
+Now you can log in as "admin" to argo.yourdomain.com or \<name of the environmrnt>.argo.yourdomain.com
 
 
 generate your own "cert.pem" and "key.pem" by command `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 750 -nodes`. Then you can print them by `cat cert.pem | base64 -w 0` and `cat key.pem | base64 -w 0` so you are able to copy them from the terminal and insert as values to secret.yaml file that is in Helm chart. **Currently this method of using self-signed certificates is temporary and it would be better to use some other TLS certificate approach but if you are ok with then remember to not expose the values of "cert.pem" and "key.pem" in GitHub repo (this repo is showcase example and self-signed certificates will be removed in progress for this repo). Making the better and more secure approach is in progress for that repo!**
