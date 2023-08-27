@@ -74,7 +74,8 @@ recusandae alias error harum maxime adipisci amet laborum.
 
 If you don't have any internet domain then register one manually e.g. in the AWS console from Route 53 interface and create a hosted zone for in Route 53 (if you register a domain through Route 53 then the hosted zone is automatically created for that domain)
 Create an ACM cert issued for domains yourdomain.com, *.yourdomain.com, and *.argo.yourdomain.com (you can do this e.g. in the AWS console from ACM 53 interface). After that create CNAME record for each domain (in the AWS console from ACM 53 interface there is a button "Create records in Route 53") in order to allow AWS to validate your domains.
-Create an S3 Bucket for a Terraform remote state.
+Create an S3 Bucket for a Terraform remote state. It should have enabled versioning, default encryption, and object lock setting (under "Advanced settings").
+Create a DynamoDB table with a partition key "LockID" type string.
 XXSetup Terrafom infra
 XXXAdd 6 A type aliases records with the right Ingress Load Balancer URL (each pair of aliases for the specific environment should have the right specific Load Balancer URL assigned). AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
 XXXThen make sure you have right configured ~/.aws/credentials file on XXX so you have configured a default IAM user and IAM user that is used to access Argo CD (in this repo jakubszuber-admin). Both can be the same IAM user with the same AWS Access Key. MAYBE JUST OPENID SO THE BELOW LINE WON'T BE NEEDED.
@@ -84,7 +85,7 @@ aws sts get-caller-identity
 aws eks update-kubeconfig --name \<name of one of the clusters> --region us-east-1 --profile jakubszuber-admin
 kubectl get secrets -n argocd
 kubectl get secret argocd-initial-admin-secret -n argocd --template={{.data.password}} | base64 -d
-Now you can log in as "admin" to argo.yourdomain.com or \<name of the environmrnt>.argo.yourdomain.com
+Now you can log in as "admin" to argo.yourdomain.com or \<name of the environment>.argo.yourdomain.com
 
 
 generate your own "cert.pem" and "key.pem" by command `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 750 -nodes`. Then you can print them by `cat cert.pem | base64 -w 0` and `cat key.pem | base64 -w 0` so you are able to copy them from the terminal and insert as values to secret.yaml file that is in Helm chart. **Currently this method of using self-signed certificates is temporary and it would be better to use some other TLS certificate approach but if you are ok with then remember to not expose the values of "cert.pem" and "key.pem" in GitHub repo (this repo is showcase example and self-signed certificates will be removed in progress for this repo). Making the better and more secure approach is in progress for that repo!**
@@ -94,6 +95,7 @@ Change all occurrences of "jakubszuber/react-nginx-image" and "react-nginx-image
 Setup OpenID Connect between GitHub and AWS
 Configure Snyk account with repo
 Create "Staging" and "Production" GitHub environments and then add a protection role for "Production" so this environment will require reviewers (add some reviews that will be able to allow for changes deployment)
+Create the Identity provider in AWS IAM with Provider type "OpenID Connect", Provider URL "https://token.action.githubcontent.com", Audience "sts.amazonaws.com". Then create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json) (remember to change the IAM user number and name of the GitHub user and repo), then add an IAM Policy with a content similar to [this](create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json).
 
 > Note: By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
 
@@ -124,7 +126,7 @@ molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum.
 
 # Reuired modifications
 
-XXAdd right environment variables, secrets, dockerhub repository, etc
+XXYou have to modify following things, specific for your case environment variables, secrets, dockerhub repository, domain name, s3 bucket's name, dynamodb tables's name, etc
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum.
 
