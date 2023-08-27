@@ -4,11 +4,13 @@ data "terraform_remote_state" "vpc" {
   backend = "s3"
 
   config = {
-    bucket = "golden-devops-bucket-demo"
+    bucket          = "golden-devops-bucket"
     #key    = "k8-demo-vpc.tfstate"
-    key    = "env:/${terraform.workspace}/vpc.tfstate"  # TODO
     #key    = "vpc.tfstate"
-    region = "us-east-1"
+    key             = "env:/${terraform.workspace}/eks.tfstate"
+    region          = "us-east-1"
+    dynamodb_table  = "golden-devops-dynamodb"
+    encrypt         = true
   }
 }
 
