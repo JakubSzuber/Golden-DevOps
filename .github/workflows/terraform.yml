@@ -168,6 +168,7 @@ jobs:
           #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
 
 #  deploy-staging:
+#    if: github.event_name == 'push'
 #    needs: [deploy-development]
 #    #the same
 #    environment: 
@@ -176,6 +177,7 @@ jobs:
 #    #the same
 #
 #  deploy-production:
+#    if: github.event_name == 'push'
 #    needs: [deploy-staging]
 #    #the same
 #    environment: 
