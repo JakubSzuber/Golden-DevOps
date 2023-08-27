@@ -99,10 +99,11 @@ jobs:
           #terraform workspace new dev || terraform workspace select dev
           #terraform init
 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color
-        continue-on-error: true
+      # TODO OOOTemporaray turned off
+      #- name: Terraform Plan
+      #  id: plan
+      #  run: terraform plan -no-color
+      #  continue-on-error: true
 
 # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
 #      - uses: actions/github-script@v6
