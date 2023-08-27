@@ -1,6 +1,6 @@
 ---
 # Complete workflow responsible for the changes of the Terraform configuration files in our Terraform CI/CD pipeline
-# TODO: Resolve all TODO from this workflow
+# TODO OOOOOo: Resolve all TODO from this workflow
 
 name: Terraform
 
@@ -30,13 +30,13 @@ env:
 
 jobs:
   test:
-    if: github.event_name == 'pull_request'
+    # if: github.event_name == 'pull_request'  # TODO TEMPORARY TURNED OFF FOR TESTING PURPOSES
     name: Formating and syntax tests
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
-        working-directory: .
+        working-directory: terraform-infrastructure
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -46,24 +46,27 @@ jobs:
         with:
           terraform_version: 1.2.5
 
-      - name: Terraform fmt
+      - name: Terraform fmt  # TODO if there is an error then probably you just have to enter the right dir
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
 
-      - name: Terraform Validate
+      - name: Terraform Validate  # TODO if there is an error then probably you just have to enter the right dir
         id: validate
         run: terraform validate -no-color
 
   deploy-development:
     needs: [test]
-    if: github.event_name == 'pull_request'
+    #if: github.event_name == 'pull_request'  # TODO TEMPORARY TURNED OFF FOR TESTING PURPOSES
     name: Deploy to Development
     runs-on: ubuntu-latest
+    environment: 
+      name: Development
+      url: https://dev.goldendevops.com/
     defaults:
       run:
         shell: bash
-        working-directory: .
+        working-directory: terraform-infrastructure
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -82,170 +85,95 @@ jobs:
         with:
           terraform_version: 1.2.5
 
-      - name: Terraform Init
+      - name: Terraform Init  # TODO Meybe use reusable workflow or sth like that
         id: init
-        env:  # You can also set your S3 Bucket's name and key name as GitHub secrets and then use them here by e.g. ${{ secrets.AWS_BUCKET_NAME }}
-          AWS_BUCKET_NAME: golden-devops-bucket
-          AWS_BUCKET_KEY_NAME: "env:/${terraform.workspace}/eks.tfstate"  # TODO OOOOOOOOOO CHANGE THAT
-        run: terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
-
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color
-        continue-on-error: true
-
-      - uses: actions/github-script@v6
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            <details><summary>Validation Output</summary>
-
-            \`\`\`\n
-            ${{ steps.validate.outputs.stdout }}
-            \`\`\`
-
-            </details>
-
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-
-            <details><summary>Show Plan</summary>
-
-            \`\`\`\n
-            ${process.env.PLAN}
-            \`\`\`
-
-            </details>
-
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
-
-
-  deploy:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: .
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials from the AWS account
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
-          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
-          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
-          aws-region: us-east-1
-          role-session-name: GitHub-OIDC-TERRAFORM
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.2.5
-
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
-
-      - name: Terraform Init
-        id: init
-        env:  # You can also set your S3 Bucket's name and key name as GitHub secrets and then use them here by e.g. ${{ secrets.AWS_BUCKET_NAME }}
-          AWS_BUCKET_NAME: golden-devops-bucket
-          AWS_BUCKET_KEY_NAME: "env:/${terraform.workspace}/eks.tfstate"  # TODO OOOOOOOOOO CHANGE THAT
-        run: terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-
-      - uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            <details><summary>Validation Output</summary>
-
-            \`\`\`\n
-            ${{ steps.validate.outputs.stdout }}
-            \`\`\`
-
-            </details>
-
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-
-            <details><summary>Show Plan</summary>
-
-            \`\`\`\n
-            ${process.env.PLAN}
-            \`\`\`
-
-            </details>
-
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
-
-#  test-unit:
-#    name: Unit tests in Docker
-#    needs: [deploy]
-#    runs-on: ubuntu-latest
-#
-#    permissions:
-#      packages: read  # Obtain permission needed to pull docker image to ghcr.io
-#
-#    steps:
-#      - name: Login to ghcr.io registry
-#        uses: docker/login-action@v2
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Unit Testing in Docker
         run: |
-          docker run --rm ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
+          cd vpc
+          terraform workspace new dev | terraform workspace select dev
+          terraform init
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace new dev | terraform workspace select dev
+          #terraform init
+          #cd ../argocd
+          #terraform workspace new dev | terraform workspace select dev
+          #terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        continue-on-error: true
+
+# TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+#      - uses: actions/github-script@v6
+#        env:
+#          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          script: |
+#            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+#            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+#            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+#            <details><summary>Validation Output</summary>
+#
+#            \`\`\`\n
+#            ${{ steps.validate.outputs.stdout }}
+#            \`\`\`
+#
+#            </details>
+#
+#            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+#
+#            <details><summary>Show Plan</summary>
+#
+#            \`\`\`\n
+#            ${process.env.PLAN}
+#            \`\`\`
+#
+#            </details>
+#
+#            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+#
+#            github.rest.issues.createComment({
+#              issue_number: context.issue.number,
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              body: output
+#            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          pwd
+          cd vpc
+          terraform workspace list
+          terraform workspace select dev
+          terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace select dev
+          #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+          #cd ../argocd
+          #terraform workspace select dev
+          #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+
+#  deploy-staging:
+#    needs: [deploy-development]
+#    #the same
+#    environment: 
+#      name: Staging
+#      url: https://staging.goldendevops.com/
+#    #the same
+#
+#  deploy-production:
+#    needs: [deploy-staging]
+#    #the same
+#    environment: 
+#      name: Production
+#      url: https://goldendevops.com/
+#    #the same
