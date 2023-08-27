@@ -2,11 +2,13 @@ data "terraform_remote_state" "eks" {
   backend = "s3"
 
   config = {
-    bucket = "golden-devops-bucket-demo"
-    #key    = "k8-demo-eks.tfstate"
-    #key    = "env:/${terraform.workspace}/k8-demo-eks.tfstate"  # TODO
-    key    = "env:/${terraform.workspace}/eks.tfstate"
-    region = "us-east-1"
+    bucket          = "golden-devops-bucket"
+    #key   = "k8-demo-eks.tfstate"
+    #key   = "env:/${terraform.workspace}/k8-demo-eks.tfstate"  # TODO
+    key             = "env:/${terraform.workspace}/eks.tfstate"
+    region          = "us-east-1"
+    dynamodb_table  = "golden-devops-dynamodb"
+    encrypt         = true
   }
 }
 
