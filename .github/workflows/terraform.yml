@@ -53,7 +53,7 @@ jobs:
 
       - name: Terraform Validate  # TODO if there is an error then probably you just have to enter the right dir
         id: validate
-        run: pwd && terraform validate -no-color
+        run: pwd && terraform validate
 
   deploy-development:
     needs: [test]
@@ -104,12 +104,12 @@ jobs:
         #run: terraform plan -no-color
         run: |
           cd vpc
-          terraform plan -no-color
+          terraform plan
         # TODO temporarily turned off
           #cd ../eks
-          #terraform plan -no-color
+          #terraform plan
           #cd ../argocd
-          #terraform plan -no-color
+          #terraform plan
         continue-on-error: true
 
 # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
