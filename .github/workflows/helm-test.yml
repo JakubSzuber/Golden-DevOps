@@ -4,13 +4,14 @@
 # chart even if the chart itself hasn't changed. By doing this we ensure that the potentially changed source code still works along with the Helm chart.
 
 name: Helm-Test
+# TODO make this workflow universal so it will be able to work for each helm chart within the helm-charts directory
 
 on:
   workflow_dispatch:  # Step "Run chart-testing (list-changed)" will always return that there are no changes while workflow is executed manually
   pull_request:
     branches: [main]
     paths:
-      - 'helm-chart/**'
+      - 'helm-charts/**'
 
 jobs:
   test:
@@ -74,7 +75,7 @@ jobs:
             --docker-server=ghcr.io \
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
-          helm install golden-devops-helm-release helm-chart --values helm-chart/values.yaml -f helm-chart/values-prod.yaml --set disableTLS=true
+          helm install golden-devops-helm-release helm-charts/main-chart --values helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml --set disableTLS=true
           echo "Waiting to startup containers..."
           sleep 50
           kubectl get all --namespace=prod-namespace
