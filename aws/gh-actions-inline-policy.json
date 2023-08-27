@@ -2,7 +2,20 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "VisualEditor0",
+            "Sid": "S3BucketRemoteState",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::golden-devops-bucket/*",
+                "arn:aws:s3:::golden-devops-bucket"
+            ]
+        },
+        {
+            "Sid": "Infrastructure",
             "Effect": "Allow",
             "Action": [
                 "iam:PassRole",
