@@ -1,35 +1,144 @@
 ---
 # Complete workflow responsible for the changes of the Terraform configuration files in our Terraform CI/CD pipeline
+# TODO: Resolve all TODO from this workflow
 
 name: Terraform
 
 concurrency: terraform
 
-# TODO those event triggers are completely temporary
+# TODO Those event triggers are temporarily turned off
 on:  # TODO Change the trigger events' logic (or leave if you are sure it's ok (but it's probably not)). Maybe do that branch have to start with "dev_" or branch main but only for /src
   workflow_dispatch:
 #  push:
 #    branches: [main]
 #    paths:
-#      - 'src/**'
-#      - '!src/**/README.md'
+#      - 'terraform-infrastructure/**'
 #  pull_request:
 #    branches: [main]
 #    paths:
-#      - 'src/**'
-#      - '!src/**/README.md'
+#      - 'terraform-infrastructure/**'
 
 permissions:
-  id-token: write # This is required for aws oidc connection
-  contents: read # This is required for actions/checkout
-  pull-requests: write # This is required for gh bot to comment PR
+  id-token: write       # This is required for aws OIDC connection
+  contents: read        # This is required for actions/checkout
+  pull-requests: write  # This is required for the GitHub bot to comment on PR
 
 env:
   TF_LOG: INFO
-  #AWS_REGION: ${{ secrets.AWS_REGION }}  #?
-  AWS_REGION: us-east-2
+  #AWS_REGION: ${{ secrets.AWS_REGION }}  # TODO?
+  AWS_REGION: us-east-1
 
 jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    name: Formating and syntax tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.5
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+  deploy-development:
+    needs: [test]
+    if: github.event_name == 'pull_request'
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from the AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
+          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
+          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
+          aws-region: us-east-1
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.5
+
+      - name: Terraform Init
+        id: init
+        env:  # You can also set your S3 Bucket's name and key name as GitHub secrets and then use them here by e.g. ${{ secrets.AWS_BUCKET_NAME }}
+          AWS_BUCKET_NAME: golden-devops-bucket
+          AWS_BUCKET_KEY_NAME: "env:/${terraform.workspace}/eks.tfstate"  # TODO OOOOOOOOOO CHANGE THAT
+        run: terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        continue-on-error: true
+
+      - uses: actions/github-script@v6
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
+
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
+
+
   deploy:
     runs-on: ubuntu-latest
     defaults:
@@ -40,11 +149,13 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials from AWS account
+      - name: Configure AWS credentials from the AWS account
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
+          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
+          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
+          aws-region: us-east-1
           role-session-name: GitHub-OIDC-TERRAFORM
 
       - name: Setup Terraform
@@ -59,9 +170,9 @@ jobs:
 
       - name: Terraform Init
         id: init
-        env:
-          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
-          AWS_BUCKET_KEY_NAME: ${{ secrets.AWS_BUCKET_KEY_NAME }}
+        env:  # You can also set your S3 Bucket's name and key name as GitHub secrets and then use them here by e.g. ${{ secrets.AWS_BUCKET_NAME }}
+          AWS_BUCKET_NAME: golden-devops-bucket
+          AWS_BUCKET_KEY_NAME: "env:/${terraform.workspace}/eks.tfstate"  # TODO OOOOOOOOOO CHANGE THAT
         run: terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
 
       - name: Terraform Validate
