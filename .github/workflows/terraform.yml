@@ -48,12 +48,12 @@ jobs:
 
       - name: Terraform fmt  # TODO if there is an error then probably you just have to enter the right dir
         id: fmt
-        run: terraform fmt -check
+        run: pwd && terraform fmt -check
         continue-on-error: true
 
       - name: Terraform Validate  # TODO if there is an error then probably you just have to enter the right dir
         id: validate
-        run: terraform validate -no-color
+        run: pwd && terraform validate -no-color
 
   deploy-development:
     needs: [test]
@@ -89,14 +89,14 @@ jobs:
         id: init
         run: |
           cd vpc
-          terraform workspace new dev | terraform workspace select dev
           terraform init
+          terraform workspace new dev || terraform workspace select dev
         # TODO temporarily turned off
           #cd ../eks
-          #terraform workspace new dev | terraform workspace select dev
+          #terraform workspace new dev || terraform workspace select dev
           #terraform init
           #cd ../argocd
-          #terraform workspace new dev | terraform workspace select dev
+          #terraform workspace new dev || terraform workspace select dev
           #terraform init
 
       - name: Terraform Plan
