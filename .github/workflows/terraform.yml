@@ -99,11 +99,10 @@ jobs:
           #terraform workspace new dev || terraform workspace select dev
           #terraform init
 
-      # TODO OOOTemporaray turned off
-      #- name: Terraform Plan
-      #  id: plan
-      #  run: terraform plan -no-color
-      #  continue-on-error: true
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        continue-on-error: true
 
 # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
 #      - uses: actions/github-script@v6
@@ -150,10 +149,7 @@ jobs:
         #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
-          pwd
           cd vpc
-          terraform workspace list
-          terraform workspace select dev
           terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
         # TODO temporarily turned off
           #cd ../eks
