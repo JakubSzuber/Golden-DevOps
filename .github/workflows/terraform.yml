@@ -276,7 +276,7 @@ jobs:
           cd argocd
           terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
 
-  deploy-staging:  # TODO i am current don't started doing staging and prod (for the eks and argo cd usage) yet
+  deploy-staging:
     #if: github.event_name == 'push'  # TODO TEMPORARY TURNED OFF FOR TESTING PURPOSES
     needs: [deploy-development]
     name: Deploy to Staging
@@ -319,24 +319,8 @@ jobs:
           terraform init
           terraform workspace new staging || terraform workspace select staging
 
-      - name: Terraform Plan
-        id: plan
-        #run: terraform plan -no-color
-        run: |
-          cd vpc
-          terraform plan
-          cd ../eks
-          terraform plan
-          cd ../argocd
-          terraform plan
-        continue-on-error: true
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
       - name: Terraform Apply
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd vpc
@@ -391,22 +375,6 @@ jobs:
           terraform init
           terraform workspace new prod || terraform workspace select prod
 
-      - name: Terraform Plan
-        id: plan
-        #run: terraform plan -no-color
-        run: |
-          cd vpc
-          terraform plan
-          cd ../eks
-          terraform plan
-          cd ../argocd
-          terraform plan
-        continue-on-error: true
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
       - name: Terraform Apply
         #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
@@ -420,5 +388,5 @@ jobs:
           terraform workspace select prod
           terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
 
-# TODO Meybe use reusable workflow or sth like that for deploying
+# TODO Meybe use reusable workflow/matrix or sth like that for deploying
 
