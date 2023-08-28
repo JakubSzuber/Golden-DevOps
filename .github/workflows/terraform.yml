@@ -98,15 +98,12 @@ jobs:
           terraform init
           terraform workspace new dev || terraform workspace select dev
 
-      - name: Terraform Plan
-        id: plan
+      - name: Terraform Plan for VPC
+        id: plan-vpc
         #run: terraform plan -no-color
         run: |
+          pwd
           cd vpc
-          terraform plan
-          cd ../eks
-          terraform plan
-          cd ../argocd
           terraform plan
         continue-on-error: true
 
@@ -147,21 +144,132 @@ jobs:
 #              body: output
 #            })
 
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
+      - name: Terraform Plan Status for VPC
+        if: steps.plan-vpc.outcome == 'failure'
         run: exit 1
 
-      - name: Terraform Apply
+      - name: Terraform Apply for VPC
         #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
+          pwd
           cd vpc
           terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
-          cd ../eks
-          terraform workspace select dev
+
+      - name: Terraform Plan for EKS
+        id: plan-eks
+        #run: terraform plan -no-color
+        run: |
+          pwd
+          cd eks
+          terraform plan
+        continue-on-error: true
+
+# TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+#      - uses: actions/github-script@v6
+#        env:
+#          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          script: |
+#            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+#            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+#            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+#            <details><summary>Validation Output</summary>
+#
+#            \`\`\`\n
+#            ${{ steps.validate.outputs.stdout }}
+#            \`\`\`
+#
+#            </details>
+#
+#            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+#
+#            <details><summary>Show Plan</summary>
+#
+#            \`\`\`\n
+#            ${process.env.PLAN}
+#            \`\`\`
+#
+#            </details>
+#
+#            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+#
+#            github.rest.issues.createComment({
+#              issue_number: context.issue.number,
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              body: output
+#            })
+
+      - name: Terraform Plan Status for EKS
+        if: steps.plan-eks.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply for EKS
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          pwd
+          cd eks
           terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
-          cd ../argocd
-          terraform workspace select dev
+
+      - name: Terraform Plan for ArgoCD
+        id: plan-argocd
+        #run: terraform plan -no-color
+        run: |
+          pwd
+          cd argocd
+          terraform plan
+        continue-on-error: true
+
+# TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+#      - uses: actions/github-script@v6
+#        env:
+#          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          script: |
+#            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+#            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+#            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+#            <details><summary>Validation Output</summary>
+#
+#            \`\`\`\n
+#            ${{ steps.validate.outputs.stdout }}
+#            \`\`\`
+#
+#            </details>
+#
+#            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+#
+#            <details><summary>Show Plan</summary>
+#
+#            \`\`\`\n
+#            ${process.env.PLAN}
+#            \`\`\`
+#
+#            </details>
+#
+#            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+#
+#            github.rest.issues.createComment({
+#              issue_number: context.issue.number,
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              body: output
+#            })
+
+      - name: Terraform Plan Status for ArgoCD
+        if: steps.plan-argocd.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply for ArgoCD
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          pwd
+          cd argocd
           terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
 
   deploy-staging:
