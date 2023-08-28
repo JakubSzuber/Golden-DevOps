@@ -48,18 +48,18 @@ jobs:
         with:
           terraform_version: 1.2.5
 
-      - name: Terraform Init  # TODO Meybe use reusable workflow or sth like that
+      - name: Terraform Init  # TODO Maybe it doesn't make sense
         id: init
         run: |
           cd vpc
           terraform init
-          terraform workspace new dev || terraform workspace select dev
+          terraform workspace select dev
         # TODO temporarily turned off
           #cd ../eks
-          #terraform workspace new dev || terraform workspace select dev
+          #terraform workspace select dev
           #terraform init
           #cd ../argocd
-          #terraform workspace new dev || terraform workspace select dev
+          #terraform workspace select dev
           #terraform init
 
       - name: Terraform Plan
@@ -79,19 +79,19 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Terraform Apply
+      - name: Terraform Destroy
         #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd vpc
-          terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
         # TODO temporarily turned off
           #cd ../eks
           #terraform workspace select dev
-          #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+          #terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
           #cd ../argocd
           #terraform workspace select dev
-          #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+          #terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
 
   remove-staging:
     needs: [remove-development]
@@ -122,18 +122,18 @@ jobs:
         with:
           terraform_version: 1.2.5
 
-      - name: Terraform Init  # TODO Meybe use reusable workflow or sth like that
+      - name: Terraform Init  # TODO Maybe it doesn't make sense
         id: init
         run: |
           cd vpc
           terraform init
-          terraform workspace new staging || terraform workspace select staging
+          terraform workspace select staging
         # TODO temporarily turned off
           #cd ../eks
-          #terraform workspace new staging || terraform workspace select staging
+          #terraform workspace select staging
           #terraform init
           #cd ../argocd
-          #terraform workspace new staging || terraform workspace select staging
+          #terraform workspace select staging
           #terraform init
 
       - name: Terraform Plan
@@ -153,19 +153,19 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Terraform Apply
+      - name: Terraform Destroy
         #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd vpc
-          terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
+          terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
         # TODO temporarily turned off
           #cd ../eks
           #terraform workspace select staging
-          #terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
+          #terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
           #cd ../argocd
           #terraform workspace select staging
-          #terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
+          #terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
 
   remove-production:
     needs: [remove-staging]
@@ -196,18 +196,18 @@ jobs:
         with:
           terraform_version: 1.2.5
 
-      - name: Terraform Init  # TODO Meybe use reusable workflow or sth like that
+      - name: Terraform Init  # TODO Maybe it doesn't make sense
         id: init
         run: |
           cd vpc
           terraform init
-          terraform workspace new prod || terraform workspace select prod
+          terraform workspace select prod
         # TODO temporarily turned off
           #cd ../eks
-          #terraform workspace new prod || terraform workspace select prod
+          #terraform workspace select prod
           #terraform init
           #cd ../argocd
-          #terraform workspace new prod || terraform workspace select prod
+          #terraform workspace select prod
           #terraform init
 
       - name: Terraform Plan
@@ -227,18 +227,18 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Terraform Apply
+      - name: Terraform Destroy
         #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd vpc
-          terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+          terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
         # TODO temporarily turned off
           #cd ../eks
           #terraform workspace select prod
-          #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+          #terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
           #cd ../argocd
           #terraform workspace select prod
-          #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+          #terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
 
 # TODO Meybe use reusable workflow or sth like that for removing
