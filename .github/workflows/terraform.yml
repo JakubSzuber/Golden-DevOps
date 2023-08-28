@@ -91,13 +91,12 @@ jobs:
           cd vpc
           terraform init
           terraform workspace new dev || terraform workspace select dev
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace new dev || terraform workspace select dev
-          #terraform init
-          #cd ../argocd
-          #terraform workspace new dev || terraform workspace select dev
-          #terraform init
+          cd ../eks
+          terraform init
+          terraform workspace new dev || terraform workspace select dev
+          cd ../argocd
+          terraform init
+          terraform workspace new dev || terraform workspace select dev
 
       - name: Terraform Plan
         id: plan
@@ -105,11 +104,10 @@ jobs:
         run: |
           cd vpc
           terraform plan
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform plan
-          #cd ../argocd
-          #terraform plan
+          cd ../eks
+          terraform plan
+          cd ../argocd
+          terraform plan
         continue-on-error: true
 
 # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
@@ -159,13 +157,12 @@ jobs:
         run: |
           cd vpc
           terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select dev
-          #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
-          #cd ../argocd
-          #terraform workspace select dev
-          #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+          cd ../eks
+          terraform workspace select dev
+          terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+          cd ../argocd
+          terraform workspace select dev
+          terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
 
   deploy-staging:
     #if: github.event_name == 'push'  # TODO TEMPORARY TURNED OFF FOR TESTING PURPOSES
@@ -203,13 +200,12 @@ jobs:
           cd vpc
           terraform init
           terraform workspace new staging || terraform workspace select staging
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace new staging || terraform workspace select staging
-          #terraform init
-          #cd ../argocd
-          #terraform workspace new staging || terraform workspace select staging
-          #terraform init
+          cd ../eks
+          terraform init
+          terraform workspace new staging || terraform workspace select staging
+          cd ../argocd
+          terraform init
+          terraform workspace new staging || terraform workspace select staging
 
       - name: Terraform Plan
         id: plan
@@ -217,11 +213,10 @@ jobs:
         run: |
           cd vpc
           terraform plan
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform plan
-          #cd ../argocd
-          #terraform plan
+          cd ../eks
+          terraform plan
+          cd ../argocd
+          terraform plan
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -234,13 +229,12 @@ jobs:
         run: |
           cd vpc
           terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select staging
-          #terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
-          #cd ../argocd
-          #terraform workspace select staging
-          #terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
+          cd ../eks
+          terraform workspace select staging
+          terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
+          cd ../argocd
+          terraform workspace select staging
+          terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
 
   deploy-production:
     #if: github.event_name == 'push'  # TODO TEMPORARY TURNED OFF FOR TESTING PURPOSES
@@ -278,13 +272,12 @@ jobs:
           cd vpc
           terraform init
           terraform workspace new prod || terraform workspace select prod
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace new prod || terraform workspace select prod
-          #terraform init
-          #cd ../argocd
-          #terraform workspace new prod || terraform workspace select prod
-          #terraform init
+          cd ../eks
+          terraform init
+          terraform workspace new prod || terraform workspace select prod
+          cd ../argocd
+          terraform init
+          terraform workspace new prod || terraform workspace select prod
 
       - name: Terraform Plan
         id: plan
@@ -292,11 +285,10 @@ jobs:
         run: |
           cd vpc
           terraform plan
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform plan
-          #cd ../argocd
-          #terraform plan
+          cd ../eks
+          terraform plan
+          cd ../argocd
+          terraform plan
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -309,13 +301,12 @@ jobs:
         run: |
           cd vpc
           terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select prod
-          #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
-          #cd ../argocd
-          #terraform workspace select prod
-          #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+          cd ../eks
+          terraform workspace select prod
+          terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+          cd ../argocd
+          terraform workspace select prod
+          terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
 
 # TODO Meybe use reusable workflow or sth like that for deploying
 
