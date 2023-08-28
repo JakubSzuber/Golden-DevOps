@@ -311,8 +311,11 @@ jobs:
           terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
         # TODO temporarily turned off
           #cd ../eks
-          #terraform workspace select staging
+          #terraform workspace select prod
           #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
           #cd ../argocd
-          #terraform workspace select staging
+          #terraform workspace select prod
           #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+
+# TODO Meybe use reusable workflow or sth like that for deploying
+
