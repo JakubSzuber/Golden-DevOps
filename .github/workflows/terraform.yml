@@ -211,7 +211,7 @@ jobs:
           #terraform workspace new staging || terraform workspace select staging
           #terraform init
 
-      - name: Terraform Plan  # TODO does it makes sense for staging???
+      - name: Terraform Plan
         id: plan
         #run: terraform plan -no-color
         run: |
@@ -224,7 +224,7 @@ jobs:
           #terraform plan
         continue-on-error: true
 
-      - name: Terraform Plan Status  # TODO does it makes sense for staging???
+      - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
@@ -242,12 +242,77 @@ jobs:
           #terraform workspace select staging
           #terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
 
-#  deploy-production:
-#    #if: github.event_name == 'push'  # TODO TEMPORARY TURNED OFF FOR TESTING PURPOSES
-#    needs: [deploy-staging]
-#    name: Deploy to Production
-#    runs-on: ubuntu-latest
-#    environment: 
-#      name: Production
-#      url: https://goldendevops.com/
-#    #the same
+  deploy-production:
+    #if: github.event_name == 'push'  # TODO TEMPORARY TURNED OFF FOR TESTING PURPOSES
+    needs: [deploy-staging]
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: 
+      name: Production
+      url: https://goldendevops.com/
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform-infrastructure
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from the AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
+          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
+          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
+          aws-region: us-east-1
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.5
+
+      - name: Terraform Init  # TODO Meybe use reusable workflow or sth like that
+        id: init
+        run: |
+          cd vpc
+          terraform init
+          terraform workspace new prod || terraform workspace select prod
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace new prod || terraform workspace select prod
+          #terraform init
+          #cd ../argocd
+          #terraform workspace new prod || terraform workspace select prod
+          #terraform init
+
+      - name: Terraform Plan
+        id: plan
+        #run: terraform plan -no-color
+        run: |
+          cd vpc
+          terraform plan
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform plan
+          #cd ../argocd
+          #terraform plan
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          cd vpc
+          terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace select staging
+          #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+          #cd ../argocd
+          #terraform workspace select staging
+          #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
