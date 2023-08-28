@@ -104,7 +104,7 @@ jobs:
         run: |
           pwd
           cd vpc
-          terraform plan
+          terraform plan -var-file terraform-dev.tfvars
         continue-on-error: true
 
 # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
@@ -166,7 +166,7 @@ jobs:
         run: |
           pwd
           cd eks
-          terraform plan
+          terraform plan -var-file terraform-dev.tfvars
         continue-on-error: true
 
 # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
@@ -224,7 +224,7 @@ jobs:
         run: |
           pwd
           cd argocd
-          terraform plan
+          terraform plan -var-file terraform-dev.tfvars
         continue-on-error: true
 
 # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
