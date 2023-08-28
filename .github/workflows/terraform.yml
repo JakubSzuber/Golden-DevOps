@@ -107,7 +107,11 @@ jobs:
           terraform plan
         continue-on-error: true
 
-# TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+# TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
+# !!! The entire logic of this gh bot comment for PR will be the following logic: !!!
+# Under PR there will be 4 separate comments for gh bot: status of tests, plan for vpc, plan for eks, plan for argocd (this is a right approach because
+# first have to be applied vpc so then we can do "terraform plan" for eks and so on... so we can't have just single gh bot comment)
+# in https://youtu.be/GowFk_5Rx_I?t=985 you can see gh bot comment
 #      - uses: actions/github-script@v6
 #        env:
 #          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
@@ -207,7 +211,7 @@ jobs:
         run: exit 1
 
       - name: Terraform Apply for EKS
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           pwd
@@ -223,7 +227,7 @@ jobs:
           terraform plan
         continue-on-error: true
 
-# TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+# TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
 #      - uses: actions/github-script@v6
 #        env:
 #          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
@@ -265,14 +269,14 @@ jobs:
         run: exit 1
 
       - name: Terraform Apply for ArgoCD
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           pwd
           cd argocd
           terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
 
-  deploy-staging:
+  deploy-staging:  # TODO i am current don't started doing staging and prod (for the eks and argo cd usage) yet
     #if: github.event_name == 'push'  # TODO TEMPORARY TURNED OFF FOR TESTING PURPOSES
     needs: [deploy-development]
     name: Deploy to Staging
