@@ -1,28 +1,18 @@
 ---
 # Complete workflow responsible for destroying entire terraform infrastructure
+# TODO OOOOOo: Resolve all TODO from this workflow
 
 name: Infra-cleanup
 
 concurrency: infra-cleanup
 
-# TODO those event triggers are completely temporary
-on:  # TODO Change the trigger events' logic (or leave if you are sure it's ok (but it's probably not)). Maybe do that branch have to start with "dev_" or branch main but only for /src
+on:
   workflow_dispatch:
-#  push:
-#    branches: [main]
-#    paths:
-#      - 'src/**'
-#      - '!src/**/README.md'
-#  pull_request:
-#    branches: [main]
-#    paths:
-#      - 'src/**'
-#      - '!src/**/README.md'
 
-permissions:
-  id-token: write # This is required for aws oidc connection
-  contents: read # This is required for actions/checkout
-  pull-requests: write # This is required for gh bot to comment PR
+permissions:  # TODO maybe change those permissions
+  id-token: write       # This is required for aws OIDC connection
+  contents: read        # This is required for actions/checkout
+  pull-requests: write  # This is required for the GitHub bot to comment on PR
 
 env:
   TF_LOG: INFO
@@ -30,21 +20,27 @@ env:
   AWS_REGION: us-east-2
 
 jobs:
-  deploy:
+  remove-development:
+    name: Remove the Development
     runs-on: ubuntu-latest
+    environment: 
+      name: Development
+      url: https://dev.goldendevops.com/
     defaults:
       run:
         shell: bash
-        working-directory: .
+        working-directory: terraform-infrastructure
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials from AWS account
+      - name: Configure AWS credentials from the AWS account
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
+          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
+          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
+          aws-region: us-east-1
           role-session-name: GitHub-OIDC-TERRAFORM
 
       - name: Setup Terraform
@@ -52,22 +48,197 @@ jobs:
         with:
           terraform_version: 1.2.5
 
-#  test-unit:
-#    name: Unit tests in Docker
-#    needs: [deploy]
-#    runs-on: ubuntu-latest
-#
-#    permissions:
-#      packages: read  # Obtain permission needed to pull docker image to ghcr.io
-#
-#    steps:
-#      - name: Login to ghcr.io registry
-#        uses: docker/login-action@v2
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Unit Testing in Docker
+      - name: Terraform Init  # TODO Meybe use reusable workflow or sth like that
+        id: init
         run: |
-          docker run --rm ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
+          cd vpc
+          terraform init
+          terraform workspace new dev || terraform workspace select dev
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace new dev || terraform workspace select dev
+          #terraform init
+          #cd ../argocd
+          #terraform workspace new dev || terraform workspace select dev
+          #terraform init
+
+      - name: Terraform Plan
+        id: plan
+        #run: terraform plan -no-color
+        run: |
+          cd vpc
+          terraform plan
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform plan
+          #cd ../argocd
+          #terraform plan
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          cd vpc
+          terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace select dev
+          #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+          #cd ../argocd
+          #terraform workspace select dev
+          #terraform apply -var-file terraform-dev.tfvars -auto-approve -input=false
+
+  remove-staging:
+    needs: [remove-development]
+    name: Remove the Staging
+    runs-on: ubuntu-latest
+    environment: 
+      name: Staging
+      url: https://staging.goldendevops.com/
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform-infrastructure
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from the AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
+          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
+          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
+          aws-region: us-east-1
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.5
+
+      - name: Terraform Init  # TODO Meybe use reusable workflow or sth like that
+        id: init
+        run: |
+          cd vpc
+          terraform init
+          terraform workspace new staging || terraform workspace select staging
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace new staging || terraform workspace select staging
+          #terraform init
+          #cd ../argocd
+          #terraform workspace new staging || terraform workspace select staging
+          #terraform init
+
+      - name: Terraform Plan
+        id: plan
+        #run: terraform plan -no-color
+        run: |
+          cd vpc
+          terraform plan
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform plan
+          #cd ../argocd
+          #terraform plan
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          cd vpc
+          terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace select staging
+          #terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
+          #cd ../argocd
+          #terraform workspace select staging
+          #terraform apply -var-file terraform-staging.tfvars -auto-approve -input=false
+
+  remove-production:
+    needs: [remove-staging]
+    name: Remove the Production
+    runs-on: ubuntu-latest
+    environment: 
+      name: Production
+      url: https://goldendevops.com/
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform-infrastructure
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from the AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
+          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
+          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
+          aws-region: us-east-1
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.5
+
+      - name: Terraform Init  # TODO Meybe use reusable workflow or sth like that
+        id: init
+        run: |
+          cd vpc
+          terraform init
+          terraform workspace new prod || terraform workspace select prod
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace new prod || terraform workspace select prod
+          #terraform init
+          #cd ../argocd
+          #terraform workspace new prod || terraform workspace select prod
+          #terraform init
+
+      - name: Terraform Plan
+        id: plan
+        #run: terraform plan -no-color
+        run: |
+          cd vpc
+          terraform plan
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform plan
+          #cd ../argocd
+          #terraform plan
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          cd vpc
+          terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+        # TODO temporarily turned off
+          #cd ../eks
+          #terraform workspace select prod
+          #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+          #cd ../argocd
+          #terraform workspace select prod
+          #terraform apply -var-file terraform-prod.tfvars -auto-approve -input=false
+
+# TODO Meybe use reusable workflow or sth like that for removing
