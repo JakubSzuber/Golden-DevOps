@@ -54,25 +54,23 @@ jobs:
           cd vpc
           terraform init
           terraform workspace select dev
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select dev
-          #terraform init
-          #cd ../argocd
-          #terraform workspace select dev
-          #terraform init
+          cd ../eks
+          terraform init
+          terraform workspace select dev
+          cd ../argocd
+          terraform init
+          terraform workspace select dev
 
       - name: Terraform Plan
         id: plan
         #run: terraform plan -no-color
         run: |
           cd vpc
-          terraform plan
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform plan
-          #cd ../argocd
-          #terraform plan
+          terraform plan -destroy -var-file terraform-dev.tfvars
+          cd ../eks
+          terraform plan -destroy -var-file terraform-dev.tfvars
+          cd ../argocd
+          terraform plan -destroy -var-file terraform-dev.tfvars
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -80,18 +78,17 @@ jobs:
         run: exit 1
 
       - name: Terraform Destroy
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd vpc
           terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select dev
-          #terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
-          #cd ../argocd
-          #terraform workspace select dev
-          #terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
+          cd ../eks
+          terraform workspace select dev
+          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
+          cd ../argocd
+          terraform workspace select dev
+          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
 
   remove-staging:
     needs: [remove-development]
@@ -128,25 +125,23 @@ jobs:
           cd vpc
           terraform init
           terraform workspace select staging
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select staging
-          #terraform init
-          #cd ../argocd
-          #terraform workspace select staging
-          #terraform init
+          cd ../eks
+          terraform init
+          terraform workspace select staging
+          cd ../argocd
+          terraform init
+          terraform workspace select staging
 
       - name: Terraform Plan
         id: plan
         #run: terraform plan -no-color
         run: |
           cd vpc
-          terraform plan
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform plan
-          #cd ../argocd
-          #terraform plan
+          terraform plan -destroy -var-file terraform-staging.tfvars
+          cd ../eks
+          terraform plan -destroy -var-file terraform-staging.tfvars
+          cd ../argocd
+          terraform plan -destroy -var-file terraform-staging.tfvars
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -159,13 +154,12 @@ jobs:
         run: |
           cd vpc
           terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select staging
-          #terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
-          #cd ../argocd
-          #terraform workspace select staging
-          #terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
+          cd ../eks
+          terraform workspace select staging
+          terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
+          cd ../argocd
+          terraform workspace select staging
+          terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
 
   remove-production:
     needs: [remove-staging]
@@ -202,25 +196,23 @@ jobs:
           cd vpc
           terraform init
           terraform workspace select prod
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select prod
-          #terraform init
-          #cd ../argocd
-          #terraform workspace select prod
-          #terraform init
+          cd ../eks
+          terraform init
+          terraform workspace select prod
+          cd ../argocd
+          terraform init
+          terraform workspace select prod
 
       - name: Terraform Plan
         id: plan
         #run: terraform plan -no-color
         run: |
           cd vpc
-          terraform plan
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform plan
-          #cd ../argocd
-          #terraform plan
+          terraform plan -destroy -var-file terraform-prod.tfvars
+          cd ../eks
+          terraform plan -destroy -var-file terraform-prod.tfvars
+          cd ../argocd
+          terraform plan -destroy -var-file terraform-prod.tfvars
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -228,17 +220,16 @@ jobs:
         run: exit 1
 
       - name: Terraform Destroy
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARLY TURNED OFF FOR TESTING PURPOSES
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd vpc
           terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
-        # TODO temporarily turned off
-          #cd ../eks
-          #terraform workspace select prod
-          #terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
-          #cd ../argocd
-          #terraform workspace select prod
-          #terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
+          cd ../eks
+          terraform workspace select prod
+          terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
+          cd ../argocd
+          terraform workspace select prod
+          terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
 
 # TODO Meybe use reusable workflow or sth like that for removing
