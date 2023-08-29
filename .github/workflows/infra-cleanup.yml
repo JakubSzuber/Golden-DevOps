@@ -66,10 +66,13 @@ jobs:
         #run: terraform plan -no-color
         run: |
           cd argocd
+          terraform workspace list
           terraform plan -destroy -var-file terraform-dev.tfvars
           cd ../eks
+          terraform workspace list
           terraform plan -destroy -var-file terraform-dev.tfvars
           cd ../vpc
+          terraform workspace list
           terraform plan -destroy -var-file terraform-dev.tfvars
         continue-on-error: true
 
@@ -82,6 +85,8 @@ jobs:
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd argocd
+          terraform workspace list
+          terraform workspace select dev
           terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
           cd ../eks
           terraform workspace select dev
@@ -137,10 +142,13 @@ jobs:
         #run: terraform plan -no-color
         run: |
           cd argocd
+          terraform workspace list
           terraform plan -destroy -var-file terraform-staging.tfvars
           cd ../eks
+          terraform workspace list
           terraform plan -destroy -var-file terraform-staging.tfvars
           cd ../vpc
+          terraform workspace list
           terraform plan -destroy -var-file terraform-staging.tfvars
         continue-on-error: true
 
@@ -153,6 +161,8 @@ jobs:
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd argocd
+          terraform workspace list
+          terraform workspace select dev
           terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
           cd ../eks
           terraform workspace select staging
@@ -208,10 +218,13 @@ jobs:
         #run: terraform plan -no-color
         run: |
           cd argocd
+          terraform workspace list
           terraform plan -destroy -var-file terraform-prod.tfvars
           cd ../eks
+          terraform workspace list
           terraform plan -destroy -var-file terraform-prod.tfvars
           cd ../vpc
+          terraform workspace list
           terraform plan -destroy -var-file terraform-prod.tfvars
         continue-on-error: true
 
@@ -224,6 +237,8 @@ jobs:
         #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
         run: |
           cd argocd
+          terraform workspace list
+          terraform workspace select dev
           terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
           cd ../eks
           terraform workspace select prod
