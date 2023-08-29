@@ -64,7 +64,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         #run: terraform plan -no-color
-        # TEMPRARALY MOVEN HERE
+        # TEMPRARALY MOVEN HERE (CHANGE "cd vpc" to "cd ../vpc")
         #          cd argocd
           #terraform workspace list
           #terraform plan -destroy -var-file terraform-dev.tfvars
@@ -72,7 +72,7 @@ jobs:
           #terraform workspace list
           #terraform plan -destroy -var-file terraform-dev.tfvars
         run: |
-          cd ../vpc
+          cd vpc
           terraform workspace list
           terraform plan -destroy -var-file terraform-dev.tfvars
         continue-on-error: true
