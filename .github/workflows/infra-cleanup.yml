@@ -64,15 +64,14 @@ jobs:
       - name: Terraform Plan
         id: plan
         #run: terraform plan -no-color
-        # TEMPRARALY MOVEN HERE (CHANGE "cd vpc" to "cd ../vpc")
-        #          cd argocd
-          #terraform workspace list
-          #terraform plan -destroy -var-file terraform-dev.tfvars
-          #cd ../eks
-          #terraform workspace list
-          #terraform plan -destroy -var-file terraform-dev.tfvars
         run: |
-          cd vpc
+          cd argocd
+          terraform workspace list
+          terraform plan -destroy -var-file terraform-dev.tfvars
+          cd ../eks
+          terraform workspace list
+          terraform plan -destroy -var-file terraform-dev.tfvars
+          cd ../vpc
           terraform workspace list
           terraform plan -destroy -var-file terraform-dev.tfvars
         continue-on-error: true
@@ -81,24 +80,23 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-# TODO temparly
-#      - name: Terraform Destroy ArgoCD
-#        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-#        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-#        run: |
-#          cd argocd
-#          terraform workspace list
-#          terraform workspace select dev
-#          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
-#
-#      - name: Terraform Destroy EKS
-#        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-#        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-#        run: |
-#          cd eks
-#          terraform workspace list
-#          terraform workspace select dev
-#          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
+      - name: Terraform Destroy ArgoCD
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          cd argocd
+          terraform workspace list
+          terraform workspace select dev
+          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
+
+      - name: Terraform Destroy EKS
+        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
+        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
+        run: |
+          cd eks
+          terraform workspace list
+          terraform workspace select dev
+          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
 
       - name: Terraform Destroy VPC
         #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
