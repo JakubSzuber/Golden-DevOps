@@ -28,4 +28,9 @@ module "vpc" {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"           = 1
   }
+
+  # Explicitly specify the delete timeout to make sure that VPC will be deleted (usually it takes more than the default 5 minutes timeout)
+  timeouts {
+    delete = "45m"
+  }
 }
