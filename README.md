@@ -225,9 +225,11 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 <!--TODO write somewhere that the website for the project may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to ;). But every relevant website's appearance should be available to see in this README.md-->
 <!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
 <!--TODO do all TODOs from each file on repo-->
-<!--TODO write what contains each terarfor module (remember that "eks" module contains eks itself as well as the eks addons)-->
-
-
+<!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons)-->
+<!--TODO write something about which and how Gitops deployment models ware implemented (push-base and pull-based)-->
+<!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
+<!--TODO create github kanban "Project" and write about it on readme-->
+<!--TODO Do all of TODO from every workflow and from my notes-->
 
 
 
