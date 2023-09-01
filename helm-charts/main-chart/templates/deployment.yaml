@@ -23,7 +23,7 @@ spec:
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
-          #image: nginx
+          #image: nginx  # Uncomment this line and comment out below one to test with a regular Nginx image
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8080
