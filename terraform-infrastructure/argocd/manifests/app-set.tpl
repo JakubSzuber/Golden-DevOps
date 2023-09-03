@@ -8,7 +8,7 @@ spec:
       repoURL: https://github.com/JakubSzuber/Golden-DevOps.git
       revision: HEAD
       directories:
-      - path: helm-charts/* #?NOWE 
+      - path: helm-charts/*
   template:
     metadata:
       name: '{{path.basename}}'
@@ -17,8 +17,8 @@ spec:
       source:
         repoURL: https://github.com/JakubSzuber/Golden-DevOps.git
         targetRevision: HEAD
-        path: '{{path}}' #?????????????????????????/
-        helm: #?NOWE 
+        path: '{{path}}'
+        helm:
           valueFiles:
           - "values.yaml"
           - "values-${env_prefix}yaml"

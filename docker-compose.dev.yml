@@ -1,14 +1,16 @@
 services:
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - ./healthchecks:/healthchecks
-    healthcheck:
-      test: /healthchecks/postgres-healthcheck
-      interval: "5s"
+# Uncomment the lines of code related to Postgres if you want to use it
+#  postgres:
+#    image: postgres:15-alpine
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#    volumes:
+#      - ./healthchecks:/healthchecks
+#      - db:/var/lib/postgresql/data
+#    healthcheck:
+#      test: /healthchecks/postgres-healthcheck
+#      interval: "5s"
   frontend:
     environment:
       - CHOKIDAR_USEPOLLING=true
@@ -25,9 +27,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - .:/app
       - /app/node_modules
-    depends_on:
-      postgres:
-        condition: service_started  # TODO change to "service_healthy" after fixing the bug
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
 
-# volumes:
-#   postgres_data: {}
+#volumes:
+#  db:
+#    driver: local

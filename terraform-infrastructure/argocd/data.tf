@@ -3,8 +3,6 @@ data "terraform_remote_state" "eks" {
 
   config = {
     bucket          = "golden-devops-bucket"
-    #key   = "k8-demo-eks.tfstate"
-    #key   = "env:/${terraform.workspace}/k8-demo-eks.tfstate"  # TODO
     key             = "env:/${terraform.workspace}/eks.tfstate"
     region          = "us-east-1"
     dynamodb_table  = "golden-devops-dynamodb"
@@ -15,10 +13,6 @@ data "terraform_remote_state" "eks" {
 data "kubectl_file_documents" "namespace" {
   content = file("${path.module}/manifests/namespace.yaml")
 }
-
-#data "kubectl_file_documents" "secret" {
-#  content = file("${path.module}/manifests/secret.yaml")
-#}
 
 data "kubectl_file_documents" "argocd" {
   content = file("${path.module}/manifests/install.yaml")

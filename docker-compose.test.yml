@@ -1,8 +1,6 @@
 services:
-  todo:
+  main-test-service:
     image: "${TESTING_IMAGE}"
-#     ports:
-#       - "8080:8080"
 
   postgres:
     image: postgres
@@ -15,16 +13,13 @@ services:
       test: /healthchecks/postgres-healthcheck
       interval: "5s"
 
-  service1:
+  main-end-service:
     image: "${TESTING_IMAGE}"
-#     ports:
-#       - "8080:8080"
     depends_on:
-      todo:
+      main-test-service:
         condition: service_healthy
       postgres:
-        condition: service_started  # TODO change to "service_healthy" after fixing the bug
-    command: curl --fail http://todo:8080 || exit 1
-
-# volumes:
-#   postgres_data: {}
+        condition: service_healthy
+    # Run all your tests here against the main-test-service service
+    # You can also change the port and/or "http" to "https" depending on your needs
+    command: curl --fail http://main-test-service:8080 || exit 1

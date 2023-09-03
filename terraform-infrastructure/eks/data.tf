@@ -5,8 +5,6 @@ data "terraform_remote_state" "vpc" {
 
   config = {
     bucket          = "golden-devops-bucket"
-    #key    = "k8-demo-vpc.tfstate"
-    #key    = "vpc.tfstate"
     key             = "env:/${terraform.workspace}/vpc.tfstate"
     region          = "us-east-1"
     dynamodb_table  = "golden-devops-dynamodb"

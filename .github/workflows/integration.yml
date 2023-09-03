@@ -108,32 +108,32 @@ jobs:
         run: |
           docker run --rm ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
 
-  test-integration:
-    name: Integration tests in Compose
-    needs: [build-test-image]
-    runs-on: ubuntu-latest
-
-    permissions:
-      packages: read  # Obtain permission needed to pull docker image to ghcr.io
-
-    steps:
-      - name: Checkout git repo
-        uses: actions/checkout@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-      - name: Login to ghcr.io registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
 # You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
+#  test-integration:
+#    name: Integration tests in Compose
+#    needs: [build-test-image]
+#    runs-on: ubuntu-latest
+#
+#    permissions:
+#      packages: read  # Obtain permission needed to pull docker image to ghcr.io
+#
+#    steps:
+#      - name: Checkout git repo
+#        uses: actions/checkout@v3
+#
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#      
+#      - name: Login to ghcr.io registry
+#        uses: docker/login-action@v2
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#
 #      - name: Test healthcheck in Docker Compose
 #        run: |
 #          export TESTING_IMAGE=ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
@@ -373,7 +373,8 @@ jobs:
   build-final-image:
     name: Build Final Image
     # TODO later add "Datreek8sPolicyCheck" and "scan-artifact-AWS-CodeGuru"
-    needs: [lint, test-unit, test-integration, test-k3d, scan-image-Trivy, scan-image-Snyk]
+    # Add "test-integration" to the below list if you want to use integration testing
+    needs: [lint, test-unit, test-k3d, scan-image-Trivy, scan-image-Snyk]
     runs-on: ubuntu-latest
 
     permissions:
