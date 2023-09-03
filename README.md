@@ -224,12 +224,10 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 <!--TODO give somewhere link to docker hub project-->
 <!--TODO write somewhere that the website for the project may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to ;). But every relevant website's appearance should be available to see in this README.md-->
 <!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
-<!--TODO do all TODOs from each file on repo-->
+<!--TODO Write somewhere that: Implementation of another service like for instance new Postgres container is very facilitated. To do so uncomment and possibly modify the following files depending on your needs: [docker-compose.dev.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.dev.yml), [docker-compose.test.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.test.yml), [integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)-->
 <!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons)-->
 <!--TODO write something about which and how Gitops deployment models ware implemented (push-base and pull-based)-->
 <!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
 <!--TODO create github kanban "Project" and write about it on readme-->
 <!--TODO Do all of TODO from every workflow and from my notes-->
-
-
 
