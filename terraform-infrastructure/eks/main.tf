@@ -2,7 +2,7 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   tags = {
     Name      = "${var.cluster_name}"
-    Project   = "eks-demo"  # TODOOOOOOOOOOOOOOOOO
+    Project   = "golden-devops"
     ManagedBy = "terraform"
   }
 }
