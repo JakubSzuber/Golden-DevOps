@@ -29,10 +29,37 @@ on:
         type: environment
         required: true
 
+# jobs:
+#   print-tag:
+#     runs-on: ubuntu-latest
+#     if:  ${{ inputs.print_tags }} 
+#     steps:
+#       - name: Print the input tag to STDOUT
+#         run: echo  The tags are ${{ inputs.tags }} and some choice is ${{ inputs.somechoice }}
+
 jobs:
-  print-tag:
+  datree-k8s-policy-check:
     runs-on: ubuntu-latest
-    if:  ${{ inputs.print_tags }} 
+    defaults:
+      run:
+        shell: bash
+        working-directory: helm-charts/main-chart
+    # env:
+    #   DATREE_TOKEN: ${{ secrets.DATREE_TOKEN }}
     steps:
-      - name: Print the input tag to STDOUT
-        run: echo  The tags are ${{ inputs.tags }} and some choice is ${{ inputs.somechoice }}
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run Datree Policy Check
+        uses: datreeio/action-datree@main
+        with:
+          path: '.'
+          cliArguments: ''
+          isHelmChart: true
+          helmArguments: '--values values.yaml -f helm-charts/main-chart/values-prod.yaml'
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: datree.sarif
+          wait-for-processing: true
