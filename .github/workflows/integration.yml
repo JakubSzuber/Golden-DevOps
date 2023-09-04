@@ -41,7 +41,7 @@ jobs:
       - name: Run Super-Linter
         uses: super-linter/super-linter/slim@v5
         env:
-          DEFAULT_BRANCH: master
+          DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false  # TODO This line should be set only if the repository is first properly linted before first usage of this line
           #FILTER_REGEX_INCLUDE: .*src/.*  # Uncomment to inlude only files within /src
@@ -248,14 +248,13 @@ jobs:
           exit-code: 0
           format: table 
 
-      - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
+      - name: Run Trivy for CRITICAL CVEs and report (blocking)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 1
-          ignore-unfixed: true
           vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
+          severity: 'CRITICAL'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
