@@ -25,14 +25,11 @@ jobs:
   lint:
     runs-on: ubuntu-22.04
     steps:
-#       - name: Echo Working
-#         run: echo "Working!"
-    
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -213,48 +210,6 @@ jobs:
             exit 1
           fi
 
-#   #TODO you can add CodeGuru but this will require cosme configuration like e.g. s3 bucket creating, further permission scope, etc
-#   #TODO If you want to add this part write a notes in github_actions.md 
-#   #TODO tutorial https://www.youtube.com/watch?v=czlx4iixe0Y
-#   scan-artifact-AWS-CodeGuru:
-#     runs-on: ubuntu-latest
-#     permissions:
-#       contents: read    # This is required for actions/checkout
-#       id-token: write   # This is required for requesting the JWT
-#       packages: read  # Obtain permission needed to push docker image to ghcr.io
-#       security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
-
-#     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v2
-#       with:
-#         fetch-depth: 0
-
-#     - uses: actions/setup-node@v3
-#       with:
-#         node-version: 18
-
-#     - run: npm build
-
-#     # TODO change the scope of permission to ise OpenID
-#     - name: Configure AWS credentials
-#       uses: aws-actions/configure-aws-credentials@v2
-#       with:
-#         role-to-assume: arn:aws:iam::152691795422:role/gh-action-role
-#         role-session-name: samplerolesession
-#         aws-region: ${{ env.AWS_REGION }}
-
-#     - name: CodeGuru Reviewer
-#       uses: aws-actions/codeguru-reviewer@v1.1
-#       with:
-#         build_path: build  # Build artifact(s) directory
-#         s3_bucket: SPECIFY S3 BUCKET WITH RIGHT PREFIX  # S3 Bucket with "codeguru-reviewer-*" prefix
-
-#     - name: Upload review result
-#       uses: github/codeql-action/upload-sarif@v1
-#       with:
-#         sarif_file: codeguru-results.sarif.json
-
   scan-image-Trivy:
     name: Scan Image with Trivy
     needs: [build-test-image]
@@ -310,13 +265,42 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
+  scan-code-Snyk:
+    name: Scan Code with Snyk
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Run Snyk to check the code for vulnerabilities (non-blocking)  # TODO make sure that the report is porperly handled
+        continue-on-error: true
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --sarif-file-output=snyk.sarif
+
+      - name: Run Snyk to check the code for vulnerabilities (blocking)
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=critical
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'snyk.sarif'
+
   scan-image-Snyk:
     name: Scan Image with Snyk
     needs: [build-test-image]
     runs-on: ubuntu-latest
     permissions:
       security-events: write
-
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v3
@@ -331,50 +315,63 @@ jobs:
       - name: Pull image to scan
         run: docker pull ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
 
-      - name: Run Snyk to check Docker image for vulnerabilities
+      - name: Run Snyk to check Docker image for vulnerabilities (non-blocking)  # TODO make sure that the report is porperly handled
         continue-on-error: true
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          args: --file=Dockerfile --severity-threshold=high
+          args: --file=Dockerfile --sarif-file-output=snyk.sarif
+
+      - name: Run Snyk to check Docker image for vulnerabilities (blocking)
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
+          args: --file=Dockerfile --severity-threshold=critical
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
+        if: always()
         with:
           sarif_file: 'snyk.sarif'
 
+
 # TODO Uncomment below and move the below two lines, uncomment and configure the rest of the below part, and setup Datree on the Datree website when you will have implemented Helm
-# env:
-#   DATREE_TOKEN: ${{ secrets.DATREE_TOKEN }}
-
-#   Datreek8sPolicyCheck:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v2
-
-#       - name: Run Datree Policy Check
-#         uses: datreeio/action-datree@main
-#         with:
-#           path: 'RELATIVE PATH TO ChartDirectory'
-#           cliArguments: ''
-#           isHelmChart: true
-#           helmArguments: '--values values.yaml'
-
-#       - name: Upload analysis results to GitHub
-#         uses: github/codeql-action/upload-sarif@v2
-#         with:
-#           sarif_file: datree.sarif
-#           wait-for-processing: true
+# TODO FIND TOOL SIMILAR TO DATREE
+#  datree-k8s-policy-check:
+#    runs-on: ubuntu-latest
+#    defaults:
+#      run:
+#        shell: bash
+#        working-directory: helm-charts/main-chart
+#    env:
+#      DATREE_TOKEN: ${{ secrets.DATREE_TOKEN }}
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#
+#      - name: Run Datree Policy Check
+#        uses: datreeio/action-datree@main
+#        with:
+#          path: '.'
+#          cliArguments: ''
+#          isHelmChart: true
+#          helmArguments: '--values values.yaml -f helm-charts/main-chart/values-prod.yaml'
+#
+#      - name: Upload analysis results to GitHub
+#        uses: github/codeql-action/upload-sarif@v2
+#        with:
+#          sarif_file: datree.sarif
+#          wait-for-processing: true
 
   build-final-image:
     name: Build Final Image
-    # TODO later add "Datreek8sPolicyCheck" and "scan-artifact-AWS-CodeGuru"
+    # TODO later add "Datreek8sPolicyCheck" and "scan-artifact-AWS-CodeGuru" and "snyk2" "snyk3"
     # Add "test-integration" to the below list if you want to use integration testing
-    needs: [lint, test-unit, test-k3d, scan-image-Trivy, scan-image-Snyk]
+    needs: [lint, test-unit, test-k3d, scan-image-Trivy, scan-code-Snyk, scan-image-Snyk]
     runs-on: ubuntu-latest
 
     permissions:
