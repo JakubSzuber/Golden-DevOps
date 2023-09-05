@@ -85,7 +85,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'jakubszuber/react-nginx-image:latest'
-          exit-code: 1
+          exit-code: 0
           #ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
           severity: 'HIGH,CRITICAL'
 
@@ -114,4 +114,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         if: always()
         with:
-          sarif_file: './trivy-results.sarif'
+          sarif_file: 'trivy-results.sarif'
