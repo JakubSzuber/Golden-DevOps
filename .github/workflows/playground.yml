@@ -36,4 +36,62 @@ jobs:
     steps:
       - name: Print the input tag to STDOUT
         run: echo  The tags are ${{ inputs.tags }} and some choice is ${{ inputs.somechoice }}
+  scan-image-Trivy:
+    name: Scan Image with Trivy
+    runs-on: ubuntu-latest
 
+    permissions:
+      contents: read  # Obtain permission needed for actions/checkout to fetch code
+      packages: read  # Obtain permission needed to push docker image to ghcr.io
+      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image to scan
+        run: docker pull jakubszuber/react-nginx-image:latest
+
+      # Gain an additional overview of the vulnerabilities
+      # - name: Run Trivy for all CVEs (non-blocking)
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
+      #     exit-code: 0
+      #     format: table
+
+      # - name: Run Trivy for all CVEs (blocking)
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: jakubszuber/react-nginx-image:latest
+      #     exit-code: 1
+      #     severity: 'CRITICAL'
+      #     format: table 
+
+      - name: Run Trivy for HIGH CVEs and report
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: jakubszuber/react-nginx-image:latest
+          exit-code: 0
+          #ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
+          severity: 'HIGH'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
