@@ -160,9 +160,9 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: jakubszuber/react-nginx-image:latest
-          args: --file=Dockerfile --severity-threshold=low --sarif-file-output=snyk-image.sarif
+          args: --file=Dockerfile --severity-threshold=low
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: 'snyk-image.sarif'
+          sarif_file: 'snyk.sarif'
