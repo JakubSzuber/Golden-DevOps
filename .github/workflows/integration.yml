@@ -274,16 +274,13 @@ jobs:
         with:
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 0
-          vuln-type: 'os,library'
-          ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
+          #ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
           severity: 'HIGH'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
+          format: 'sarif'
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
-        if: always()
         with:
           sarif_file: 'trivy-results.sarif'
 
@@ -316,13 +313,12 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+          args: --severity-threshold=high --sarif-file-output=snyk-code.sarif
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
-        if: always()
         with:
-          sarif_file: 'snyk.sarif'
+          sarif_file: 'snyk-code.sarif'
 
   scan-image-Snyk:
     name: Scan Image with Snyk
@@ -369,13 +365,12 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
+          args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk-image.sarif
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
-        if: always()
         with:
-          sarif_file: 'snyk.sarif'
+          sarif_file: 'snyk-image.sarif'
 
 
 # TODO Uncomment below and move the below two lines, uncomment and configure the rest of the below part, and setup Datree on the Datree website when you will have implemented Helm
