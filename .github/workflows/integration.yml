@@ -283,6 +283,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
+          categoty: trivy-results
 
   scan-code-Snyk:
     name: Scan Code with Snyk
@@ -319,6 +320,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'snyk-code.sarif'
+          categoty: snyk-code
 
   scan-image-Snyk:
     name: Scan Image with Snyk
@@ -371,6 +373,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'snyk-image.sarif'
+          categoty: snyk-image
 
 
 # TODO Uncomment below and move the below two lines, uncomment and configure the rest of the below part, and setup Datree on the Datree website when you will have implemented Helm
