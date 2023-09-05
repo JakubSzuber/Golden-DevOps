@@ -275,7 +275,7 @@ jobs:
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 0
           vuln-type: 'os,library'
-          #ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
+          ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
           severity: 'HIGH'
           format: 'template'
           template: '@/contrib/sarif.tpl'
