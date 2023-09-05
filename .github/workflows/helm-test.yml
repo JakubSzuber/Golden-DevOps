@@ -84,10 +84,11 @@ jobs:
           kubectl logs -l app=golden-devops-helm-release --namespace=argocd
           echo "------------------------------------------------------------------------"
 
+      # TODO Later, when you move from the self-signed certificates delete "-k" flag
       - name: Test Helm resources (curl command)
 #        if: steps.list-changed.outputs.changed == 'true'
         run: |
-          if ! kubectl exec deploy/golden-devops-helm-release --namespace=argocd -- curl --fail localhost:8080; then
+          if ! kubectl exec deploy/golden-devops-helm-release --namespace=argocd -- curl -k -f https://localhost:8080; then
             echo "Failed to retrieve data from localhost!"
             exit 1
           fi
