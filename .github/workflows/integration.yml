@@ -47,26 +47,39 @@ jobs:
           #FILTER_REGEX_INCLUDE: .*src/.*  # Uncomment to inlude only files within /src
           #FILTER_REGEX_EXCLUDE: .*/.github/workflows/.*  # Uncomment to exclude workflow files
 
-  # This job could be executed through the ubuntu, windows, and macOS hosted runners but it require additional changes
-  build-test-image:  
-#    runs-on: ${{ matrix.os }}
-#    strategy:
-#      matrix:
-#        os: [ubuntu-latest, windows-latest, macOS-latest]
-    runs-on: ubuntu-22.04
-    
+  build-unit-test-image:  
+    runs-on: ubuntu-22.04    
     permissions:
       packages: write  # Obtain permission needed to push docker image to ghcr.io
-
     steps:    
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Login to Docker Hub
+    - name: Login to ghcr.io registry
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Use GHCR as a register for test images
+    - name: Build and Push to GHCR
+      uses: docker/build-push-action@v4
+      with:
+        target: unit-test
+        push: true
+        tags: ghcr.io/jakubszuber/react-nginx-image:unit-test-${{ github.run_id }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+  build-test-image:  
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write  # Obtain permission needed to push docker image to ghcr.io
+    steps:    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
     - name: Login to ghcr.io registry
       uses: docker/login-action@v2
@@ -87,7 +100,7 @@ jobs:
 
   test-unit:
     name: Unit tests in Docker
-    needs: [build-test-image]
+    needs: [build-unit-test-image]
     runs-on: ubuntu-latest
 
     permissions:
@@ -103,7 +116,7 @@ jobs:
       
       - name: Unit Testing in Docker
         run: |
-          docker run --rm ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
+          docker run --rm ghcr.io/jakubszuber/react-nginx-image:unit-test-"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
 
 # You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
 #  test-integration:
@@ -256,13 +269,14 @@ jobs:
           exit-code: 0
           format: table 
 
-      - name: Run Trivy for CRITICAL CVEs and report (blocking)
+      - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 1
           vuln-type: 'os,library'
-          severity: 'CRITICAL'
+          #ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
+          severity: 'HIGH,CRITICAL'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
@@ -286,15 +300,13 @@ jobs:
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --sarif-file-output=snyk.sarif
 
       - name: Run Snyk to check the code for vulnerabilities (blocking)
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=critical
+          args: --severity-threshold=high,critical --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
@@ -329,7 +341,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          args: --file=Dockerfile --sarif-file-output=snyk.sarif
+          args: --file=Dockerfile
 
       - name: Run Snyk to check Docker image for vulnerabilities (blocking)
         uses: snyk/actions/docker@master
@@ -337,7 +349,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          args: --file=Dockerfile --severity-threshold=critical
+          args: --file=Dockerfile --severity-threshold=high,critical --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
