@@ -5,6 +5,7 @@
 
 name: Helm-Test
 # TODO make this workflow universal so it will be able to work for each helm chart within the helm-charts directory
+# TODO change this file if you decided to use separete namespace for main application's resources
 
 on:
   workflow_dispatch:  # Step "Run chart-testing (list-changed)" will always return that there are no changes while workflow is executed manually
@@ -78,15 +79,15 @@ jobs:
           helm install golden-devops-helm-release helm-charts/main-chart --values helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml --set disableTLS=true
           echo "Waiting to startup containers..."
           sleep 50
-          kubectl get all --namespace=prod-namespace
+          kubectl get all --namespace=argocd
           echo "---------------------------Main container logs--------------------------"
-          kubectl logs -l app=golden-devops-helm-release --namespace=prod-namespace
+          kubectl logs -l app=golden-devops-helm-release --namespace=argocd
           echo "------------------------------------------------------------------------"
 
       - name: Test Helm resources (curl command)
 #        if: steps.list-changed.outputs.changed == 'true'
         run: |
-          if ! kubectl exec deploy/golden-devops-helm-release --namespace=prod-namespace -- curl --fail localhost:8080; then
+          if ! kubectl exec deploy/golden-devops-helm-release --namespace=argocd -- curl --fail localhost:8080; then
             echo "Failed to retrieve data from localhost!"
             exit 1
           fi
@@ -97,10 +98,33 @@ jobs:
           if ! helm test golden-devops-helm-release; then
             echo "Testing of Helm golden-devops-helm-release failed!"
             echo "---------------------------Testing container logs--------------------------"
-            kubectl logs golden-devops-helm-release-connection-test --namespace=prod-namespace
+            kubectl logs golden-devops-helm-release-connection-test --namespace=argocd
             echo "---------------------------------------------------------------------------"
             exit 1
           fi
           echo "---------------------------Testing container logs--------------------------"
-          kubectl logs golden-devops-helm-release-connection-test --namespace=prod-namespace
+          kubectl logs golden-devops-helm-release-connection-test --namespace=argocd
           echo "---------------------------------------------------------------------------"
+
+  test-Snyk:
+    name: Scan Helm chart with Snyk
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Run Snyk to check Helm chart for issues
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          file: helm-charts/main-chart
+          args: --severity-threshold=high
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'snyk.sarif'
