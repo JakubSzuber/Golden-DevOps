@@ -253,6 +253,14 @@ jobs:
       - name: Pull image to scan
         run: docker pull ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
 
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Trivy for all CVEs (non-blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
+          exit-code: 0
+          format: table
+
       - name: Run Trivy for all CVEs (blocking)
         uses: aquasecurity/trivy-action@master
         with:
@@ -261,22 +269,14 @@ jobs:
           severity: 'CRITICAL'
           format: table 
 
-      # Gain an additional overview of the vulnerabilities
-      - name: Run Trivy for all CVEs (non-blocking)
+      - name: Run Trivy for HIGH CVEs and report
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 0
-          format: table 
-
-      - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          exit-code: 1
           vuln-type: 'os,library'
           #ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
-          severity: 'HIGH,CRITICAL'
+          severity: 'HIGH'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
@@ -295,13 +295,21 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
-      - name: Run Snyk to check the code for vulnerabilities (non-blocking)  # TODO make sure that the report is porperly handled
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check the code for vulnerabilities (non-blocking)
         continue-on-error: true
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk to check the code for vulnerabilities (blocking)
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=critical
+
+      - name: Run Snyk for HIGH CVEs and report
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -334,7 +342,8 @@ jobs:
       - name: Pull image to scan
         run: docker pull ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
 
-      - name: Run Snyk to check Docker image for vulnerabilities (non-blocking)  # TODO make sure that the report is porperly handled
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check Docker image for vulnerabilities (non-blocking)
         continue-on-error: true
         uses: snyk/actions/docker@master
         env:
@@ -344,6 +353,14 @@ jobs:
           args: --file=Dockerfile
 
       - name: Run Snyk to check Docker image for vulnerabilities (blocking)
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
+          args: --file=Dockerfile --severity-threshold=critical
+
+      - name: Upload result to GitHub Code Scanning
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
