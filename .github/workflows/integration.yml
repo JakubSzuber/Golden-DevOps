@@ -275,7 +275,7 @@ jobs:
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 0
           ignore-unfixed: true
-          severity: 'HIGH'
+          severity: 'LOW'  # TODO JUS TESTING
           format: 'sarif'
           output: 'trivy-results.sarif'
 
