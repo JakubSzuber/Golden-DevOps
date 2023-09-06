@@ -15,7 +15,7 @@ on:
       - 'helm-charts/**'
 
 jobs:
-  test:
+  test-with-commands:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -116,16 +116,91 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
-      - name: Run Snyk to check Helm chart for issues
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check the Helm chart for vulnerabilities (non-blocking)
+        continue-on-error: true
         uses: snyk/actions/iac@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           file: helm-charts/main-chart
-          args: --severity-threshold=high
 
-      - name: Upload result to GitHub Code Scanning
+      - name: Run Snyk to check the Helm chart for vulnerabilities (blocking)
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          file: helm-charts/main-chart
+          args: --severity-threshold=critical
+
+      - name: Run Snyk for HIGH CVEs and report
+        continue-on-error: true
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub Helm chart Scanning
         uses: github/codeql-action/upload-sarif@v2
-        if: always()
         with:
           sarif_file: 'snyk.sarif'
+
+  scan-image-Trivy:
+    name: Scan Helm chart with Trivy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read          # Obtain permission needed for actions/checkout to fetch code
+      packages: read          # Obtain permission needed to push docker image to ghcr.io
+      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+# TODO TEST IS THIS REQUIRED
+#      - name: Set up Helm
+#        uses: azure/setup-helm@f382f75448129b3be48f8121b9857be18d815a82 # tag=v3.4
+#        with:
+#          version: v3.6.3
+#
+#      - name: Set up python
+#        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # tag=v4.3.0
+#        with:
+#          python-version: 3.7
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Trivy for all CVEs (non-blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          scan-ref: 'helm-charts/main-chart'
+          exit-code: 0
+          format: table
+
+      - name: Run Trivy for all CVEs (blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          scan-ref: 'helm-charts/main-chart'
+          exit-code: 1
+          severity: 'CRITICAL'
+          format: table 
+
+      - name: Run Trivy for HIGH CVEs and report
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          scan-ref: 'helm-charts/main-chart'
+          exit-code: 0
+          ignore-unfixed: true
+          severity: 'HIGH'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
