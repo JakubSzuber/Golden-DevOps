@@ -275,7 +275,7 @@ jobs:
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 0
           ignore-unfixed: true
-          severity: 'LOW'  # TODO JUS TESTING
+          severity: 'HIGH'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
@@ -363,9 +363,9 @@ jobs:
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
+        with:  # TODO JUS TESTING   (if now workflow works then you have to add continue on error for upload sarif step)
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk-image.sarif
+          args: --file=Dockerfile --severity-threshold=low --sarif-file-output=snyk-image.sarif
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
