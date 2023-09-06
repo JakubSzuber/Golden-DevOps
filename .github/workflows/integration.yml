@@ -363,14 +363,14 @@ jobs:
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:  # TODO JUS TESTING   (if now workflow works then you have to add continue on error for upload sarif step)
+        with:  # TODO JUS TESTING   (if now workflow works then you have to add continue on error for upload sarif steps everywhere)
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          args: --file=Dockerfile --severity-threshold=low --sarif-file-output=snyk-image.sarif
+          args: --file=Dockerfile --severity-threshold=low
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: 'snyk-image.sarif'
+          sarif_file: 'snyk.sarif'
 
 
 # TODO Uncomment below and move the below two lines, uncomment and configure the rest of the below part, and setup Datree on the Datree website when you will have implemented Helm
