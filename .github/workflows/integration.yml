@@ -274,7 +274,7 @@ jobs:
         with:
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 0
-          #ignore-unfixed: true  #TODO uncomment when all scans-related code will be finished (before uncommenting clear entire github scanning)
+          ignore-unfixed: true
           severity: 'HIGH'
           format: 'sarif'
           output: 'trivy-results.sarif'
@@ -283,7 +283,6 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
-          categoty: trivy-results
 
   scan-code-Snyk:
     name: Scan Code with Snyk
@@ -320,7 +319,6 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'snyk-code.sarif'
-          categoty: snyk-code
 
   scan-image-Snyk:
     name: Scan Image with Snyk
@@ -373,7 +371,6 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'snyk-image.sarif'
-          categoty: snyk-image
 
 
 # TODO Uncomment below and move the below two lines, uncomment and configure the rest of the below part, and setup Datree on the Datree website when you will have implemented Helm
@@ -488,6 +485,25 @@ jobs:
             ${{ steps.docker_meta.outputs.labels }}
             ```
           edit-mode: replace
+
+  generate-sbom:
+    name: Generate SBOM (Software Bill of Materials) for the final image
+    needs: [build-final-image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          image-ref: 'jakubszuber/react-nginx-image'
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
 
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
