@@ -1,6 +1,3 @@
-# syntax=docker/dockerfile:1.4
-
-# 1. For build React app
 FROM node:20.5.1-bullseye-slim AS development
 
 # Set working directory
