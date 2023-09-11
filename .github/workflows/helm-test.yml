@@ -22,6 +22,7 @@ on:
 jobs:
   test-with-commands:
     if: github.event_name != 'push'
+    name: Test Using Command-Line Tools
     runs-on: ubuntu-latest
 
     steps:
@@ -229,7 +230,7 @@ jobs:
 
   image-scan-results-Snyk:
     if: github.event_name != 'pull_request'
-    name: Scan Helm Chart With Snyk
+    name: Scan Helm Chart With Snyk And Upload Results
     runs-on: ubuntu-latest
 
     permissions:
