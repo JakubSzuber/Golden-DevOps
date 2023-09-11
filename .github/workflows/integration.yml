@@ -634,7 +634,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: jakubszuber/react-nginx-image:${{ github.sha }}
+          image: jakubszuber/react-nginx-image:sha-${{ github.sha }}
           args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
