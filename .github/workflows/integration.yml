@@ -86,7 +86,7 @@ jobs:
       with:
         target: unit-test
         push: true
-        tags: ghcr.io/jakubszuber/react-nginx-image:unit-test-${{ github.run_id }}
+        tags: ghcr.io/jakubszuber/react-nginx-image-unit-test:${{ github.run_id }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         platforms: linux/amd64
@@ -120,7 +120,7 @@ jobs:
       id: docker_meta
       uses: docker/metadata-action@v4
       with:
-        images: ghcr.io/jakubszuber/react-nginx-image
+        images: ghcr.io/jakubszuber/react-nginx-image-unit-test
         flavor: |
           latest=true
         tags: |
@@ -177,7 +177,7 @@ jobs:
 
       - name: Unit Testing in Docker
         run: |
-          docker run --rm ghcr.io/jakubszuber/react-nginx-image:unit-test-"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
+          docker run --rm ghcr.io/jakubszuber/react-nginx-image-unit-test:"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
 
 # You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
 #  test-integration:
