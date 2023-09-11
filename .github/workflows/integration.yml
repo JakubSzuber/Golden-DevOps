@@ -541,7 +541,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           hide-progress: false
-          image-ref: jakubszuber/react-nginx-image:${{ github.sha }}
+          image-ref: jakubszuber/react-nginx-image:sha-${{ github.sha }}
           exit-code: 0
           format: table
 
@@ -625,7 +625,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: jakubszuber/react-nginx-image:${{ github.sha }}
+          image: jakubszuber/react-nginx-image:sha-${{ github.sha }}
           args: --file=Dockerfile --report
 
       - name: Run Snyk for HIGH CVEs and report
