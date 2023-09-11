@@ -479,6 +479,7 @@ jobs:
       - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push, merged pull request, or manual run
         uses: docker/build-push-action@v4
         with:
+          push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-from: type=gha  # Use cached image layers to reduce image building time
