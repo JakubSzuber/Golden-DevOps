@@ -5,7 +5,7 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/group.name: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/backend-protocol: HTTPS  # TODO zmien na HTTP
+    alb.ingress.kubernetes.io/backend-protocol: HTTPS
     # Use this annotation (which must match a service name) to route traffic to HTTP2 backends.
     alb.ingress.kubernetes.io/conditions.argogrpc: |
       [{"field":"http-header","httpHeaderConfig":{"httpHeaderName": "Content-Type", "values":["application/grpc"]}}]
@@ -44,7 +44,7 @@ spec:
             name: golden-devops-helm-release
             port:
               number: 443
-            namespace: argocd  # TODO Change later
+            namespace: argocd  # TODO Maybe change later
         pathType: Prefix
       - path: /
         backend:
@@ -52,7 +52,7 @@ spec:
             name: golden-devops-helm-release
             port:
               number: 443
-            namespace: argocd  # TODO Change later
+            namespace: argocd  # TODO Maybe change later
         pathType: Prefix
   tls:
   - hosts:
