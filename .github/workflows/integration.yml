@@ -33,6 +33,7 @@ env:
 
 jobs:
   lint:
+    name: Lint Repo
     if: github.event_name != 'push'
     runs-on: ubuntu-22.04
 
@@ -63,6 +64,7 @@ jobs:
           #FILTER_REGEX_EXCLUDE: .*/.github/workflows/.*  # Uncomment to exclude workflow files
 
   build-unit-test-image:
+    name: Build Unit Test Image
     if: github.event_name != 'push'
     runs-on: ubuntu-22.04
 
@@ -92,6 +94,7 @@ jobs:
         platforms: linux/amd64
 
   build-test-image:
+    name: Build Test Image (Candidate)
     if: github.event_name != 'push'
     runs-on: ubuntu-22.04
 
@@ -160,7 +163,7 @@ jobs:
 
   test-unit:
     if: github.event_name != 'push'
-    name: Unit tests in Docker
+    name: Unit Tests In Docker
     needs: [build-unit-test-image]
     runs-on: ubuntu-latest
 
@@ -182,7 +185,7 @@ jobs:
 # You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
 #  test-integration:
 #    if: github.event_name != 'push'
-#    name: Integration tests in Compose
+#    name: Integration Tests In Compose
 #    needs: [build-test-image]
 #    runs-on: ubuntu-latest
 #
@@ -214,7 +217,7 @@ jobs:
 
   test-k3d:
     if: github.event_name != 'push'
-    name: Test Deployment in Kubernetes
+    name: Test Deployment In Kubernetes
     needs: [build-test-image]
     runs-on: ubuntu-latest
 
@@ -288,7 +291,7 @@ jobs:
 
   scan-image-Trivy:
     if: github.event_name != 'push'
-    name: Scan Image with Trivy
+    name: Scan Image With Trivy
     needs: [build-test-image]
     runs-on: ubuntu-latest
 
@@ -337,7 +340,7 @@ jobs:
 
   scan-code-Snyk:
     if: github.event_name != 'push'
-    name: Scan Code with Snyk
+    name: Scan Code With Snyk
     runs-on: ubuntu-latest
 
     permissions:
@@ -363,7 +366,7 @@ jobs:
 
   scan-image-Snyk:
     if: github.event_name != 'push'
-    name: Scan Image with Snyk
+    name: Scan Image With Snyk
     needs: [build-test-image]
     runs-on: ubuntu-latest
 
@@ -488,7 +491,7 @@ jobs:
 
   generate-sbom:
     if: github.event_name != 'pull_request'
-    name: Generate SBOM (Software Bill of Materials) for the final image
+    name: Generate SBOM (Software Bill of Materials) For The Final Image
     needs: [build-final-image]
     runs-on: ubuntu-latest
     permissions:
@@ -514,7 +517,7 @@ jobs:
 
   image-scan-results-Trivy:
     if: github.event_name != 'pull_request'
-    name: Scan Image with Trivy
+    name: Scan Image With Trivy And Upload Results
     needs: [build-final-image]
     runs-on: ubuntu-latest
 
@@ -551,7 +554,7 @@ jobs:
 #        uses: aquasecurity/trivy-action@master
 #        with:
 #          hide-progress: false
-#          image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
+#          image-ref: jakubszuber/react-nginx-image:sha-${{ github.sha }}
 #          exit-code: 0
 #          ignore-unfixed: true
 #          severity: 'HIGH'
@@ -565,7 +568,7 @@ jobs:
 
   code-scan-results-Snyk:
     if: github.event_name != 'pull_request'
-    name: Scan Code with Snyk
+    name: Scan Code With Snyk And Upload Results
     runs-on: ubuntu-latest
 
     permissions:
@@ -598,7 +601,7 @@ jobs:
 
   image-scan-results-Snyk:
     if: github.event_name != 'pull_request'
-    name: Scan Image with Snyk
+    name: Scan Image With Snyk And Upload Results
     needs: [build-final-image]
     runs-on: ubuntu-latest
 
