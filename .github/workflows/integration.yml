@@ -5,25 +5,40 @@ name: CI
 
 concurrency: integration
 
-on:  # TODO Change the trigger events' logic (or leave if you are sure it's ok (but it's probably not)). Maybe do that branch have to start with "dev_" or branch main but only for /src
+on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
+      - 'Dockerfile'
       - 'src/**'
       - '!src/**/README.md'
+      - 'public/**'
+      - '!public/**/README.md'
+      - 'package.json'
+      - 'package-lock.json'
   pull_request:
-    branches: [main]
+    branches: ['main', 'dev_*', 'snyk-upgrade-*']
     paths:
+      - 'Dockerfile'
       - 'src/**'
       - '!src/**/README.md'
+      - 'public/**'
+      - '!public/**/README.md'
+      - 'package.json'
+      - 'package-lock.json'
 
 env:
-  AWS_REGION: us-east-2
+  AWS_REGION: us-east-1
 
 jobs:
   lint:
+    if: github.event_name != 'push'
     runs-on: ubuntu-22.04
+
+    permissions:
+      contents: read  # Obtain permission needed to see the code
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -47,10 +62,13 @@ jobs:
           #FILTER_REGEX_INCLUDE: .*src/.*  # Uncomment to inlude only files within /src
           #FILTER_REGEX_EXCLUDE: .*/.github/workflows/.*  # Uncomment to exclude workflow files
 
-  build-unit-test-image:  
-    runs-on: ubuntu-22.04    
+  build-unit-test-image:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-22.04
+
     permissions:
       packages: write  # Obtain permission needed to push docker image to ghcr.io
+
     steps:    
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -73,13 +91,23 @@ jobs:
         cache-to: type=gha,mode=max
         platforms: linux/amd64
 
-  build-test-image:  
+  build-test-image:
+    if: github.event_name != 'push'
     runs-on: ubuntu-22.04
+
     permissions:
-      packages: write  # Obtain permission needed to push docker image to ghcr.io
-    steps:    
+      packages: write       # Obtain permission needed to push docker image to ghcr.io
+      pull-requests: write  # Obtain permission needed to comment on PR
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
 
     - name: Login to ghcr.io registry
       uses: docker/login-action@v2
@@ -88,17 +116,50 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Docker meta for the candidate image  # Add multiple tags to the image
+      id: docker_meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ghcr.io/jakubszuber/react-nginx-image
+        flavor: |
+          latest=true
+        tags: |
+          type=semver,pattern={{version}},value=v1.0.0
+          type=semver,pattern={{major}}.{{minor}},value=v1.0.0
+          type=ref,event=pr
+          type=sha,format=long
+          type=raw,value=${{ github.run_id }}
+          type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}}
+
     # Use GHCR as a register for test images
     - name: Build and Push to GHCR
       uses: docker/build-push-action@v4
       with:
         push: true
-        tags: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-        cache-from: type=gha
+        tags: ${{ steps.docker_meta.outputs.tags }}
+        labels: ${{ steps.docker_meta.outputs.labels }}
+        cache-from: type=gha  # Use cached image layers to reduce image building time
         cache-to: type=gha,mode=max
-        platforms: linux/amd64
+        platforms: linux/amd64  # You can change to "linux/amd64,linux/arm/v7,linux/arm64"
+
+    - name: Comment to PR that the candidate image pushed to GHCR and with which tags
+      if: github.event_name == 'pull_request'
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        message: |
+          Candidate image was pushed to GHCR
+          Tags added to images (final image will have similar tags):
+          ```text
+          ${{ steps.docker_meta.outputs.tags }}
+          ```
+          Labels added to images (final image will have similar tags):
+          ```text
+          ${{ steps.docker_meta.outputs.labels }}
+          ```
 
   test-unit:
+    if: github.event_name != 'push'
     name: Unit tests in Docker
     needs: [build-unit-test-image]
     runs-on: ubuntu-latest
@@ -113,13 +174,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Unit Testing in Docker
         run: |
           docker run --rm ghcr.io/jakubszuber/react-nginx-image:unit-test-"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
 
 # You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
 #  test-integration:
+#    if: github.event_name != 'push'
 #    name: Integration tests in Compose
 #    needs: [build-test-image]
 #    runs-on: ubuntu-latest
@@ -148,9 +210,10 @@ jobs:
 #        run: |
 #          export TESTING_IMAGE=ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
 #          echo Testing image: "$TESTING_IMAGE"
-#          docker compose -f docker-compose.test.yml up --exit-code-from service1
+#          docker compose -f docker-compose.test.yml up --exit-code-from main-end-service
 
   test-k3d:
+    if: github.event_name != 'push'
     name: Test Deployment in Kubernetes
     needs: [build-test-image]
     runs-on: ubuntu-latest
@@ -224,13 +287,16 @@ jobs:
           fi
 
   scan-image-Trivy:
+    if: github.event_name != 'push'
     name: Scan Image with Trivy
     needs: [build-test-image]
     runs-on: ubuntu-latest
+
     permissions:
       contents: read          # Obtain permission needed for actions/checkout to fetch code
       packages: read          # Obtain permission needed to push docker image to ghcr.io
       security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v3
@@ -255,6 +321,7 @@ jobs:
       - name: Run Trivy for all CVEs (non-blocking)
         uses: aquasecurity/trivy-action@master
         with:
+          hide-progress: false
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 0
           format: table
@@ -262,31 +329,20 @@ jobs:
       - name: Run Trivy for all CVEs (blocking)
         uses: aquasecurity/trivy-action@master
         with:
+          hide-progress: false
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 1
           severity: 'CRITICAL'
-          format: table 
-
-      - name: Run Trivy for HIGH CVEs and report
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          exit-code: 0
-          ignore-unfixed: true
-          severity: 'HIGH'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'trivy-results.sarif'
+          format: table
 
   scan-code-Snyk:
+    if: github.event_name != 'push'
     name: Scan Code with Snyk
     runs-on: ubuntu-latest
+
     permissions:
       security-events: write
+
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v3
@@ -305,25 +361,15 @@ jobs:
         with:
           args: --severity-threshold=critical
 
-      - name: Run Snyk for HIGH CVEs and report
-        continue-on-error: true
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --sarif-file-output=snyk-code.sarif
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'snyk-code.sarif'
-
   scan-image-Snyk:
+    if: github.event_name != 'push'
     name: Scan Image with Snyk
     needs: [build-test-image]
     runs-on: ubuntu-latest
+
     permissions:
       security-events: write
+
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v3
@@ -356,24 +402,9 @@ jobs:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           args: --file=Dockerfile --severity-threshold=critical
 
-      - name: Run Snyk for HIGH CVEs and report
-        continue-on-error: true
-        uses: snyk/actions/docker@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
-          args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'snyk.sarif'
-
-
-# TODO Uncomment below and move the below two lines, uncomment and configure the rest of the below part, and setup Datree on the Datree website when you will have implemented Helm
-# TODO FIND TOOL SIMILAR TO DATREE
+# TODO PROBABLY FIND TOOL SIMILAR TO DATREE (below workflow is absolutely not finished)
 #  datree-k8s-policy-check:
+#    if: github.event_name != 'push'
 #    runs-on: ubuntu-latest
 #    defaults:
 #      run:
@@ -400,14 +431,15 @@ jobs:
 #          wait-for-processing: true
 
   build-final-image:
+    if: github.event_name != 'pull_request'
     name: Build Final Image
-    # TODO later add "Datreek8sPolicyCheck" and "scan-artifact-AWS-CodeGuru"
+    # TODO later add "Datreek8sPolicyCheck", "scan-artifact-AWS-CodeGuru", sth else
     # Add "test-integration" to the below list if you want to use integration testing
     needs: [lint, test-unit, test-k3d, scan-image-Trivy, scan-code-Snyk, scan-image-Snyk]
     runs-on: ubuntu-latest
 
     permissions:
-      packages: write  # Obtain permission needed to push docker image to ghcr.io
+      packages: write       # Obtain permission needed to push docker image to ghcr.io
       pull-requests: write  # Obtain permission needed to create and update comments in PRs
 
     steps:
@@ -444,47 +476,17 @@ jobs:
             type=sha,format=long
             type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
 
-      # TODO Make sure that below part is fully logical
-      - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push or merged pull request
+      - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push, merged pull request, or manual run
         uses: docker/build-push-action@v4
         with:
-          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-from: type=gha  # Use cached image layers to reduce image building time
           cache-to: type=gha,mode=max
           platforms: linux/amd64  # You can change to "linux/amd64,linux/arm/v7,linux/arm64"
 
-      # If PR, put image tags in the PR comments
-      # from https://github.com/marketplace/actions/create-or-update-comment
-      - name: Find comment for image tags
-        uses: peter-evans/find-comment@v2
-        if: github.event_name == 'pull_request'
-        id: fc
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: Docker image tag(s) pushed
-
-      # If PR, put image tags in the PR comments
-      - name: Create or update comment for image tags
-        uses: peter-evans/create-or-update-comment@v2
-        if: github.event_name == 'pull_request'
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Docker image tag(s) pushed:
-            ```text
-            ${{ steps.docker_meta.outputs.tags }}
-            ```
-            Labels added to images:
-            ```text
-            ${{ steps.docker_meta.outputs.labels }}
-            ```
-          edit-mode: replace
-
   generate-sbom:
+    if: github.event_name != 'pull_request'
     name: Generate SBOM (Software Bill of Materials) for the final image
     needs: [build-final-image]
     runs-on: ubuntu-latest
@@ -494,14 +496,156 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           format: 'github'
           output: 'dependency-results.sbom.json'
-          image-ref: 'jakubszuber/react-nginx-image'
+          image-ref: 'jakubszuber/react-nginx-image:${{ github.sha }}'
           github-pat: ${{ secrets.GITHUB_TOKEN }}
+
+  image-scan-results-Trivy:
+    if: github.event_name != 'pull_request'
+    name: Scan Image with Trivy
+    needs: [build-final-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read          # Obtain permission needed for actions/checkout to fetch code
+      packages: read          # Obtain permission needed to push docker image to ghcr.io
+      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull image to scan
+        run: docker pull jakubszuber/react-nginx-image:"$GITHUB_SHA"
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Trivy for all CVEs (non-blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          hide-progress: false
+          image-ref: jakubszuber/react-nginx-image:${{ github.sha }}
+          exit-code: 0
+          format: table
+
+# TODO Trivy reports to GitHub Code Scanning can be uncommented if the
+# TODO issue https://github.com/aquasecurity/trivy-action/issues/258 will be fixed
+#      - name: Run Trivy for HIGH CVEs and report
+#        uses: aquasecurity/trivy-action@master
+#        with:
+#          hide-progress: false
+#          image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
+#          exit-code: 0
+#          ignore-unfixed: true
+#          severity: 'HIGH'
+#          format: 'sarif'
+#          output: 'trivy-results.sarif'
+#
+#      - name: Upload Trivy scan results to GitHub Security tab
+#        uses: github/codeql-action/upload-sarif@v2
+#        with:
+#          sarif_file: 'trivy-results.sarif'
+
+  code-scan-results-Snyk:
+    if: github.event_name != 'pull_request'
+    name: Scan Code with Snyk
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check the code for vulnerabilities (non-blocking)
+        continue-on-error: true
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          args: --report
+
+      - name: Run Snyk for HIGH CVEs and report
+        continue-on-error: true
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --sarif-file-output=snyk-code.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'snyk-code.sarif'
+
+  image-scan-results-Snyk:
+    if: github.event_name != 'pull_request'
+    name: Scan Image with Snyk
+    needs: [build-final-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull image to scan
+        run: docker pull jakubszuber/react-nginx-image:"$GITHUB_SHA"
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check Docker image for vulnerabilities (non-blocking)
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: jakubszuber/react-nginx-image:${{ github.sha }}
+          args: --file=Dockerfile --report
+
+      - name: Run Snyk for HIGH CVEs and report
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: jakubszuber/react-nginx-image:${{ github.sha }}
+          args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'snyk.sarif'
 
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
@@ -511,6 +655,11 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       STAT: ${{ needs.build-final-image.result }}
+
+    permissions:
+      contents: read
+      actions: read
+
     steps:
       - name: TEST1
         run: |
