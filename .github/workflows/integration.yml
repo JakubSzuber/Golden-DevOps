@@ -120,7 +120,7 @@ jobs:
       id: docker_meta
       uses: docker/metadata-action@v4
       with:
-        images: ghcr.io/jakubszuber/react-nginx-image-unit-test
+        images: ghcr.io/jakubszuber/react-nginx-image
         flavor: |
           latest=true
         tags: |
