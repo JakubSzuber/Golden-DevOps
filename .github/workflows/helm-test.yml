@@ -119,10 +119,6 @@ jobs:
     if: github.event_name != 'push'
     name: Scan Helm Chart With Trivy
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: helm-charts/main-chart
 
     permissions:
       contents: read          # Obtain permission needed for actions/checkout to fetch code
@@ -132,13 +128,23 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
+      - name: Set up Helm
+        uses: azure/setup-helm@f382f75448129b3be48f8121b9857be18d815a82 # tag=v3.4
+        with:
+          version: v3.6.3
+
+      - name: Set up python
+        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # tag=v4.3.0
+        with:
+          python-version: 3.7
+
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
           hide-progress: false
-          scan-ref: '.'
+          scan-ref: 'helm-charts/main-chart'
           exit-code: 0
           format: table
 
@@ -147,7 +153,7 @@ jobs:
         with:
           scan-type: 'config'
           hide-progress: false
-          scan-ref: '.'
+          scan-ref: 'helm-charts/main-chart'
           exit-code: 1
           severity: 'CRITICAL'
           format: table
@@ -165,10 +171,14 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
-      - name: Pre-render Helm templates
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Template Helm chart's files
         run: |
-          mkdir rendered-main-chart
-          helm template helm-charts/main-chart -f helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml > rendered-main-chart/main-chart.yaml
+          cd helm-charts/main-chart
+          helm dependency update
+          helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-main-chart
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check the Helm chart for vulnerabilities (non-blocking)
@@ -177,24 +187,20 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          file: rendered-main-chart/main-chart.yaml
+          file: helm-charts/main-chart/rendered-main-chart
 
       - name: Run Snyk to check the Helm chart for vulnerabilities (blocking)
         uses: snyk/actions/iac@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          file: rendered-main-chart/main-chart.yaml
+          file: helm-charts/main-chart/rendered-main-chart
           args: --severity-threshold=critical
 
   image-scan-results-Trivy:
     if: github.event_name != 'pull_request'
     name: Scan Image With Trivy And Upload Results
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: helm-charts/main-chart
 
     permissions:
       contents: read          # Obtain permission needed for actions/checkout to fetch code
@@ -204,13 +210,23 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
+      - name: Set up Helm
+        uses: azure/setup-helm@f382f75448129b3be48f8121b9857be18d815a82 # tag=v3.4
+        with:
+          version: v3.6.3
+
+      - name: Set up python
+        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # tag=v4.3.0
+        with:
+          python-version: 3.7
+
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
           hide-progress: false
-          scan-ref: '.'
+          scan-ref: 'helm-charts/main-chart'
           exit-code: 0
           format: table
 
@@ -221,7 +237,7 @@ jobs:
 #        with:
 #          scan-type: 'config'
 #          hide-progress: false
-#          scan-ref: '.'
+#          scan-ref: 'helm-charts/main-chart'
 #          exit-code: 0
 #          ignore-unfixed: true
 #          severity: 'HIGH'
@@ -246,17 +262,14 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
-
-
-      - name: Checkout git repo
+      - name: Setup Helm
         uses: azure/setup-helm@v3
 
-      - name: TESTTTTTTTT Render
+      - name: Template Helm chart's files
         run: |
           cd helm-charts/main-chart
           helm dependency update
-          helm template . -f values.yaml -f values-prod.yaml --output-dir out
-
+          helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-main-chart
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check the Helm chart for vulnerabilities (non-blocking)
@@ -265,7 +278,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          file: helm-charts/main-chart/out
+          file: helm-charts/main-chart/rendered-main-chart
           args: --report
 
       - name: Run Snyk for HIGH CVEs and report
@@ -275,7 +288,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          file: helm-charts/main-chart/out
+          file: helm-charts/main-chart/rendered-main-chart
           args: --severity-threshold=high --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
