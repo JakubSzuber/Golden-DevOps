@@ -232,22 +232,22 @@ jobs:
 
 # TODO Trivy reports to GitHub Code Scanning can be uncommented if the
 # TODO issue https://github.com/aquasecurity/trivy-action/issues/258 will be fixed
-#      - name: Run Trivy for HIGH CVEs and report
-#        uses: aquasecurity/trivy-action@master
-#        with:
-#          scan-type: 'config'
-#          hide-progress: false
-#          scan-ref: 'helm-charts/main-chart'
-#          exit-code: 0
-#          ignore-unfixed: true
-#          severity: 'HIGH'
-#          format: 'sarif'
-#          output: 'trivy-results.sarif'
-#
-#      - name: Upload Trivy scan results to GitHub Security tab
-#        uses: github/codeql-action/upload-sarif@v2
-#        with:
-#          sarif_file: 'trivy-results.sarif'
+      - name: Run Trivy for HIGH CVEs and report
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          scan-ref: 'helm-charts/main-chart'
+          exit-code: 0
+          ignore-unfixed: true
+          severity: 'HIGH'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
 
   image-scan-results-Snyk:
     if: github.event_name != 'pull_request'
