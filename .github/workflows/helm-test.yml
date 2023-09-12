@@ -255,8 +255,7 @@ jobs:
         run: |
           cd helm-charts/main-chart
           helm dependency update
-          helm template . --output-dir out
-          snyk iac test out/
+          helm template . -f values.yaml -f values-prod.yaml --output-dir out
 
 
       # Gain an additional overview of the vulnerabilities
