@@ -26,14 +26,129 @@ recusandae alias error harum maxime adipisci amet laborum.
 <summary><b>Click to see the project structure:</b></summary>
 
 ```$ tree Golden-DevOps
-.
-├───.idea
-│   └───...
-├───.git
-│   └───...
-├─── docker-compose.yml
-├─── docker-stack.yml
-└─── ...
+Golden-DevOps/
+├── .git
+│   └── ...
+├── .github
+│   ├── ISSUE_TEMPLATE
+│   │   ├── bug_report.yml
+│   │   ├── feature_request.yml
+│   │   └── typo.yml
+│   ├── workflows
+│   │   ├── delivery.yml
+│   │   ├── helm-test.yml
+│   │   ├── infra-cleanup.yml
+│   │   ├── integration.yml
+│   │   ├── playground.yml
+│   │   └── terraform.yml
+│   ├── CONTRIBUTING.md
+│   └── pull_request_template.md
+├── .nginx
+│   └── nginx.conf
+├── .vscode
+│   └── launch.json
+├── aws
+│   ├── gh-action-role.json
+│   └── gh-actions-inline-policy.json
+├── healthchecks
+│   └── postgres-healthcheck
+├── helm-charts
+│   └── main-chart
+│       ├── templates
+│       │   ├── tests
+│       │   │   └── test-connection.yaml
+│       │   ├── NOTES.txt
+│       │   ├── apiservice.yaml
+│       │   ├── clusterrole.yaml
+│       │   ├── clusterrolebinding.yaml
+│       │   ├── configmap.yaml
+│       │   ├── deployment.yaml
+│       │   ├── hpa.yaml
+│       │   ├── metrics-server-deployment.yaml
+│       │   ├── metrics-server-service.yaml
+│       │   ├── namespace.yaml
+│       │   ├── rolebinding.yaml
+│       │   ├── secret.yaml
+│       │   ├── service.yaml
+│       │   └── serviceaccount.yaml
+│       ├── .helmignore
+│       ├── Chart.yaml
+│       ├── values-dev.yaml
+│       ├── values-prod.yaml
+│       ├── values-staging.yaml
+│       └── values.yaml
+├── images
+│   └── output.png
+├── public
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   └── robots.txt
+├── src
+│   ├── App.css
+│   ├── App.js
+│   ├── App.test.js
+│   ├── index.css
+│   ├── index.js
+│   ├── logo.svg
+│   ├── reportWebVitals.js
+│   └── setupTests.js
+├── terraform-infrastructure
+│   ├── argocd
+│   │   ├── manifests
+│   │   │   ├── app-repos.yaml
+│   │   │   ├── app-set.tpl
+│   │   │   ├── ingress.tpl
+│   │   │   ├── install.yaml
+│   │   │   ├── namespace.yaml
+│   │   │   └── service-grpc.yaml
+│   │   ├── .terraform.lock.hcl
+│   │   ├── backend.tf
+│   │   ├── data.tf
+│   │   ├── kubectl-provider.tf
+│   │   ├── main.tf
+│   │   ├── providers.tf
+│   │   ├── terraform-dev.tfvars
+│   │   ├── terraform-prod.tfvars
+│   │   ├── terraform-staging.tfvars
+│   │   ├── variables.tf
+│   │   └── versions.tf
+│   ├── eks
+│   │   ├── .terraform.lock.hcl
+│   │   ├── backend.tf
+│   │   ├── data.tf
+│   │   ├── karpenter-controller.txt
+│   │   ├── lb-controller.tf
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   ├── providers.tf
+│   │   ├── terraform-dev.tfvars
+│   │   ├── terraform-prod.tfvars
+│   │   ├── terraform-staging.tfvars
+│   │   ├── variables.tf
+│   │   └── versions.tf
+│   └── vpc
+│       ├── .terraform.lock.hcl
+│       ├── backend.tf
+│       ├── main.tf
+│       ├── outputs.tf
+│       ├── providers.tf
+│       ├── terraform-dev.tfvars
+│       ├── terraform-prod.tfvars
+│       ├── terraform-staging.tfvars
+│       ├── variables.tf
+│       └── versions.tf
+├── .dockerignore
+├── .gitignore
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── docker-compose.dev.yml
+├── docker-compose.test.yml
+├── package-lock.json
+└── package.json
 ```
 </details>
 
