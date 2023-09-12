@@ -165,8 +165,10 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
+      - name: Pre-render Helm templates
+        run: |
+          mkdir rendered-main-chart
+          helm template helm-charts/main-chart -f helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml > rendered-main-chart/main-chart.yaml
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check the Helm chart for vulnerabilities (non-blocking)
@@ -175,14 +177,14 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          file: helm-charts/main-chart
+          file: rendered-main-chart/main-chart.yaml
 
       - name: Run Snyk to check the Helm chart for vulnerabilities (blocking)
         uses: snyk/actions/iac@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          file: helm-charts/main-chart
+          file: rendered-main-chart/main-chart.yaml
           args: --severity-threshold=critical
 
   image-scan-results-Trivy:
@@ -244,8 +246,18 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v3
 
-      - name: Set up Helm
+
+
+      - name: Checkout git repo
         uses: azure/setup-helm@v3
+
+      - name: TESTTTTTTTT Render
+        run: |
+          cd helm-charts/main-chart
+          helm dependency update
+          helm template . --output-dir out
+          snyk iac test out/
+
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check the Helm chart for vulnerabilities (non-blocking)
@@ -254,7 +266,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          file: helm-charts/main-chart
+          file: helm-charts/main-chart/out
           args: --report
 
       - name: Run Snyk for HIGH CVEs and report
@@ -264,7 +276,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          file: helm-charts/main-chart
+          file: helm-charts/main-chart/out
           args: --severity-threshold=high --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
