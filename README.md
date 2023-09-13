@@ -253,6 +253,8 @@ In order to debug code in VSC make sure that you have [.vscode/launch.json](http
 Note that the initial start, compiling and automatic reload of the website's content can take a little more time than usual. If you encounter any problems with dev 
 work try to restart the container, your whole Docker and eventually WSL2.
 
+To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
+
 # Source code pipeline
 
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
