@@ -10,8 +10,12 @@ COPY package-lock.json /app/package-lock.json
 # Same as npm install
 RUN npm ci && npm cache clean --force
 
-COPY . /app
+# Copy the source code directories to main container's directory
+#COPY src public /app/
+COPY src /app/src
+COPY public /app/public
 
+# Set environment variables inside the container
 ENV CI=true
 ENV PORT=3000
 
@@ -48,7 +52,7 @@ FROM development AS unit-test
 
 ## Update apk and add npm
 RUN apt-get update; \
-    apt-get install -y npm;
+    apt-get install -y --no-install-recommends npm;
 
 # Copy the /app dir from builder stage in order to be able to do the unit tests
 COPY --from=build /app /test-app
@@ -62,7 +66,7 @@ USER root
 
 # Install curl for healthchecks
 RUN apt-get update; \
-    apt-get install -y curl
+    apt-get install -y --no-install-recommends curl
 
 # Copy config nginx
 COPY --from=build /app/.nginx/nginx.conf /etc/nginx/nginx.conf
