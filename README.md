@@ -166,7 +166,7 @@ Golden-DevOps/
 <h3>Deployment:</h3>
 
 - Docker <img align="center" alt="docker" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg">
-- Docker Compose <img align="center" alt="docker compose" width="36px" src="https://gitlab.developers.cam.ac.uk/uploads/-/system/project/avatar/4542/compose.png">
+- Docker Compose <img align="center" alt="docker compose" width="36px" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/compose.png">
 - Helm <img align="center" alt="Helm Charts" width="36px" src="https://helm.sh/img/helm.svg">
 - Kubernetes <img align="center" alt="kubernetes" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg">
 - Argo CD <img align="center" alt="Argo CD" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/argocd/argocd-original.svg">
