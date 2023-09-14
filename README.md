@@ -1,16 +1,17 @@
-[![Continuous Integration](https://github.com/JakubSzuber/Golden-DevOps/workflows/CI/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/integration.yml)
-[![Continuous Delivery](https://github.com/JakubSzuber/Golden-DevOps/workflows/CD/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/delivery.yml)
-TODO Add above badges for other workflows
-
 # Repository in progress, don't use yet!
 <!-- TODO change above header to something similar to below -->
-<!-- TODO here repo's main graphic -->
 <!--
-# Score-Counter-Game
-***Description:*** A simple application focused on using many of Python's features mainly from standard library but also from the most basic modules. 
-User in the game earns points for playing in four mini-games and at the end user can see its score and place at the leaderboard. Whole activity is saved into logs logs.txt file. The application has a GUI created in [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter).
-***Whole project and idea for it is totally my authorship!***
--->
+<div align="center" class="no-border">
+  <img src="https://cdn-icons-png.flaticon.com/512/5266/5266248.png" alt="Golden-DevOps Logo">
+  <br>
+  <h3>Golden-DevOps is a fully open-source project that uses all core DevOps tools</h3>
+  
+  [![release](https://img.shields.io/github/v/release/JakubSzuber/Golden-DevOps)](https://github.com/JakubSzuber/Golden-DevOps/releases)
+  [![Continuous Integration](https://github.com/JakubSzuber/Golden-DevOps/workflows/CI/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/integration.yml)
+  [![Continuous Delivery](https://github.com/JakubSzuber/Golden-DevOps/workflows/CD/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/delivery.yml)
+  TODO Add above badges for other workflows
+</div>
+
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
 numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
@@ -21,6 +22,9 @@ tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
 quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
+
+***Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo***
+-->
 
 <details>
 <summary><b>Click to see the project structure:</b></summary>
