@@ -39,20 +39,28 @@ jobs:
           helm: '3.12.2'
           kubeconform: '0.6.2'
       - run: |
+          kubectl create secret docker-registry regcred \
+            --docker-server=ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }}
           helm plugin install https://github.com/jtyr/kubeconform-helm
           cd helm-charts/main-chart
           echo "-------------------------------------------"
-          helm kubeconform .
+          helm kubeconform -f helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml .
           echo "-------------------------------------------"
-          helm kubeconform --verbose --summary .
+          helm kubeconform -f helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml --verbose --summary .
           echo "-------------------------------------------"
-          kubeconform -summary -output json .
+          kubeconform -f helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml -summary -output json .
           echo "-------------------------------------------"
-          helm template --debug
+          helm template --debug -f helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml
           echo "-------------------------------------------"
-          helm install --dry-run --debug
+          helm install golden-devops-helm-release . --dry-run --debug -f helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml
           echo "-------------------------------------------"
-          helm install --dry-run
+          helm install golden-devops-helm-release . --dry-run -f helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml
+
+#          helm install golden-devops-helm-release helm-charts/main-chart --values helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml --set disableTLS=true
+
+
 
   test-with-commands:
     if: github.event_name != 'push'
