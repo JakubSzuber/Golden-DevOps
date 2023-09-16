@@ -20,6 +20,34 @@ on:
       - 'helm-charts/**'
 
 jobs:
+  test-kubeconform:
+    if: github.event_name != 'push'
+    name: XXXXXXXXXX
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read  # Obtain permission needed for actions/checkout to fetch code
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: XXXXX
+        uses: yokawasa/action-setup-kube-tools@v0.9.2
+        with:
+          kubectl: '1.17.1'
+          helm: '3.5.2'
+          kubeconform: '0.5.0'
+      - run: |
+          kubeconform -v
+          cd helm-charts/main-chart
+          echo "--------------------------------"
+          helm kubeconform .
+          echo "--------------------------------"
+          helm kubeconform --verbose --summary .
+          echo "--------------------------------"
+          kubeconform -summary -output json .
+
   test-with-commands:
     if: github.event_name != 'push'
     name: Test Using Command-Line Tools
