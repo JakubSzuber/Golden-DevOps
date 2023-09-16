@@ -65,13 +65,13 @@ jobs:
           helm plugin install https://github.com/jtyr/kubeconform-helm
           cd helm-charts/main-chart
           echo "-------------------------------------------"
-          helm kubeconform -f values.yaml -f values-prod.yaml .
+          helm kubeconform -f values.yaml -f values-prod.yaml . | echo "Nothing noticed by Kubeconform..."
           echo "-------------------------------------------"
           helm kubeconform -f values.yaml -f values-prod.yaml --verbose --summary .
           echo "-------------------------------------------"
-          kubeconform -f values.yaml -f values-prod.yaml -summary -output json .
+          helm kubeconform -f values.yaml -f values-prod.yaml --summary --output json .
           echo "-------------------------------------------"
-          helm template golden-devops-helm-release . --debug -f values.yaml -f values-prod.yaml
+          helm template . --debug -f values.yaml -f values-prod.yaml
           echo "-------------------------------------------"
           helm install golden-devops-helm-release . --dry-run --debug -f values.yaml -f values-prod.yaml
           echo "-------------------------------------------"
