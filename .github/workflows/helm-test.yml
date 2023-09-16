@@ -35,18 +35,24 @@ jobs:
       - name: XXXXX
         uses: yokawasa/action-setup-kube-tools@v0.9.2
         with:
-          kubectl: '1.17.1'
-          helm: '3.5.2'
-          kubeconform: '0.5.0'
+          kubectl: '1.27.1'
+          helm: '3.12.2'
+          kubeconform: '0.6.2'
       - run: |
-          kubeconform -v
+          helm plugin install https://github.com/jtyr/kubeconform-helm
           cd helm-charts/main-chart
-          echo "--------------------------------"
+          echo "-------------------------------------------"
           helm kubeconform .
-          echo "--------------------------------"
+          echo "-------------------------------------------"
           helm kubeconform --verbose --summary .
-          echo "--------------------------------"
+          echo "-------------------------------------------"
           kubeconform -summary -output json .
+          echo "-------------------------------------------"
+          helm template --debug
+          echo "-------------------------------------------"
+          helm install --dry-run --debug
+          echo "-------------------------------------------"
+          helm install --dry-run
 
   test-with-commands:
     if: github.event_name != 'push'
