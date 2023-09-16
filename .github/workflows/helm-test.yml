@@ -20,9 +20,9 @@ on:
       - 'helm-charts/**'
 
 jobs:
-  test-kubeconform:
+  test-kubeconform-dry-run:
     if: github.event_name != 'push'
-    name: XXXXXXXXXX
+    name: Test Using Kubeconform and "--dry-run" flag
     runs-on: ubuntu-latest
 
     permissions:
@@ -31,6 +31,17 @@ jobs:
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v3
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.4.0
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Run micro Kubernetes cluster for testing purposes
         uses: AbsaOSS/k3d-action@v2
@@ -49,14 +60,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: XXXXX
+      - name: Set up Kubernetes tools
+#        if: steps.list-changed.outputs.changed == 'true'
         uses: yokawasa/action-setup-kube-tools@v0.9.2
         with:
           kubectl: '1.27.1'
           helm: '3.12.2'
           kubeconform: '0.6.2'
 
-      - name: XXXXXX
+      - name: Run Kubeconform and "--dry-run" commands
+#        if: steps.list-changed.outputs.changed == 'true'
         run: |
           kubectl create secret docker-registry regcred \
             --docker-server=ghcr.io \
@@ -76,10 +89,6 @@ jobs:
           helm install golden-devops-helm-release . --dry-run --debug -f values.yaml -f values-prod.yaml
           echo "-------------------------------------------"
           helm install golden-devops-helm-release . --dry-run -f values.yaml -f values-prod.yaml
-
-#          helm install golden-devops-helm-release helm-charts/main-chart --values helm-charts/main-chart/values.yaml -f helm-charts/main-chart/values-prod.yaml --set disableTLS=true
-
-
 
   test-with-commands:
     if: github.event_name != 'push'
