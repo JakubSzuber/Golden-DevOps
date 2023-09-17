@@ -22,7 +22,7 @@ on:
 jobs:
   test-kubeconform-dry-run:
     if: github.event_name != 'push'
-    name: Test Using Kubeconform and "--dry-run" flag
+    name: Test Feasibility Of Execution The Helm Chart Using Kubeconform And "--dry-run" Flag
     runs-on: ubuntu-latest
 
     permissions:
@@ -76,6 +76,9 @@ jobs:
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           helm plugin install https://github.com/jtyr/kubeconform-helm
+
+      # Each step has "if: always()" in order to execute despite of result of the previous step. 
+      # This gives us more comprehensive debugging in case of a fail.
 
       - name: Run basic Kubeconform command
         #if: steps.list-changed.outputs.changed == 'true' && always()
