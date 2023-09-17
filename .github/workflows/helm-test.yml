@@ -78,43 +78,43 @@ jobs:
           helm plugin install https://github.com/jtyr/kubeconform-helm
 
       - name: Run basic Kubeconform command
-#        if: steps.list-changed.outputs.changed == 'true'
-        continue-on-error: true
+        #if: steps.list-changed.outputs.changed == 'true' && always()
+        if: always()
         run: |
           cd helm-charts/main-chart
-          helm kubeconform -f values.yaml -f values-prod.yaml . | echo "Nothing noticed by Kubeconform..."
+          helm kubeconform -f values.yaml -f values-prod.yaml . || echo "Nothing noticed by Kubeconform..." && exit 1
 
       - name: Run Kubeconform command with summary and verbose mode
-        continue-on-error: true
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true' && always()
+        if: always()
         run: |
           cd helm-charts/main-chart
           helm kubeconform -f values.yaml -f values-prod.yaml --verbose --summary .
 
       - name: Run Kubeconform command with summary and json format
-        continue-on-error: true
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true' && always()
+        if: always()
         run: |
           cd helm-charts/main-chart
           helm kubeconform -f values.yaml -f values-prod.yaml --summary --output json .
 
       - name: Run "helm template" command in debug mode
-        continue-on-error: true
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true' && always()
+        if: always()
         run: |
           cd helm-charts/main-chart
           helm template . --debug -f values.yaml -f values-prod.yaml
 
       - name: Run "helm install" command in debug mode and "--dry-run" flag
-        continue-on-error: true
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true' && always()
+        if: always()
         run: |
           cd helm-charts/main-chart
           helm install golden-devops-helm-release . --dry-run --debug -f values.yaml -f values-prod.yaml
 
       - name: Run "helm install" command with and "--dry-run" flag
-        continue-on-error: true
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true' && always()
+        if: always()
         run: |
           cd helm-charts/main-chart
           helm install golden-devops-helm-release . --dry-run -f values.yaml -f values-prod.yaml
