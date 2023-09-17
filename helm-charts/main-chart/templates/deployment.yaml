@@ -1,6 +1,6 @@
 ---
-apiVersion: a/v1
-ind: Deployment
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: {{ .Values.appName }}
   namespace: {{ .Values.namespace }}
@@ -18,7 +18,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Values.appName }}
     spec:
-      magePullSecrets:
+      imagePullSecrets:
         - name: regcred
       containers:
         - name: {{ .Values.appName }}
@@ -41,7 +41,7 @@ spec:
           - name: tls
             mountPath: /etc/nginx/tls
             readOnly: true
-      volumes
+      volumes:
       - name: tls
         secret:
           secretName: nginx-tls-secret
