@@ -18,7 +18,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Values.appName }}
     spec:
-      imagePullSecrets:
+      magePullSecrets:
         - name: regcred
       containers:
         - name: {{ .Values.appName }}
