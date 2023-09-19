@@ -25,12 +25,21 @@ jobs:
     name: Test Feasibility Of Execution The Helm Chart Using Kubeconform And "--dry-run" Flag
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read  # Obtain permission needed for actions/checkout to fetch code
-
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.11.2
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          check-latest: true
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.4.0
