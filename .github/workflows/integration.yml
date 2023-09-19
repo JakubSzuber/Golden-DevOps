@@ -405,38 +405,10 @@ jobs:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           args: --file=Dockerfile --severity-threshold=critical
 
-# TODO PROBABLY FIND TOOL SIMILAR TO DATREE (below workflow is absolutely not finished)
-#  datree-k8s-policy-check:
-#    if: github.event_name != 'push'
-#    runs-on: ubuntu-latest
-#    defaults:
-#      run:
-#        shell: bash
-#        working-directory: helm-charts/main-chart
-#    env:
-#      DATREE_TOKEN: ${{ secrets.DATREE_TOKEN }}
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#
-#      - name: Run Datree Policy Check
-#        uses: datreeio/action-datree@main
-#        with:
-#          path: '.'
-#          cliArguments: ''
-#          isHelmChart: true
-#          helmArguments: '--values values.yaml -f helm-charts/main-chart/values-prod.yaml'
-#
-#      - name: Upload analysis results to GitHub
-#        uses: github/codeql-action/upload-sarif@v2
-#        with:
-#          sarif_file: datree.sarif
-#          wait-for-processing: true
-
   build-final-image:
     if: github.event_name != 'pull_request'
     name: Build Final Image
-    # TODO later add "Datreek8sPolicyCheck", "scan-artifact-AWS-CodeGuru", sth else
+    # TODO Maybe later add "scan-artifact-AWS-CodeGuru"
     # Add "test-integration" to the below list if you want to use integration testing
     needs: [lint, test-unit, test-k3d, scan-image-Trivy, scan-code-Snyk, scan-image-Snyk]
     runs-on: ubuntu-latest
