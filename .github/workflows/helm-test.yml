@@ -38,7 +38,7 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
+          changed=$(ct list-changed --target-branch ${{ github.event.pull_request.head.ref }})
           if [[ -n "$changed" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
@@ -149,14 +149,14 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
+          changed=$(ct list-changed --target-branch ${{ github.event.pull_request.head.ref }})
           if [[ -n "$changed" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }}
+        run: ct lint --target-branch ${{ github.event.pull_request.head.ref }}
 
       - name: Run micro Kubernetes cluster for testing purposes
         uses: AbsaOSS/k3d-action@v2
@@ -170,7 +170,7 @@ jobs:
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --target-branch ${{ github.event.repository.default_branch }}
+        run: ct install --target-branch ${{ github.event.pull_request.head.ref }}
 
       - name: Login to Docker Hub
 #        if: steps.list-changed.outputs.changed == 'true'
@@ -247,7 +247,9 @@ jobs:
       id: changed-files
       uses: tj-actions/changed-files@v35
 
-    - name: Get file(s) from PR
+    - run: echo "${{ steps.changed-files.outputs.all_changed_files }}""
+
+    - name: Scan file(s) from PR
       if: github.event_name == 'pull_request'
       uses: kubescape/github-action@main
       with:
