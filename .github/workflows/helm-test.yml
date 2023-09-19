@@ -217,7 +217,56 @@ jobs:
           kubectl logs golden-devops-helm-release-connection-test --namespace=argocd
           echo "---------------------------------------------------------------------------"
 
-  scan-image-Trivy:
+  test-kubescape:
+    if: github.event_name != 'push'
+    name: Scan Helm Chart With Kubescape
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout git repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Get changed files
+      if: github.event_name == 'pull_request'
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+
+    - name: Get file(s) from PR
+      if: github.event_name == 'pull_request'
+      uses: kubescape/github-action@main
+      with:
+        files: ${{ steps.changed-files.outputs.all_changed_files }}
+        fixFiles: true
+        format: "sarif"
+
+    - name: PR Suggester according to SARIF file
+      if: github.event_name == 'pull_request'
+      uses: HollowMan6/sarif4reviewdog@v1.0.0
+      with:
+        file: 'results.sarif'
+        level: warning
+
+    # Gain an additional overview of the vulnerabilities
+    - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
+      uses: kubescape/github-action@main
+      continue-on-error: true
+      with:
+        files: "helm-charts/main-chart"
+
+    - name: Run Kubeconform for all CVEs (blocking)
+      uses: kubescape/github-action@main
+      with:
+        files: "helm-charts/main-chart"
+        severityThreshold: critical
+
+  scan-Trivy:
     if: github.event_name != 'push'
     name: Scan Helm Chart With Trivy
     runs-on: ubuntu-latest
@@ -289,7 +338,7 @@ jobs:
           file: helm-charts/main-chart/rendered-main-chart
           args: --severity-threshold=critical
 
-  image-scan-results-Trivy:
+  scan-results-Trivy:
     if: github.event_name != 'pull_request'
     name: Scan Image With Trivy And Upload Results
     runs-on: ubuntu-latest
@@ -329,7 +378,7 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  image-scan-results-Snyk:
+  scan-results-Snyk:
     if: github.event_name != 'pull_request'
     name: Scan Helm Chart With Snyk And Upload Results
     runs-on: ubuntu-latest
@@ -375,3 +424,39 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'snyk.sarif'
+
+  scan-results-Kubeconform:
+    if: github.event_name != 'pull_request'
+    name: Scan Helm Chart With Kubeconform And Upload Results
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read          # Obtain permission needed for actions/checkout to fetch code
+      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
+    steps:
+    - name: Checkout git repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    # Gain an additional overview of the vulnerabilities
+    - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
+      continue-on-error: true
+      uses: kubescape/github-action@main
+      with:
+        files: "helm-charts/main-chart"
+
+    - name: Run Kubeconform for HIGH CVEs and report
+      continue-on-error: true
+      uses: kubescape/github-action@main
+      with:
+        format: sarif
+        outputFile: results
+        files: "helm-charts/main-chart"
+        severityThreshold: high
+
+    - name: Upload Kubescape scan results to Github Code Scanning
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: results.sarif
