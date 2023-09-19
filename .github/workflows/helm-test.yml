@@ -85,7 +85,7 @@ jobs:
         if: always()
         run: |
           cd helm-charts/main-chart
-          helm kubeconform -f values.yaml -f values-prod.yaml . || echo "Nothing noticed by Kubeconform..." && exit 1
+          helm kubeconform -f values.yaml -f values-prod.yaml . || echo "Nothing noticed by Kubeconform..."
 
       - name: Run Kubeconform command with summary and verbose mode
         #if: steps.list-changed.outputs.changed == 'true' && always()
@@ -233,6 +233,15 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+
+    - name: Template Helm chart's files
+      run: |
+        cd helm-charts/main-chart
+        helm dependency update
+        helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-main-chart
+
     - name: Get changed files
       if: github.event_name == 'pull_request'
       id: changed-files
@@ -258,12 +267,12 @@ jobs:
       uses: kubescape/github-action@main
       continue-on-error: true
       with:
-        files: "helm-charts/main-chart"
+        files: "helm-charts/main-chart/rendered-main-chart"
 
     - name: Run Kubeconform for all CVEs (blocking)
       uses: kubescape/github-action@main
       with:
-        files: "helm-charts/main-chart"
+        files: "helm-charts/main-chart/rendered-main-chart"
         severityThreshold: critical
 
   scan-Trivy:
@@ -440,12 +449,21 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+
+    - name: Template Helm chart's files
+      run: |
+        cd helm-charts/main-chart
+        helm dependency update
+        helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-main-chart
+
     # Gain an additional overview of the vulnerabilities
     - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
       continue-on-error: true
       uses: kubescape/github-action@main
       with:
-        files: "helm-charts/main-chart"
+        files: "helm-charts/main-chart/rendered-main-chart"
 
     - name: Run Kubeconform for HIGH CVEs and report
       continue-on-error: true
@@ -453,7 +471,7 @@ jobs:
       with:
         format: sarif
         outputFile: results
-        files: "helm-charts/main-chart"
+        files: "helm-charts/main-chart/rendered-main-chart"
         severityThreshold: high
 
     - name: Upload Kubescape scan results to Github Code Scanning
