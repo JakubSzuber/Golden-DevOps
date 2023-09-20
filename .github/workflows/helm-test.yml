@@ -249,7 +249,7 @@ jobs:
       run: |
         cd helm-charts/main-chart
         helm dependency update
-        helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-main-chart
+        helm template . -f values.yaml -f values-prod.yaml --output-dir ../../rendered-main-chart
 
     - name: Get changed files
       if: github.event_name == 'pull_request'
@@ -266,6 +266,10 @@ jobs:
           mv $file changed-files/templates/
         done
 
+    - name: Clear content of helm-charts/main-chart/templates to contain only changed files
+      run: |
+        find helm-charts/main-chart/templates -type f -delete
+
     - name: Template Helm chart's files
       run: |
         cd changed-files
@@ -274,14 +278,15 @@ jobs:
         ls -l rendered-changed-files/golden-devops-chart/templates
         for file in $(ls rendered-changed-files/golden-devops-chart/templates); do
           cat "rendered-changed-files/golden-devops-chart/templates/$file"
+          cp "rendered-changed-files/golden-devops-chart/templates/$file" helm-charts/main-chart/templates
         done
 
     - name: Scan file(s) from PR
       if: github.event_name == 'pull_request'
       uses: kubescape/github-action@main
       with:
-        #files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
-        files: "changed-files/rendered-changed-files/golden-devops-chart"
+        files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
+        #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
         fixFiles: true
         format: "sarif"
 
@@ -298,13 +303,13 @@ jobs:
       uses: kubescape/github-action@main
       continue-on-error: true
       with:
-        files: "helm-charts/main-chart/rendered-main-chart"
+        files: "rendered-main-chart"
 
     - name: Run Kubeconform for all CVEs (blocking)
       if: always()  # TODO OOOOOOOOO temporary
       uses: kubescape/github-action@main
       with:
-        files: "helm-charts/main-chart/rendered-main-chart"
+        files: "rendered-main-chart"
         severityThreshold: critical
 
   scan-Trivy:
