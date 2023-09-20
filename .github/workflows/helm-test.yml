@@ -283,11 +283,11 @@ jobs:
 
     - name: Scan file(s) from PR
       if: github.event_name == 'pull_request'
-      uses: kubescape/github-action@main
+      uses: kubescape/github-action@v2.3.6
       with:
         files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
         #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
-        #fixFiles: true  # TODO OOOOOOOOO temporary
+        fixFiles: true  # TODO OOOOOOOOO temporary
         format: "sarif"
 
     - name: PR Suggester according to SARIF file
