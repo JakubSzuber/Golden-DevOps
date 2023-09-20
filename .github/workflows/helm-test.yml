@@ -273,7 +273,7 @@ jobs:
         helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-changed-files
         ls -l rendered-changed-files/golden-devops-chart/templates
         for file in $(ls rendered-changed-files/golden-devops-chart/templates); do
-          cat $file
+          cat "rendered-changed-files/golden-devops-chart/templates/$file"
         done
 
     - name: Scan file(s) from PR
