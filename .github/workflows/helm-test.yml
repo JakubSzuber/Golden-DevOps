@@ -285,7 +285,7 @@ jobs:
     - name: Scan file(s) from PR
       if: github.event_name == 'pull_request'
       #continue-on-error: true  # TODO OOOOOOOOO temporary
-      uses: kubescape/github-action@v2.3.6
+      uses: kubescape/github-action@v2.9.1
       with:
         files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
         #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
@@ -495,14 +495,14 @@ jobs:
       run: |
         cd helm-charts/main-chart
         helm dependency update
-        helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-main-chart
+        helm template . -f values.yaml -f values-prod.yaml --output-dir ../../rendered-main-chart
 
     # Gain an additional overview of the vulnerabilities
     - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
       continue-on-error: true
       uses: kubescape/github-action@main
       with:
-        files: "helm-charts/main-chart/rendered-main-chart"
+        files: "rendered-main-chart"
 
     - name: Run Kubeconform for HIGH CVEs and report
       continue-on-error: true
@@ -510,7 +510,7 @@ jobs:
       with:
         format: sarif
         outputFile: results
-        files: "helm-charts/main-chart/rendered-main-chart"
+        files: "rendered-main-chart"
         severityThreshold: high
 
     - name: Upload Kubescape scan results to Github Code Scanning
