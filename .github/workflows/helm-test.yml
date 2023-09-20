@@ -278,7 +278,7 @@ jobs:
         ls -l rendered-changed-files/golden-devops-chart/templates
         for file in $(ls rendered-changed-files/golden-devops-chart/templates); do
           cat "rendered-changed-files/golden-devops-chart/templates/$file"
-          cp "rendered-changed-files/golden-devops-chart/templates/$file" helm-charts/main-chart/templates
+          cp "rendered-changed-files/golden-devops-chart/templates/$file" ../helm-charts/main-chart/templates
         done
 
     - name: Scan file(s) from PR
