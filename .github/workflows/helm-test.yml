@@ -231,11 +231,11 @@ jobs:
     name: Scan Helm Chart With Kubescape
     runs-on: ubuntu-latest
 
-    permissions:
-      actions: read
-      contents: read
-      pull-requests: write
-      security-events: write
+    #permissions:  # TODO OOOOOOOOO temporary
+    #  actions: read
+    #  contents: read
+    #  pull-requests: write
+    #  security-events: write
 
     steps:
     - name: Checkout git repo
@@ -284,7 +284,7 @@ jobs:
 
     - name: Scan file(s) from PR
       if: github.event_name == 'pull_request'
-      continue-on-error: true  # TODO OOOOOOOOO temporary
+      #continue-on-error: true  # TODO OOOOOOOOO temporary
       uses: kubescape/github-action@v2.3.6
       with:
         files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
