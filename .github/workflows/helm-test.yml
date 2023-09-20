@@ -234,6 +234,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      pull-requests: write
       security-events: write
 
     steps:
@@ -283,6 +284,7 @@ jobs:
 
     - name: Scan file(s) from PR
       if: github.event_name == 'pull_request'
+      #continue-on-error: true  # TODO OOOOOOOOO temporary
       uses: kubescape/github-action@v2.3.6
       with:
         files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
