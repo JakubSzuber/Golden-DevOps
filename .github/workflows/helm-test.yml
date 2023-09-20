@@ -287,7 +287,7 @@ jobs:
       with:
         files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
         #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
-        fixFiles: true
+        #fixFiles: true  # TODO OOOOOOOOO temporary
         format: "sarif"
 
     - name: PR Suggester according to SARIF file
