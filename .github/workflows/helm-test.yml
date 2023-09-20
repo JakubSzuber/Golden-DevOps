@@ -258,9 +258,10 @@ jobs:
 
     - run: |
         echo "${{ steps.changed-files.outputs.all_changed_files }}"
-        mkdir changed-files
+        mkdir -p changed-files/templates
+        echo -e "apiVersion: v2\n\nname: golden-devops-chart" > changed-files/Chart.yaml
         for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-          mv $file changed-files/
+          mv $file changed-files/templates/
         done
 
     - name: Template Helm chart's files
