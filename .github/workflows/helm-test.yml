@@ -258,7 +258,7 @@ jobs:
 
     - run: |
         echo "${{ steps.changed-files.outputs.all_changed_files }}"
-        mdir changed-files
+        mkdir changed-files
         for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
           mv $file changed-files/
         done
