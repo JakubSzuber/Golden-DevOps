@@ -259,6 +259,8 @@ jobs:
     - run: |
         echo "${{ steps.changed-files.outputs.all_changed_files }}"
         mkdir -p changed-files/templates
+        cp helm-charts/main-chart/values.yaml changed-files
+        cp helm-charts/main-chart/values-prod.yaml changed-files
         echo -e "apiVersion: v2\n\nname: golden-devops-chart\n\nversion: 0.1.0" > changed-files/Chart.yaml
         for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
           mv $file changed-files/templates/
