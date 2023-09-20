@@ -271,13 +271,17 @@ jobs:
         cd changed-files
         helm dependency update
         helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-changed-files
+        ls -l rendered-changed-files
+        for file in $(ls rendered-changed-files); do
+          cat $file
+        done
 
     - name: Scan file(s) from PR
       if: github.event_name == 'pull_request'
       uses: kubescape/github-action@main
       with:
         #files: ${{ steps.changed-files.outputs.all_changed_files }}
-        files: rendered-changed-files
+        files: changed-files/rendered-changed-files
         fixFiles: true
         format: "sarif"
 
