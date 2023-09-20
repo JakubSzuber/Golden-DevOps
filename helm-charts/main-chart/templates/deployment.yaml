@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,6 +45,7 @@ spec:
       - name: tls
         secret:
           secretName: nginx-tls-secret
+
 
 
 
