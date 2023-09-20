@@ -282,8 +282,8 @@ jobs:
       with:
         #files: ${{ steps.changed-files.outputs.all_changed_files }}
         files: "changed-files/rendered-changed-files"
-        fixFiles: true
-        format: "sarif"
+#        fixFiles: true
+#        format: "sarif"
 
     - name: PR Suggester according to SARIF file
       if: github.event_name == 'pull_request'
