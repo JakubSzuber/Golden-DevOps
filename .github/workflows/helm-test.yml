@@ -281,7 +281,7 @@ jobs:
       uses: kubescape/github-action@main
       with:
         #files: ${{ steps.changed-files.outputs.all_changed_files }}
-        files: changed-files/rendered-changed-files
+        files: "changed-files/rendered-changed-files"
         fixFiles: true
         format: "sarif"
 
@@ -294,12 +294,14 @@ jobs:
 
     # Gain an additional overview of the vulnerabilities
     - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
+      if: always()  # TODO OOOOOOOOO temporary
       uses: kubescape/github-action@main
       continue-on-error: true
       with:
         files: "helm-charts/main-chart/rendered-main-chart"
 
     - name: Run Kubeconform for all CVEs (blocking)
+      if: always()  # TODO OOOOOOOOO temporary
       uses: kubescape/github-action@main
       with:
         files: "helm-charts/main-chart/rendered-main-chart"
