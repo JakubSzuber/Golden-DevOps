@@ -38,6 +38,8 @@ Golden-DevOps/
 │   │   ├── bug_report.yml
 │   │   ├── feature_request.yml
 │   │   └── typo.yml
+│   ├── linters
+│   │   └── .hadolint.yaml
 │   ├── workflows
 │   │   ├── delivery.yml
 │   │   ├── helm-test.yml
