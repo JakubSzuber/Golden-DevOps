@@ -64,7 +64,7 @@ FROM nginxinc/nginx-unprivileged:1.25
 ## Switch to root user for setup
 USER root
 
-# Install curl for healthchecks
+## Install curl for healthchecks
 RUN apt-get update; \
     apt-get install -y --no-install-recommends curl=7.88.1-10+deb12u1
 
