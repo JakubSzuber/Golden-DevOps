@@ -149,7 +149,6 @@ jobs:
       if: github.event_name == 'pull_request'
       uses: thollander/actions-comment-pull-request@v2
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         message: |
           Candidate image was pushed to GHCR
           Tags added to images (final image will have similar tags):
@@ -160,6 +159,29 @@ jobs:
           ```text
           ${{ steps.docker_meta.outputs.labels }}
           ```
+        reactions: eyes, rocket
+
+    - name: TESTT
+      if: github.event_name == 'pull_request'
+      uses: peter-evans/create-or-update-comment@v3
+      with:
+        body: |
+          Candidate image was pushed to GHCR
+          Tags added to images (final image will have similar tags):
+          ```text
+          ${{ steps.docker_meta.outputs.tags }}
+          ```
+          Labels added to images (final image will have similar tags):
+          ```text
+          ${{ steps.docker_meta.outputs.labels }}
+          ```
+
+          This is a multi-line test comment
+          - With GitHub **Markdown** :sparkles:
+          - Created by [create-or-update-comment][1]
+
+          [1]: https://github.com/peter-evans/create-or-update-comment
+        reactions: '+1'
 
   test-unit:
     if: github.event_name != 'push'
