@@ -10,10 +10,10 @@ COPY package-lock.json /app/package-lock.json
 # Same as npm install
 RUN npm ci && npm cache clean --force
 
-# Copy the source code directories to main container's directory
-#COPY src public /app/
+# Copy the source code directories and .nginx/nginx.conf to main container's directory
 COPY src /app/src
 COPY public /app/public
+COPY .nginx/nginx.conf /app/.nginx/nginx.conf
 
 # Set environment variables inside the container
 ENV CI=true
@@ -42,7 +42,7 @@ usermod -aG docker vscode
 COPY --from=gloursdocker/docker / /
 
 RUN npm install && npm cache clean --force
-RUN npm install -g nodemon
+RUN npm install -g nodemon@3.0.1
 
 CMD [ "nodemon", "--inspect=0.0.0.0:9229"]
 
@@ -66,7 +66,7 @@ USER root
 
 # Install curl for healthchecks
 RUN apt-get update; \
-    apt-get install -y --no-install-recommends curl=7.74.0-1.3+deb11u7
+    apt-get install -y --no-install-recommends curl
 
 # Copy config nginx
 COPY --from=build /app/.nginx/nginx.conf /etc/nginx/nginx.conf
