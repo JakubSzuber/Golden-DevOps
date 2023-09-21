@@ -147,7 +147,7 @@ jobs:
         cache-to: type=gha,mode=max
         platforms: linux/amd64  # You can change to "linux/amd64,linux/arm/v7,linux/arm64"
 
-    - name: Comment to PR that the candidate image pushed to GHCR and with which tags
+    - name: 1. Comment to PR that the candidate image was pushed to GHCR and with which tags, labels
       if: github.event_name == 'pull_request'
       uses: thollander/actions-comment-pull-request@v2
       with:
@@ -163,7 +163,7 @@ jobs:
           ```
         reactions: eyes, rocket
 
-    - name: TESTT
+    - name: 2. Comment to PR that the candidate image was pushed to GHCR and with which tags, labels
       if: github.event_name == 'pull_request'
       uses: peter-evans/create-or-update-comment@v3
       with:
