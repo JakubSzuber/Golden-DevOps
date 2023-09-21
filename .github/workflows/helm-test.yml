@@ -285,7 +285,7 @@ jobs:
     - name: Scan file(s) from PR
       if: github.event_name == 'pull_request'
       #continue-on-error: true  # TODO OOOOOOOOO temporary
-      uses: kubescape/github-action@master
+      uses: kubescape/github-action@main
       with:
         files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
         #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
