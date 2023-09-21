@@ -182,6 +182,7 @@ jobs:
 
           [1]: https://github.com/peter-evans/create-or-update-comment
         reactions: '+1'
+        issue-number: ${{ github.event.number }}
 
   test-unit:
     if: github.event_name != 'push'
