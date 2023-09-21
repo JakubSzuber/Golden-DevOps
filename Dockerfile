@@ -54,7 +54,7 @@ FROM development AS unit-test
 RUN apt-get update; \
     apt-get install -y --no-install-recommends npm;
 
-# Copy the /app dir from builder stage in order to be able to do the unit tests
+## Copy the /app dir from builder stage in order to be able to do the unit tests
 COPY --from=build /app /test-app
 
 
