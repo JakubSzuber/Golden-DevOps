@@ -231,11 +231,11 @@ jobs:
     name: Scan Helm Chart With Kubescape
     runs-on: ubuntu-latest
 
-    #permissions:  # TODO OOOOOOOOO temporary
-    #  actions: read
-    #  contents: read
-    #  pull-requests: write
-    #  security-events: write
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+      security-events: write
 
     steps:
     - name: Checkout git repo
@@ -282,73 +282,32 @@ jobs:
           cp "rendered-changed-files/golden-devops-chart/templates/$file" ../helm-charts/main-chart/templates
         done
 
-    - name: Scan file(s) from PR
-      if: github.event_name == 'pull_request'
-      #continue-on-error: true  # TODO OOOOOOOOO temporary
-      uses: kubescape/github-action@main
-      with:
-        files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
-        #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
-        fixFiles: true  # TODO OOOOOOOOO temporary
-        format: "sarif"
-
-    - name: Scan file(s) from PR
-      if: always()  # TODO OOOOOOOOO temporary
-      #continue-on-error: true  # TODO OOOOOOOOO temporary
-      uses: kubescape/github-action@v2.3.8
-      with:
-        files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
-        #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
-        fixFiles: true  # TODO OOOOOOOOO temporary
-        format: "sarif"
-
-    - name: Scan file(s) from PR
-      if: always()  # TODO OOOOOOOOO temporary
-      #continue-on-error: true  # TODO OOOOOOOOO temporary
-      uses: kubescape/github-action@v2.3.6
-      with:
-        files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
-        #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
-        fixFiles: true  # TODO OOOOOOOOO temporary
-        format: "sarif"
-
-    - name: Scan file(s) from PR
-      if: always()  # TODO OOOOOOOOO temporary
-      #continue-on-error: true  # TODO OOOOOOOOO temporary
-      uses: kubescape/github-action@v0.0.1
-      with:
-        files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
-        #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
-        fixFiles: true  # TODO OOOOOOOOO temporary
-        format: "sarif"
-
-    - name: Scan file(s) from PR
-      if: always()  # TODO OOOOOOOOO temporary
-      #continue-on-error: true  # TODO OOOOOOOOO temporary
-      uses: kubescape/github-action@v0.0.0
-      with:
-        files: ${{ steps.changed-files.outputs.all_changed_files }}  # TODO OOOOOOOOO temporary
-        #files: "changed-files/rendered-changed-files/golden-devops-chart"  # TODO OOOOOOOOO temporary
-        fixFiles: true  # TODO OOOOOOOOO temporary
-        format: "sarif"
-
-    - name: PR Suggester according to SARIF file
-      if: github.event_name == 'pull_request'
-      uses: HollowMan6/sarif4reviewdog@v1.0.0
-      with:
-        file: 'results.sarif'
-        level: warning
+# TODO Uncomment below 2 steps when the releases of https://github.com/kubescape/github-action will catch up 
+# on https://github.com/kubescape/kubescape so the issues https://github.com/kubescape/kubescape/issues/1271 and 
+# https://github.com/kubescape/kubescape/issues/1255 will be resolved also on Kubescape's GHA action
+#    - name: Scan file(s) from PR
+#      if: github.event_name == 'pull_request'
+#      uses: kubescape/github-action@main
+#      with:
+#        files: ${{ steps.changed-files.outputs.all_changed_files }}
+#        fixFiles: true
+#        format: "sarif"
+#
+#    - name: PR Suggester according to SARIF file
+#      if: github.event_name == 'pull_request'
+#      uses: HollowMan6/sarif4reviewdog@v1.0.0
+#      with:
+#        file: 'results.sarif'
+#        level: warning
 
     # Gain an additional overview of the vulnerabilities
     - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
-      if: always()  # TODO OOOOOOOOO temporary
       uses: kubescape/github-action@main
       continue-on-error: true
       with:
         files: "rendered-main-chart"
 
     - name: Run Kubeconform for all CVEs (blocking)
-      if: always()  # TODO OOOOOOOOO temporary
       uses: kubescape/github-action@main
       with:
         files: "rendered-main-chart"
