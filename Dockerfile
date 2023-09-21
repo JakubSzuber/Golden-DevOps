@@ -66,7 +66,7 @@ USER root
 
 # Install curl for healthchecks
 RUN apt-get update; \
-    apt-get install -y --no-install-recommends curl
+    apt-get install -y --no-install-recommends curl=7.88.1-10+deb12u1
 
 # Copy config nginx
 COPY --from=build /app/.nginx/nginx.conf /etc/nginx/nginx.conf
