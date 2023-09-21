@@ -32,7 +32,7 @@ FROM development as dev-envs
 ENV PATH /app/node_modules/.bin:$PATH
 ENV NODE_ENV=development
 
-RUN apt-get update && apt-get install -y --no-install-recommends git
+RUN apt-get update && apt-get install -y --no-install-recommends git=1:2.25.1-1ubuntu3.11
 
 RUN useradd -s /bin/bash -m vscode && \
 groupadd docker && \
@@ -52,7 +52,7 @@ FROM development AS unit-test
 
 ## Update apk and add npm
 RUN apt-get update; \
-    apt-get install -y --no-install-recommends npm;
+    apt-get install -y --no-install-recommends npm=6.14.4+ds-1ubuntu2;
 
 # Copy the /app dir from builder stage in order to be able to do the unit tests
 COPY --from=build /app /test-app
@@ -66,7 +66,7 @@ USER root
 
 # Install curl for healthchecks
 RUN apt-get update; \
-    apt-get install -y --no-install-recommends curl
+    apt-get install -y --no-install-recommends curl=7.68.0-1ubuntu2.19
 
 # Copy config nginx
 COPY --from=build /app/.nginx/nginx.conf /etc/nginx/nginx.conf
