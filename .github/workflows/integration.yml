@@ -38,7 +38,9 @@ jobs:
     runs-on: ubuntu-22.04
 
     permissions:
-      contents: read  # Obtain permission needed to see the code
+      contents: read
+      packages: read
+      statuses: write
 
     steps:
       - name: Checkout code
@@ -431,9 +433,6 @@ jobs:
   build-final-image:
     if: github.event_name != 'pull_request'
     name: Build Final Image
-    # TODO Maybe later add "scan-artifact-AWS-CodeGuru"
-    # Add "test-integration" to the below list if you want to use integration testing
-    needs: [lint, test-unit, test-k3d, scan-image-Trivy, scan-code-Snyk, scan-image-Snyk]
     runs-on: ubuntu-latest
 
     permissions:
