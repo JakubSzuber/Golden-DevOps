@@ -70,16 +70,20 @@ jobs:
             type=ref,event=pr
             type=sha,format=long
             type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
-        env:
-          IMAGE_TAG: ${{ steps.docker_meta.outputs.tags }}
 
-      - run: echo "${{ env.IMAGE_TAG }}"
-      - run: echo "------------------------------"
-      - run: echo "$IMAGE_TAG"
-      - run: echo "------------------------------"
-      - run: echo "${{ steps.docker_meta.outputs.tags }}"
-      - run: echo "------------------------------"
-      - run: exit 1
+      - run: |
+          TAGS="${{ steps.docker_meta.outputs.tags }}"
+          echo "------------------------------"
+          echo "${{ env.TAGS }}"
+          echo "------------------------------"
+          echo "$TAGS"
+          echo "------------------------------"
+          echo "${{ steps.docker_meta.outputs.tags }}"
+          echo "******************************"
+          EXTRACTED=$(echo "$TAGS" | grep -E "ghcr.io/.*/react-nginx-image:stable-" | awk -F'react-nginx-image:' '{print \$2}')
+          echo "------------------------------"
+          echo "IMAGE_TAG=$EXTRACTED" >> "$GITHUB_ENV"
+          exit 1
 
       - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push, merged pull request, or manual run
         uses: docker/build-push-action@v4
