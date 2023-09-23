@@ -85,7 +85,8 @@ jobs:
           echo $EXTRACTED
           echo "5------------------------------"
           echo "IMAGE_TAG=$EXTRACTED" >> $GITHUB_ENV
-          echo "6------------------------------"
+
+      - run: |
           echo "${{ env.IMAGE_TAG }}"
           echo "--or--"
           echo "$IMAGE_TAG"
