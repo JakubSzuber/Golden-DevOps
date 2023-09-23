@@ -73,17 +73,19 @@ jobs:
 
       - run: |
           TAGS="${{ steps.docker_meta.outputs.tags }}"
-          echo "------------------------------"
+          echo "1------------------------------"
           echo "${{ env.TAGS }}"
-          echo "------------------------------"
+          echo "2------------------------------"
           echo "$TAGS"
-          echo "------------------------------"
+          echo "3------------------------------"
           echo "${{ steps.docker_meta.outputs.tags }}"
           echo "******************************"
           EXTRACTED=$(echo "$TAGS" | grep -E "ghcr.io/.*/react-nginx-image:stable-" | awk -F 'react-nginx-image:' '{print $2}')
-          echo "------------------------------"
+          echo "4------------------------------"
+          echo $EXTRACTED
+          echo "5------------------------------"
           echo "IMAGE_TAG=$EXTRACTED" >> "$GITHUB_ENV"
-          echo "------------------------------"
+          echo "6------------------------------"
           echo "${{ env.TAGS }}"
           exit 1
 
