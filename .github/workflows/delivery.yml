@@ -1,37 +1,257 @@
 ---
-# Deploy to every environment
+# Complete workflow responsible for the CD in our CI/CD pipeline
 
 name: CD
 
 concurrency: delivery
 
-on:  # Trigger automatically on integration.yml success (merged pull request or direct push)
+on:
   workflow_dispatch:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
+  push:  # Trigger automatically on merged pull request or direct push
     branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'src/**'
+      - '!src/**/README.md'
+      - 'public/**'
+      - '!public/**/README.md'
+      - 'package.json'
+      - 'package-lock.json'
 
 env:
+  IMAGE_TAG: stable-00000000-aaaa111
   AWS_REGION: us-east-1
-  ECS_SERVICE: my-service
-  ECS_CLUSTER: initial-cluster
-  ECS_TASK_DEFINITION: .aws/ecs-task-definition.json
-  CONTAINER_NAME: some-nginx
-  IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+  # TODO Do sth with below env variables
+  #ECS_SERVICE: my-service
+  #ECS_CLUSTER: initial-cluster
+  #ECS_TASK_DEFINITION: .aws/ecs-task-definition.json
+  #CONTAINER_NAME: some-nginx
 
 jobs:
-  # TODO use reusable workflow for the change-tag-dev and change-tag-staging jobs
-  # Only trigger if the previous workflow run was successful and the event was not a pull request
-  change-tag-dev:
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event != 'pull_request'
+  build-final-image:
+    name: Build Final Image
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write    # This is required for actions/checkout
-      id-token: write   # This is required for requesting the JWT
+      packages: write       # Obtain permission needed to push docker image to ghcr.io
+      pull-requests: write  # Obtain permission needed to create and update comments in PRs
+
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # TODO fix the "type=ref,event=pr" tag
+      - name: Docker meta for the final image  # Add multiple tags to the image
+        id: docker_meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/jakubszuber/react-nginx-image,jakubszuber/react-nginx-image
+          flavor: |
+            latest=true
+          tags: |
+            type=semver,pattern={{version}},value=v1.0.0
+            type=semver,pattern={{major}}.{{minor}},value=v1.0.0
+            type=ref,event=pr
+            type=sha,format=long
+            type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
+        env:
+          IMAGE_TAG: ${{ steps.docker_meta.outputs.tags }}
+
+      - run: echo "${{ env.IMAGE_TAG }}"
+      - run: echo "------------------------------"
+      - run: echo "$IMAGE_TAG"
+      - run: echo "------------------------------"
+      - run: echo "${{ steps.docker_meta.outputs.tags }}"
+      - run: echo "------------------------------"
+      - run: exit 1
+
+      - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push, merged pull request, or manual run
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha  # Use cached image layers to reduce image building time
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64  # You can change to "linux/amd64,linux/arm/v7,linux/arm64"
+
+  generate-sbom:
+    name: Generate SBOM (Software Bill of Materials) For The Final Image
+    needs: [build-final-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          image-ref: 'jakubszuber/react-nginx-image:${{ github.sha }}'
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
+
+  image-scan-results-Trivy:
+    name: Scan Image With Trivy And Upload Results
+    needs: [build-final-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read          # Obtain permission needed for actions/checkout to fetch code
+      packages: read          # Obtain permission needed to push docker image to ghcr.io
+      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull image to scan
+        run: docker pull jakubszuber/react-nginx-image:sha-"$GITHUB_SHA"
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Trivy for all CVEs (non-blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          hide-progress: false
+          image-ref: jakubszuber/react-nginx-image:sha-${{ github.sha }}
+          exit-code: 0
+          format: table
+
+      - name: Run Trivy for HIGH CVEs and report
+        uses: aquasecurity/trivy-action@master
+        with:
+          hide-progress: false
+          image-ref: jakubszuber/react-nginx-image:sha-${{ github.sha }}
+          exit-code: 0
+          ignore-unfixed: true
+          severity: 'HIGH'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          limit-severities-for-sarif: 'true'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  code-scan-results-Snyk:
+    name: Scan Code With Snyk And Upload Results
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check the code for vulnerabilities (non-blocking)
+        continue-on-error: true
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          args: --report
+
+      - name: Run Snyk for HIGH CVEs and report
+        continue-on-error: true
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --sarif-file-output=snyk-code.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'snyk-code.sarif'
+
+  image-scan-results-Snyk:
+    name: Scan Image With Snyk And Upload Results
+    needs: [build-final-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull image to scan
+        run: docker pull jakubszuber/react-nginx-image:sha-"$GITHUB_SHA"
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check Docker image for vulnerabilities (non-blocking)
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: jakubszuber/react-nginx-image:sha-${{ github.sha }}
+          args: --file=Dockerfile --report
+
+      - name: Run Snyk for HIGH CVEs and report
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: jakubszuber/react-nginx-image:sha-${{ github.sha }}
+          args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'snyk.sarif'
+
+  # TODO use reusable workflow for the change-tag-dev and change-tag-staging jobs
+  change-tag-dev:
+    needs: [build-final-image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # This is required for actions/checkout
+      id-token: write  # This is required for requesting the JWT
 
     environment: 
       name: Development
@@ -60,9 +280,7 @@ jobs:
           git push
 
   change-tag-staging:
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event != 'pull_request'
+    needs: [change-tag-dev]
     runs-on: ubuntu-latest
 
     permissions:
@@ -95,6 +313,7 @@ jobs:
           git commit -m "Update the image's tag in the Helm values-staging.yaml file [skip actions]"
           git push
 
+# TODO do sth with below code
 #       - name: Configure AWS credentials
 #         uses: aws-actions/configure-aws-credentials@v2
 #         with:
@@ -136,7 +355,6 @@ jobs:
 #           cluster: ${{ env.ECS_CLUSTER }}
 #           wait-for-service-stability: true
 
-  # TODO add some smoke test maybe by codeguru or just simply use some command that will check the status of the task or do "curl" on container
   change-tag-production:
     runs-on: ubuntu-latest
     needs: [change-tag-staging]
@@ -169,16 +387,15 @@ jobs:
 
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
-    name: Notify Slack
+    name: Notify Slack (Update Of Main Deployment's Container)
     needs: [change-tag-production]
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event != 'pull_request'
     runs-on: ubuntu-latest
     env: 
       STAT: ${{ needs.change-tag-production.result }}
 
-    # TODO Add here permissions: block
+    permissions:
+      contents: read
+      actions: read
 
     steps:
       - name: TEST1
