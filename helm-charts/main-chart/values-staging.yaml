@@ -2,4 +2,4 @@ namespace: argocd  # TODO Maybe change
 
 image:
   name: jakubszuber/react-nginx-image
-  tag: IMAGE_TAG
+  tag: stable-20230921-a3aa134
