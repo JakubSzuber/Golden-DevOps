@@ -19,7 +19,7 @@ on:
       - 'package-lock.json'
 
 env:
-  # The variable "IMAGE_TAG" by default contains only showcase value but later it will
+  # TODOCHANGE The variable "IMAGE_TAG" by default contains only showcase value but later it will
   # contain the main tag of the image that is a reference for other actions, manifests, etc.
   # It is fusion of "stable" + "date of build" + "short sha"
   IMAGE_TAG: stable-20230101-aaaa111s
@@ -74,14 +74,14 @@ jobs:
             type=sha,format=long
             type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=1100
 
-      - name: Save the main image's tag to IMAGE_TAG
+      - name: Save the main image's tag to output "image_tag"
         run: |
           TAGS="${{ steps.docker_meta.outputs.tags }}"
           echo "$TAGS"
           echo "------------------------------"
           EXTRACTED=$(echo "$TAGS" | grep -E "ghcr.io/.*/react-nginx-image:stable-" | awk -F 'react-nginx-image:' '{print $2}')
           echo $EXTRACTED
-          echo "IMAGE_TAG=$EXTRACTED" >> $GITHUB_ENV
+          echo "image_tag=$EXTRACTED" >> $GITHUB_OUTPUT
 
       - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push, merged pull request, or manual run
         uses: docker/build-push-action@v4
@@ -117,7 +117,7 @@ jobs:
           scan-type: 'fs'
           format: 'github'
           output: 'dependency-results.sbom.json'
-          image-ref: 'jakubszuber/react-nginx-image:${{ env.IMAGE_TAG }}'
+          image-ref: 'jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}'
           github-pat: ${{ secrets.GITHUB_TOKEN }}
 
   image-scan-results-Trivy:
@@ -141,14 +141,14 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull image to scan
-        run: docker pull jakubszuber/react-nginx-image:"$IMAGE_TAG"
+        run: docker pull jakubszuber/react-nginx-image:"${{ steps.build-final-image.outputs.im }}"
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
         uses: aquasecurity/trivy-action@master
         with:
           hide-progress: false
-          image-ref: jakubszuber/react-nginx-image:$IMAGE_TAG
+          image-ref: jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}
           exit-code: 0
           format: table
 
@@ -156,7 +156,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           hide-progress: false
-          image-ref: jakubszuber/react-nginx-image:$IMAGE_TAG
+          image-ref: jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}
           exit-code: 0
           ignore-unfixed: true
           severity: 'HIGH'
@@ -220,7 +220,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull image to scan
-        run: docker pull jakubszuber/react-nginx-image:"$IMAGE_TAG"
+        run: docker pull jakubszuber/react-nginx-image:"${{ needs.build-final-image.outputs.image_tag }}"
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check Docker image for vulnerabilities (non-blocking)
@@ -229,7 +229,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: jakubszuber/react-nginx-image:$IMAGE_TAG
+          image: jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}
           args: --file=Dockerfile --report
 
       - name: Run Snyk for HIGH CVEs and report
@@ -238,7 +238,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: jakubszuber/react-nginx-image:$IMAGE_TAG
+          image: jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}
           args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
@@ -261,10 +261,10 @@ jobs:
 
     steps:
       - name: Print the used tag
-        run: echo "To development environment will deploy a container with image tag  $IMAGE_TAG"
+        run: echo "To development environment will deploy a container with image tag  ${{ needs.build-final-image.outputs.image_tag }}"
 
       - name: Print the used tag
-        run: echo "Changing the image's tag in the manifest to $IMAGE_TAG"
+        run: echo "Changing the image's tag in the manifest to ${{ needs.build-final-image.outputs.image_tag }}"
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -272,7 +272,7 @@ jobs:
       - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
         run: |
           echo "Helm values-dev.yaml file before change:" && cat helm-charts/main-chart/values-dev.yaml
-          sed -i "s/stable-.*/${{ env.IMAGE_TAG }}/" helm-charts/main-chart/values-dev.yaml
+          sed -i "s/stable-.*/${{ needs.build-final-image.outputs.image_tag }}/" helm-charts/main-chart/values-dev.yaml
           echo "Helm values-dev.yaml file after change:" && cat helm-charts/main-chart/values-dev.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -282,7 +282,7 @@ jobs:
           git push
 
   change-tag-staging:
-    needs: [change-tag-dev]
+    needs: [build-final-image, change-tag-dev]
     runs-on: ubuntu-latest
 
     permissions:
@@ -295,10 +295,10 @@ jobs:
 
     steps:
       - name: Print the used tag
-        run: echo "To staging environment will deploy a container with image tag  $IMAGE_TAG"
+        run: echo "To staging environment will deploy a container with image tag  ${{ needs.build-final-image.outputs.image_tag }}"
 
       - name: Print the used tag
-        run: echo "Changing the image's tag in the manifest to $IMAGE_TAG"
+        run: echo "Changing the image's tag in the manifest to ${{ needs.build-final-image.outputs.image_tag }}"
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -306,7 +306,7 @@ jobs:
       - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
         run: |
           echo "Helm values-staging.yaml file before change:" && cat helm-charts/main-chart/values-staging.yaml
-          sed -i "s/stable-.*/${{ env.IMAGE_TAG }}/" helm-charts/main-chart/values-staging.yaml
+          sed -i "s/stable-.*/${{ needs.build-final-image.outputs.image_tag }}/" helm-charts/main-chart/values-staging.yaml
           echo "Helm values-staging.yaml file after change:" && cat helm-charts/main-chart/values-staging.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -332,14 +332,14 @@ jobs:
 #         id: build-image
 #         env:
 #           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#           IMAGE_TAG: ${{ env.IMAGE_TAG }}
+#           IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
 #         run: |
 #           # Build a docker container and
 #           # push it to ECR so that it can
 #           # be deployed to ECS.
-#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-#           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.build-final-image.outputs.image_tag }} .
+#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.build-final-image.outputs.image_tag }}
+#           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.build-final-image.outputs.image_tag }}" >> $GITHUB_OUTPUT
 
 #       - name: Fill in the new image ID in the Amazon ECS task definition
 #         id: task-def
@@ -347,7 +347,7 @@ jobs:
 #         with:
 #           task-definition: ${{ env.ECS_TASK_DEFINITION }}
 #           container-name: ${{ env.CONTAINER_NAME }}
-#           image: docker.io/jakubszuber/testing_image:$IMAGE_TAG  # Use just created image by the CI workflow
+#           image: docker.io/jakubszuber/testing_image:${{ needs.build-final-image.outputs.image_tag }}  # Use just created image by the CI workflow
 
 #       - name: Deploy Amazon ECS task definition
 #         uses: aws-actions/amazon-ecs-deploy-task-definition@v1.4.11
@@ -359,7 +359,7 @@ jobs:
 
   change-tag-production:
     runs-on: ubuntu-latest
-    needs: [change-tag-staging]
+    needs: [build-final-image, change-tag-staging]
 
     permissions:
       contents: write
@@ -370,7 +370,7 @@ jobs:
 
     steps:
       - name: Print the used tag
-        run: echo "Changing the image's tag in the manifest to $IMAGE_TAG"
+        run: echo "Changing the image's tag in the manifest to ${{ needs.build-final-image.outputs.image_tag }}"
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -378,7 +378,7 @@ jobs:
       - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
         run: |
           echo "Helm values-prod.yaml file before change:" && cat helm-charts/main-chart/values-prod.yaml
-          sed -i "s/stable-.*/${{ env.IMAGE_TAG }}/" helm-charts/main-chart/values-prod.yaml
+          sed -i "s/stable-.*/${{ needs.build-final-image.outputs.image_tag }}/" helm-charts/main-chart/values-prod.yaml
           echo "Helm values-prod.yaml file after change:" && cat helm-charts/main-chart/values-prod.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
