@@ -97,6 +97,8 @@ jobs:
     name: Generate SBOM (Software Bill of Materials) For The Final Image
     needs: [build-final-image]
     runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
 
     permissions:
       contents: write
@@ -117,13 +119,15 @@ jobs:
           scan-type: 'fs'
           format: 'github'
           output: 'dependency-results.sbom.json'
-          image-ref: 'jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}'
+          image-ref: 'jakubszuber/react-nginx-image:$IMAGE_TAG'
           github-pat: ${{ secrets.GITHUB_TOKEN }}
 
   image-scan-results-Trivy:
     name: Scan Image With Trivy And Upload Results
     needs: [build-final-image]
     runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
 
     permissions:
       contents: read          # Obtain permission needed for actions/checkout to fetch code
@@ -141,14 +145,14 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull image to scan
-        run: docker pull jakubszuber/react-nginx-image:"${{ steps.build-final-image.outputs.im }}"
+        run: docker pull jakubszuber/react-nginx-image:"$IMAGE_TAG"
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
         uses: aquasecurity/trivy-action@master
         with:
           hide-progress: false
-          image-ref: jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}
+          image-ref: jakubszuber/react-nginx-image:$IMAGE_TAG
           exit-code: 0
           format: table
 
@@ -156,7 +160,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           hide-progress: false
-          image-ref: jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}
+          image-ref: jakubszuber/react-nginx-image:$IMAGE_TAG
           exit-code: 0
           ignore-unfixed: true
           severity: 'HIGH'
@@ -205,6 +209,8 @@ jobs:
     name: Scan Image With Snyk And Upload Results
     needs: [build-final-image]
     runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
 
     permissions:
       security-events: write
@@ -220,7 +226,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull image to scan
-        run: docker pull jakubszuber/react-nginx-image:"${{ needs.build-final-image.outputs.image_tag }}"
+        run: docker pull jakubszuber/react-nginx-image:"$IMAGE_TAG"
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check Docker image for vulnerabilities (non-blocking)
@@ -229,7 +235,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}
+          image: jakubszuber/react-nginx-image:$IMAGE_TAG
           args: --file=Dockerfile --report
 
       - name: Run Snyk for HIGH CVEs and report
@@ -238,7 +244,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: jakubszuber/react-nginx-image:${{ needs.build-final-image.outputs.image_tag }}
+          image: jakubszuber/react-nginx-image:$IMAGE_TAG
           args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
@@ -250,6 +256,8 @@ jobs:
   change-tag-dev:
     needs: [build-final-image]
     runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: $IMAGE_TAG
 
     permissions:
       contents: write  # This is required for actions/checkout
@@ -261,10 +269,10 @@ jobs:
 
     steps:
       - name: Print the used tag
-        run: echo "To development environment will deploy a container with image tag  ${{ needs.build-final-image.outputs.image_tag }}"
+        run: echo "To development environment will deploy a container with image tag  $IMAGE_TAG"
 
       - name: Print the used tag
-        run: echo "Changing the image's tag in the manifest to ${{ needs.build-final-image.outputs.image_tag }}"
+        run: echo "Changing the image's tag in the manifest to $IMAGE_TAG"
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -272,7 +280,7 @@ jobs:
       - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
         run: |
           echo "Helm values-dev.yaml file before change:" && cat helm-charts/main-chart/values-dev.yaml
-          sed -i "s/stable-.*/${{ needs.build-final-image.outputs.image_tag }}/" helm-charts/main-chart/values-dev.yaml
+          sed -i "s/stable-.*/$IMAGE_TAG/" helm-charts/main-chart/values-dev.yaml
           echo "Helm values-dev.yaml file after change:" && cat helm-charts/main-chart/values-dev.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -284,6 +292,8 @@ jobs:
   change-tag-staging:
     needs: [build-final-image, change-tag-dev]
     runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: $IMAGE_TAG
 
     permissions:
       contents: write    # This is required for actions/checkout
@@ -295,10 +305,10 @@ jobs:
 
     steps:
       - name: Print the used tag
-        run: echo "To staging environment will deploy a container with image tag  ${{ needs.build-final-image.outputs.image_tag }}"
+        run: echo "To staging environment will deploy a container with image tag  $IMAGE_TAG"
 
       - name: Print the used tag
-        run: echo "Changing the image's tag in the manifest to ${{ needs.build-final-image.outputs.image_tag }}"
+        run: echo "Changing the image's tag in the manifest to $IMAGE_TAG"
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -306,7 +316,7 @@ jobs:
       - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
         run: |
           echo "Helm values-staging.yaml file before change:" && cat helm-charts/main-chart/values-staging.yaml
-          sed -i "s/stable-.*/${{ needs.build-final-image.outputs.image_tag }}/" helm-charts/main-chart/values-staging.yaml
+          sed -i "s/stable-.*/IMAGE_TAG/" helm-charts/main-chart/values-staging.yaml
           echo "Helm values-staging.yaml file after change:" && cat helm-charts/main-chart/values-staging.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -332,14 +342,14 @@ jobs:
 #         id: build-image
 #         env:
 #           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#           IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
+#           IMAGE_TAG: $IMAGE_TAG
 #         run: |
 #           # Build a docker container and
 #           # push it to ECR so that it can
 #           # be deployed to ECS.
-#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.build-final-image.outputs.image_tag }} .
-#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.build-final-image.outputs.image_tag }}
-#           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:${{ needs.build-final-image.outputs.image_tag }}" >> $GITHUB_OUTPUT
+#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+#           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
 #       - name: Fill in the new image ID in the Amazon ECS task definition
 #         id: task-def
@@ -347,7 +357,7 @@ jobs:
 #         with:
 #           task-definition: ${{ env.ECS_TASK_DEFINITION }}
 #           container-name: ${{ env.CONTAINER_NAME }}
-#           image: docker.io/jakubszuber/testing_image:${{ needs.build-final-image.outputs.image_tag }}  # Use just created image by the CI workflow
+#           image: docker.io/jakubszuber/testing_image:$IMAGE_TAG  # Use just created image by the CI workflow
 
 #       - name: Deploy Amazon ECS task definition
 #         uses: aws-actions/amazon-ecs-deploy-task-definition@v1.4.11
@@ -360,6 +370,8 @@ jobs:
   change-tag-production:
     runs-on: ubuntu-latest
     needs: [build-final-image, change-tag-staging]
+    env:
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
 
     permissions:
       contents: write
@@ -370,7 +382,7 @@ jobs:
 
     steps:
       - name: Print the used tag
-        run: echo "Changing the image's tag in the manifest to ${{ needs.build-final-image.outputs.image_tag }}"
+        run: echo "Changing the image's tag in the manifest to $IMAGE_TAG"
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -378,7 +390,7 @@ jobs:
       - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
         run: |
           echo "Helm values-prod.yaml file before change:" && cat helm-charts/main-chart/values-prod.yaml
-          sed -i "s/stable-.*/${{ needs.build-final-image.outputs.image_tag }}/" helm-charts/main-chart/values-prod.yaml
+          sed -i "s/stable-.*/$IMAGE_TAG/" helm-charts/main-chart/values-prod.yaml
           echo "Helm values-prod.yaml file after change:" && cat helm-charts/main-chart/values-prod.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
