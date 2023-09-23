@@ -100,7 +100,7 @@ jobs:
     needs: [build-final-image]
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
 
     permissions:
       contents: write
@@ -129,7 +129,7 @@ jobs:
     needs: [build-final-image]
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
 
     permissions:
       contents: read          # Obtain permission needed for actions/checkout to fetch code
@@ -212,7 +212,7 @@ jobs:
     needs: [build-final-image]
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
 
     permissions:
       security-events: write
@@ -259,7 +259,7 @@ jobs:
     needs: [build-final-image]
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
 
     permissions:
       contents: write  # This is required for actions/checkout
@@ -295,7 +295,7 @@ jobs:
     needs: [build-final-image, change-tag-dev]
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
 
     permissions:
       contents: write    # This is required for actions/checkout
@@ -373,7 +373,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-final-image, change-tag-staging]
     env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
 
     permissions:
       contents: write
