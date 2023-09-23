@@ -35,7 +35,7 @@ jobs:
     # contain the main tag of the image that is a reference for other actions, manifests, etc.
     # It is fusion of "stable" + "date of build" + "short sha"
     outputs:
-      IMAGE_TAG: ${{ steps.step1.outputs.test }}
+      IMAGE_TAG: ${{ steps.save-output.outputs.image_tag }}
 
     permissions:
       packages: write       # Obtain permission needed to push docker image to ghcr.io
@@ -77,6 +77,7 @@ jobs:
             type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=1100
 
       - name: Save the main image's tag to output "image_tag"
+        id: save-output
         run: |
           TAGS="${{ steps.docker_meta.outputs.tags }}"
           echo "$TAGS"
@@ -299,7 +300,7 @@ jobs:
 
     permissions:
       contents: write    # This is required for actions/checkout
-      id-token: write   # This is required for requesting the JWT
+      id-token: write   # TODO This is required for requesting the JWT
 
     environment: 
       name: Staging
