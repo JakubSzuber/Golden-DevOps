@@ -86,7 +86,10 @@ jobs:
           echo "5------------------------------"
           echo "IMAGE_TAG=$EXTRACTED" >> "$GITHUB_ENV"
           echo "6------------------------------"
-          echo "${{ env.TAGS }}"
+          echo "${{ env.IMAGE_TAG }}"
+          echo "--or--"
+          echo "$IMAGE_TAG"
+          sleep 3
           exit 1
 
       - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push, merged pull request, or manual run
