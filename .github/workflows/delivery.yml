@@ -391,6 +391,7 @@ jobs:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
     name: Notify Slack (Update Of Main Deployment's Container)
     needs: [change-tag-production]
+    if: always()
     runs-on: ubuntu-latest
     env: 
       STAT: ${{ needs.change-tag-production.result }}
