@@ -19,10 +19,6 @@ on:
       - 'package-lock.json'
 
 env:
-  # TODOCHANGE The variable "IMAGE_TAG" by default contains only showcase value but later it will
-  # contain the main tag of the image that is a reference for other actions, manifests, etc.
-  # It is fusion of "stable" + "date of build" + "short sha"
-  IMAGE_TAG: stable-20230101-aaaa111s
   AWS_REGION: us-east-1
   # TODO Do sth with below env variables
   #ECS_SERVICE: my-service
@@ -34,6 +30,12 @@ jobs:
   build-final-image:
     name: Build Final Image
     runs-on: ubuntu-latest
+
+    # The output "IMAGE_TAG" by default contains only showcase value but later it will
+    # contain the main tag of the image that is a reference for other actions, manifests, etc.
+    # It is fusion of "stable" + "date of build" + "short sha"
+    outputs:
+      IMAGE_TAG: ${{ steps.step1.outputs.test }}
 
     permissions:
       packages: write       # Obtain permission needed to push docker image to ghcr.io
@@ -257,7 +259,7 @@ jobs:
     needs: [build-final-image]
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: $IMAGE_TAG
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
 
     permissions:
       contents: write  # This is required for actions/checkout
@@ -293,7 +295,7 @@ jobs:
     needs: [build-final-image, change-tag-dev]
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: $IMAGE_TAG
+      IMAGE_TAG: ${{ needs.build-final-image.outputs.image_tag }}
 
     permissions:
       contents: write    # This is required for actions/checkout
