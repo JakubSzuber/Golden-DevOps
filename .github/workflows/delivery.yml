@@ -84,7 +84,7 @@ jobs:
           echo "4------------------------------"
           echo $EXTRACTED
           echo "5------------------------------"
-          echo "IMAGE_TAG=$EXTRACTED" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=$EXTRACTED" >> $GITHUB_ENV
           echo "6------------------------------"
           echo "${{ env.IMAGE_TAG }}"
           echo "--or--"
