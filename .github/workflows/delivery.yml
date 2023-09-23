@@ -80,9 +80,11 @@ jobs:
           echo "------------------------------"
           echo "${{ steps.docker_meta.outputs.tags }}"
           echo "******************************"
-          EXTRACTED=$(echo "$TAGS" | grep -E "ghcr.io/.*/react-nginx-image:stable-" | awk -F'react-nginx-image:' '{print \$2}')
+          EXTRACTED=$(echo "$TAGS" | grep -E "ghcr.io/.*/react-nginx-image:stable-" | awk -F 'react-nginx-image:' '{print $2}')
           echo "------------------------------"
           echo "IMAGE_TAG=$EXTRACTED" >> "$GITHUB_ENV"
+          echo "------------------------------"
+          echo "${{ env.TAGS }}"
           exit 1
 
       - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push, merged pull request, or manual run
