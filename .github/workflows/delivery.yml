@@ -274,6 +274,7 @@ jobs:
           sarif_file: 'snyk.sarif'
 
   change-tag-dev:
+    name: Deploy To Development
     needs: [build-final-image]
     uses: ./.github/workflows/reusable-change-tag.yml
     with:
@@ -286,6 +287,7 @@ jobs:
       contents: write  # This is required for changing the image's tag in Helm values.yaml
 
   change-tag-staging:
+    name: Deploy To Staging
     needs: [build-final-image, change-tag-dev]
     uses: ./.github/workflows/reusable-change-tag.yml
     with:
@@ -298,6 +300,7 @@ jobs:
       contents: write  # This is required for changing the image's tag in Helm values.yaml
 
   change-tag-production:
+    name: Deploy To Production
     needs: [build-final-image, change-tag-staging]
     uses: ./.github/workflows/reusable-change-tag.yml
     with:
