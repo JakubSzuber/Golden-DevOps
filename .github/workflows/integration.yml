@@ -442,27 +442,32 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       STAT: > 
-        ${{ needs.lint.result }} && 
-        ${{ needs.test-unit.result }} && 
-        ${{ needs.test-k3d.result }} && 
-        ${{ needs.scan-image-Trivy.result }} && 
-        ${{ needs.scan-image-Snyk.result }} && 
-        ${{ needs.scan-code-Snyk.result }}
+        ${{ toJson([
+          needs.lint.result, 
+          needs.test-unit.result, 
+          needs.test-k3d.result, 
+          needs.scan-image-Trivy.result, 
+          needs.scan-image-Snyk.result, 
+          needs.scan-code-Snyk.result
+        ]) }}
 
     permissions:
       contents: read
       actions: read
 
     steps:
-      - name: TEST1
+      - name: Convert statuses of jobs
         run: |
-          if [[ "$STAT" == "skipped" ]]; then
+          STAT_LIST=${{ fromJson(env.STAT) }}
+          if [[ "skipped" =~ ${STAT_LIST[@]} ]]; then
             echo "STAT=failure" >> "$GITHUB_ENV"
           fi
-      - name: TEST
+
+      - name: Print converted statuses of jobs
         run: |
-          echo "$STAT"
-          echo ${{ env.STAT }}
+          STAT_LIST=${{ fromJson(env.STAT) }}
+          echo "Converted statuses of jobs: ${STAT_LIST[@]}"
+
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ env.STAT }}
