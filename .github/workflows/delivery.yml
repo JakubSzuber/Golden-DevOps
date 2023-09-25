@@ -273,66 +273,41 @@ jobs:
         with:
           sarif_file: 'snyk.sarif'
 
-  # TODO try to take more repetitive code to reusable workflow
   change-tag-dev:
     needs: [build-final-image]
-    runs-on: ubuntu-latest
-    env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
+    uses: ./.github/workflows/reusable-change-tag.yml
+    with:
+      environment: dev
+      img_tag: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
+      gh-environment-name: Development
+      gh-environment-url: https://dev.goldendevops.com/
 
     permissions:
-      contents: write  # This is required for actions/checkout
-
-    environment: 
-      name: Development
-      url: https://dev.goldendevops.com/
-
-    steps:
-      - name: Deploy to Development
-        uses: ./.github/workflows/reusable-change-tag.yml
-        with:
-          environment: dev
-          img_tag: ${{ env.IMAGE_TAG }}
+      contents: write  # This is required for changing the image's tag in Helm values.yaml
 
   change-tag-staging:
     needs: [build-final-image, change-tag-dev]
-    runs-on: ubuntu-latest
-    env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
+    uses: ./.github/workflows/reusable-change-tag.yml
+    with:
+      environment: staging
+      img_tag: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
+      gh-environment-name: Staging
+      gh-environment-url: https://staging.goldendevops.com/
 
     permissions:
-      contents: write  # This is required for actions/checkout
-
-    environment: 
-      name: Staging
-      url: https://staging.goldendevops.com/
-
-    steps:
-      - name: Deploy to Staging
-        uses: ./.github/workflows/reusable-change-tag.yml
-        with:
-          environment: staging
-          img_tag: ${{ env.IMAGE_TAG }}
+      contents: write  # This is required for changing the image's tag in Helm values.yaml
 
   change-tag-production:
-    runs-on: ubuntu-latest
     needs: [build-final-image, change-tag-staging]
-    env:
-      IMAGE_TAG: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
+    uses: ./.github/workflows/reusable-change-tag.yml
+    with:
+      environment: prod
+      img_tag: ${{ needs.build-final-image.outputs.IMAGE_TAG }}
+      gh-environment-name: Production
+      gh-environment-url: https://goldendevops.com/
 
     permissions:
-      contents: write
-
-    environment: 
-      name: Production
-      url: https://goldendevops.com/
-
-    steps:
-      - name: Deploy to Production
-        uses: ./.github/workflows/reusable-change-tag.yml
-        with:
-          environment: prod
-          img_tag: ${{ env.IMAGE_TAG }}
+      contents: write  # This is required for changing the image's tag in Helm values.yaml
 
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook

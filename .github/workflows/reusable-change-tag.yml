@@ -14,6 +14,14 @@ on:
         description: Tag of the image (required to insert right image's tag to Helm values.yaml file)
         required: true
         type: string
+      gh-environment-name:
+        description: GitHub environment's name (required to associate job with right GitHub environment)
+        required: true
+        type: string
+      gh-environment-url:
+        description: GitHub environment's URL (required to associate job with right GitHub environment)
+        required: true
+        type: string
     outputs:
       result:
         description: The result of the the workflow operation
@@ -27,6 +35,10 @@ jobs:
     env:
       ENV: ${{ inputs.environment }}
       IMAGE_TAG: ${{ inputs.img_tag }}
+
+    environment: 
+      name: ${{ inputs.gh-environment-name }}
+      url: ${{ inputs.gh-environment-url }}
 
     steps:
       - name: Print the used tag
@@ -50,6 +62,8 @@ jobs:
           git commit -m "Update the image's tag in the Helm values-$ENV.yaml file [skip actions]"
           git push
 
-      - name: Set result output
+      - name: Set result output and print it
         id: set-result
-        run: echo "outcome=success" >> $GITHUB_OUTPUT
+        run: |
+          echo "outcome=success" >> $GITHUB_OUTPUT
+          echo "The workflow's result is: ${{ steps.set-result.outputs.outcome }}"
