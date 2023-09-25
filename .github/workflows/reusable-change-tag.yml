@@ -1,0 +1,55 @@
+---
+name: Reusable Deploy
+# TODO Restrict permissions
+
+on: 
+  workflow_call:
+    inputs:
+      environment:
+        description: The environment to which deploy (required to use right Helm values.yaml file)
+        required: true
+        default: ""
+        type: string
+      img_tag:
+        description: Tag of the image (required to insert right image's tag to Helm values.yaml file)
+        required: true
+        type: string
+    outputs:
+      result:
+        description: The result of the the workflow operation
+        value: ${{ jobs.deploy-to-env.outputs.outcome }}
+
+jobs:
+  deploy-to-env:
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.set-result.outputs.outcome }}
+    env:
+      ENV: ${{ inputs.environment }}
+      IMAGE_TAG: ${{ inputs.img_tag }}
+
+    steps:
+      - name: Print the used tag
+        run: echo "To $ENV environment will deploy a container with image tag  $IMAGE_TAG"
+
+      - name: Print the used tag
+        run: echo "Changing the image's tag in the manifest to $IMAGE_TAG"
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
+        run: |
+          echo "Helm values-$ENV.yaml file before change:" && cat helm-charts/main-chart/values-$ENV.yaml
+          sed -i "s/stable-.*/$IMAGE_TAG/" helm-charts/main-chart/values-$ENV.yaml
+          echo "Helm values-$ENV.yaml file after change:" && cat helm-charts/main-chart/values-$ENV.yaml
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git pull
+          git add helm-charts/main-chart/values-$ENV.yaml
+          git commit -m "Update the image's tag in the Helm values-$ENV.yaml file [skip actions]"
+          git push
+
+      - name: Set result output
+        id: set-result
+        run: echo "outcome=success" >> $GITHUB_OUTPUT
