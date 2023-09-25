@@ -456,8 +456,7 @@ jobs:
     steps:
       - name: Convert statuses of jobs
         run: |
-          IFS=', ' read -r -a STAT_LIST <<< "$STAT"
-          if [[ "skipped" =~ "${STAT_LIST[@]}" || "cancelled" =~ "${STAT_LIST[@]}" || "failure" =~ "${STAT_LIST[@]}" ]]; then
+          if [[ $STAT == *"failure"* || $STAT == *"skipped"* || $STAT == *"cancelled"* ]]; then
             echo "STAT=failure" >> "$GITHUB_ENV"
           else
             echo "STAT=success" >> "$GITHUB_ENV"
