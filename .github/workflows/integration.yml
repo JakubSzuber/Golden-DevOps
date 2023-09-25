@@ -1,5 +1,5 @@
 ---
-# Complete workflow responsible for the integration in our CI/CD pipeline
+# Complete workflow responsible for the CI in our CI/CD pipeline
 
 name: CI
 
@@ -7,16 +7,6 @@ concurrency: integration
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'Dockerfile'
-      - 'src/**'
-      - '!src/**/README.md'
-      - 'public/**'
-      - '!public/**/README.md'
-      - 'package.json'
-      - 'package-lock.json'
   pull_request:
     branches: ['main', 'dev_*', 'snyk-upgrade-*']
     paths:
@@ -161,6 +151,12 @@ jobs:
           ```text
           ${{ steps.docker_meta.outputs.labels }}
           ```
+
+          This is a multi-line comment
+          - With GitHub **Markdown** :sparkles:
+          - Created by [actions-comment-pull-request][1]
+
+          [1]: https://github.com/thollander/actions-comment-pull-request
         reactions: eyes, rocket
 
     - name: 2. Comment to PR that the candidate image was pushed to GHCR and with which tags, labels
@@ -178,12 +174,14 @@ jobs:
           ${{ steps.docker_meta.outputs.labels }}
           ```
 
-          This is a multi-line test comment
+          This is a multi-line comment
           - With GitHub **Markdown** :sparkles:
           - Created by [create-or-update-comment][1]
 
           [1]: https://github.com/peter-evans/create-or-update-comment
-        reactions: '+1'
+        reactions: |
+            heart
+            hooray
         issue-number: ${{ github.event.number }}
 
   test-unit:
@@ -430,221 +428,26 @@ jobs:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           args: --file=Dockerfile --severity-threshold=critical
 
-  build-final-image:
-    if: github.event_name != 'pull_request'
-    name: Build Final Image
-    runs-on: ubuntu-latest
-
-    permissions:
-      packages: write       # Obtain permission needed to push docker image to ghcr.io
-      pull-requests: write  # Obtain permission needed to create and update comments in PRs
-
-    steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Login to ghcr.io registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Docker meta for the final image  # Add multiple tags to the image
-        id: docker_meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/jakubszuber/react-nginx-image,jakubszuber/react-nginx-image
-          flavor: |
-            latest=true
-          tags: |
-            type=semver,pattern={{version}},value=v1.0.0
-            type=semver,pattern={{major}}.{{minor}},value=v1.0.0
-            type=ref,event=pr
-            type=sha,format=long
-            type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}}
-
-      - name: Build Docker image and push it to GHCR and Docker Hub if the event is a direct push, merged pull request, or manual run
-        uses: docker/build-push-action@v4
-        with:
-          push: true
-          tags: ${{ steps.docker_meta.outputs.tags }}
-          labels: ${{ steps.docker_meta.outputs.labels }}
-          cache-from: type=gha  # Use cached image layers to reduce image building time
-          cache-to: type=gha,mode=max
-          platforms: linux/amd64  # You can change to "linux/amd64,linux/arm/v7,linux/arm64"
-
-  generate-sbom:
-    if: github.event_name != 'pull_request'
-    name: Generate SBOM (Software Bill of Materials) For The Final Image
-    needs: [build-final-image]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          format: 'github'
-          output: 'dependency-results.sbom.json'
-          image-ref: 'jakubszuber/react-nginx-image:${{ github.sha }}'
-          github-pat: ${{ secrets.GITHUB_TOKEN }}
-
-  image-scan-results-Trivy:
-    if: github.event_name != 'pull_request'
-    name: Scan Image With Trivy And Upload Results
-    needs: [build-final-image]
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read          # Obtain permission needed for actions/checkout to fetch code
-      packages: read          # Obtain permission needed to push docker image to ghcr.io
-      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
-
-    steps:
-      - name: Checkout git repo
-        uses: actions/checkout@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Pull image to scan
-        run: docker pull jakubszuber/react-nginx-image:sha-"$GITHUB_SHA"
-
-      # Gain an additional overview of the vulnerabilities
-      - name: Run Trivy for all CVEs (non-blocking)
-        uses: aquasecurity/trivy-action@master
-        with:
-          hide-progress: false
-          image-ref: jakubszuber/react-nginx-image:sha-${{ github.sha }}
-          exit-code: 0
-          format: table
-
-      - name: Run Trivy for HIGH CVEs and report
-        uses: aquasecurity/trivy-action@master
-        with:
-          hide-progress: false
-          image-ref: jakubszuber/react-nginx-image:sha-${{ github.sha }}
-          exit-code: 0
-          ignore-unfixed: true
-          severity: 'HIGH'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-  code-scan-results-Snyk:
-    if: github.event_name != 'pull_request'
-    name: Scan Code With Snyk And Upload Results
-    runs-on: ubuntu-latest
-
-    permissions:
-      security-events: write
-
-    steps:
-      - name: Checkout git repo
-        uses: actions/checkout@v3
-
-      # Gain an additional overview of the vulnerabilities
-      - name: Run Snyk to check the code for vulnerabilities (non-blocking)
-        continue-on-error: true
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          args: --report
-
-      - name: Run Snyk for HIGH CVEs and report
-        continue-on-error: true
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --sarif-file-output=snyk-code.sarif
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'snyk-code.sarif'
-
-  image-scan-results-Snyk:
-    if: github.event_name != 'pull_request'
-    name: Scan Image With Snyk And Upload Results
-    needs: [build-final-image]
-    runs-on: ubuntu-latest
-
-    permissions:
-      security-events: write
-
-    steps:
-      - name: Checkout git repo
-        uses: actions/checkout@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Pull image to scan
-        run: docker pull jakubszuber/react-nginx-image:sha-"$GITHUB_SHA"
-
-      # Gain an additional overview of the vulnerabilities
-      - name: Run Snyk to check Docker image for vulnerabilities (non-blocking)
-        continue-on-error: true
-        uses: snyk/actions/docker@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          image: jakubszuber/react-nginx-image:sha-${{ github.sha }}
-          args: --file=Dockerfile --report
-
-      - name: Run Snyk for HIGH CVEs and report
-        continue-on-error: true
-        uses: snyk/actions/docker@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          image: jakubszuber/react-nginx-image:sha-${{ github.sha }}
-          args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif
-
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'snyk.sarif'
-
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
-    name: Notify Slack
-    needs: [build-final-image]
+    name: Notify Slack (Final CI Result)
+    needs:  # Add "test-integration" if you use this job
+      - lint
+      - test-unit
+      - test-k3d
+      - scan-image-Trivy
+      - scan-image-Snyk
+      - scan-code-Snyk
     if: always()
     runs-on: ubuntu-latest
     env: 
-      STAT: ${{ needs.build-final-image.result }}
+      STAT: > 
+        ${{ needs.lint.result }} && 
+        ${{ needs.test-unit.result }} && 
+        ${{ needs.test-k3d.result }} && 
+        ${{ needs.scan-image-Trivy.result }} && 
+        ${{ needs.scan-image-Snyk.result }} && 
+        ${{ needs.scan-code-Snyk.result }}
 
     permissions:
       contents: read
