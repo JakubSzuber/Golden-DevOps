@@ -440,16 +440,14 @@ jobs:
       - scan-code-Snyk
     if: always()
     runs-on: ubuntu-latest
-    env: 
+    env:
       STAT: > 
-        ${{ toJson([
-          needs.lint.result, 
-          needs.test-unit.result, 
-          needs.test-k3d.result, 
-          needs.scan-image-Trivy.result, 
-          needs.scan-image-Snyk.result, 
-          needs.scan-code-Snyk.result
-        ]) }}
+        "${{ needs.lint.result }}", 
+        "${{ needs.test-unit.result }}", 
+        "${{ needs.test-k3d.result }}", 
+        "${{ needs.scan-image-Trivy.result }}", 
+        "${{ needs.scan-image-Snyk.result }}", 
+        "${{ needs.scan-code-Snyk.result }}"
 
     permissions:
       contents: read
@@ -458,15 +456,15 @@ jobs:
     steps:
       - name: Convert statuses of jobs
         run: |
-          STAT_LIST=${{ fromJson(env.STAT) }}
-          if [[ "skipped" =~ ${STAT_LIST[@]} ]]; then
+          IFS=', ' read -r -a STAT_LIST <<< "$STAT"
+          if [[ "skipped" =~ "${STAT_LIST[@]}" ]]; then
             echo "STAT=failure" >> "$GITHUB_ENV"
           fi
 
       - name: Print converted statuses of jobs
         run: |
-          STAT_LIST=${{ fromJson(env.STAT) }}
-          echo "Converted statuses of jobs: ${STAT_LIST[@]}"
+          IFS=', ' read -r -a STAT_LIST <<< "$STAT"
+          echo "${STAT_LIST[@]}"
 
       - uses: 8398a7/action-slack@v3
         with:
