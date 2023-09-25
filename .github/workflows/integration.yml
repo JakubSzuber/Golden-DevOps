@@ -457,14 +457,15 @@ jobs:
       - name: Convert statuses of jobs
         run: |
           IFS=', ' read -r -a STAT_LIST <<< "$STAT"
-          if [[ "skipped" =~ "${STAT_LIST[@]}" ]]; then
+          if [[ "skipped" || "fail" =~ "${STAT_LIST[@]}" ]]; then
             echo "STAT=failure" >> "$GITHUB_ENV"
+          else
+            echo "STAT=success" >> "$GITHUB_ENV"
           fi
 
-      - name: Print converted statuses of jobs
+      - name: Print end status of the workflow
         run: |
-          IFS=', ' read -r -a STAT_LIST <<< "$STAT"
-          echo "${STAT_LIST[@]}"
+          echo "The status of teh workflow: ${{ env.STAT }}"
 
       - uses: 8398a7/action-slack@v3
         with:
