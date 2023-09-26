@@ -21,7 +21,7 @@ updates:
     open-pull-requests-limit: 10
 
   - package-ecosystem: "terraform"
-    directory: "/terraform-infrastructure"
+    directory: "/terraform-infrastructure/*"
     schedule:
       interval: "weekly"
       time: "06:00"
