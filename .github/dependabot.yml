@@ -1,0 +1,35 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "06:00"
+    open-pull-requests-limit: 10
+#    ignore:  # Example usage of "ignore:" key
+#      - dependency-name: "aws*"
+#      - dependency-name: "express"
+#        versions: ["4.x", "5.x"]
+#      - dependency-name: "*"
+#        update-types: ["version-update:semver-patch"]
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "06:00"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "terraform"
+    directory: "/terraform-infrastructure"
+    schedule:
+      interval: "weekly"
+      time: "06:00"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "weekly"
+      time: "06:00"
+    open-pull-requests-limit: 10
