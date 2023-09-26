@@ -1,0 +1,9 @@
+# When a pull request is created that modifies code owned by a specific user, team, or organization according to the CODEOWNERS file, 
+# GitHub will automatically request their review. This helps streamline the code review workflow and ensures that the right people are 
+# involved in the review process.
+# 
+# For more info visit: 
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+* @JakubSzuber
+.github/workflows/* @JakubSzuber
