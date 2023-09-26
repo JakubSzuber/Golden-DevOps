@@ -1,6 +1,5 @@
 ---
 name: Reusable Deploy
-# TODO Restrict permissions
 
 on: 
   workflow_call:
