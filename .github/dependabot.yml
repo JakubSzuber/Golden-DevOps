@@ -35,27 +35,7 @@ updates:
         update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "terraform"
-    directory: "/terraform-infrastructure/argocd"
-    schedule:
-      interval: "weekly"
-      time: "06:00"
-    open-pull-requests-limit: 10
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
-
-  - package-ecosystem: "terraform"
-    directory: "/terraform-infrastructure/eks"
-    schedule:
-      interval: "weekly"
-      time: "06:00"
-    open-pull-requests-limit: 10
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
-
-  - package-ecosystem: "terraform"
-    directory: "/terraform-infrastructure/vpc"
+    directory: "/terraform-infrastructure/**"
     schedule:
       interval: "weekly"
       time: "06:00"
