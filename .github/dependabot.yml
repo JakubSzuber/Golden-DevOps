@@ -20,15 +20,29 @@ updates:
       time: "06:00"
     open-pull-requests-limit: 10
 
-  - package-ecosystem: "terraform"
-    directory: "/terraform-infrastructure"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
     schedule:
       interval: "weekly"
       time: "06:00"
     open-pull-requests-limit: 10
 
-  - package-ecosystem: "github-actions"
-    directory: "/.github/workflows"
+  - package-ecosystem: "terraform"
+    directory: "/terraform-infrastructure/argocd"
+    schedule:
+      interval: "weekly"
+      time: "06:00"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "terraform"
+    directory: "/terraform-infrastructure/eks"
+    schedule:
+      interval: "weekly"
+      time: "06:00"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "terraform"
+    directory: "/terraform-infrastructure/vpc"
     schedule:
       interval: "weekly"
       time: "06:00"
