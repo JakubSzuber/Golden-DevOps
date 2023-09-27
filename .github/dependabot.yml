@@ -4,7 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      time: "06:00"
+      time: "06:00"  # 06:00 UTC will be 08:00 in (GMT+2) timezone
     open-pull-requests-limit: 10
 #    ignore:  # Example usage of "ignore:" key
 #      - dependency-name: "aws*"
@@ -21,7 +21,7 @@ updates:
     open-pull-requests-limit: 10
 
   - package-ecosystem: "terraform"
-    directory: "/terraform-infrastructure/*"
+    directory: "/terraform-infrastructure/*/<anything>.tf"
     schedule:
       interval: "weekly"
       time: "06:00"
