@@ -6,12 +6,13 @@ updates:
       interval: "weekly"
       time: "06:00"  # 06:00 UTC will be 08:00 in (GMT+2) timezone
     open-pull-requests-limit: 10
-#    ignore:  # Example usage of "ignore:" key
-#      - dependency-name: "aws*"
-#      - dependency-name: "express"
-#        versions: ["4.x", "5.x"]
-#      - dependency-name: "*"
-#        update-types: ["version-update:semver-patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+      # Example usage of "ignore:" key
+      #- dependency-name: "aws*"
+      #- dependency-name: "express"
+      #  versions: ["4.x", "5.x"]
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -19,6 +20,9 @@ updates:
       interval: "weekly"
       time: "06:00"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/.github/workflows"
@@ -26,6 +30,9 @@ updates:
       interval: "weekly"
       time: "06:00"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "terraform"
     directory: "/terraform-infrastructure/argocd"
@@ -33,6 +40,9 @@ updates:
       interval: "weekly"
       time: "06:00"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "terraform"
     directory: "/terraform-infrastructure/eks"
@@ -40,6 +50,9 @@ updates:
       interval: "weekly"
       time: "06:00"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "terraform"
     directory: "/terraform-infrastructure/vpc"
@@ -47,3 +60,6 @@ updates:
       interval: "weekly"
       time: "06:00"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
