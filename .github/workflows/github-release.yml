@@ -1,5 +1,5 @@
 ---
-# Workflow responsible for publishing the GitHub releses
+# Workflow responsible for publishing the GitHub release
 
 name: Publish GitHub Release
 
