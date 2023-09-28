@@ -1,0 +1,44 @@
+{
+    "workbench.colorTheme": "One Dark Pro Darker",
+    "python.defaultInterpreterPath": "C:\\Python311\\python.exe",
+    "window.zoomLevel": 1,
+    "workbench.iconTheme": "vscode-icons",
+    "editor.mouseWheelZoom": true,
+    "vscode-pets.petColor": "black",
+    "vscode-pets.petSize": "medium",
+    "vscode-pets.theme": "forest",
+    "vscode-pets.position": "explorer",
+    "editor.accessibilitySupport": "on",
+    "settingsSync.ignoredExtensions": [
+        "shalldie.background"
+    ],
+    "[html]": {
+        "editor.defaultFormatter": "mohd-akram.vscode-html-format"
+    },
+    "[python]": {
+        "editor.formatOnType": true
+    },
+    "files.associations": {
+        "Dockerfile.*": "dockerfile"
+    },
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "eslint.workingDirectories": [
+        {
+            "mode": "auto"
+        }
+    ],
+    "files.autoSave": "onFocusChange",
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "/bin/bash"
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash"
+}
