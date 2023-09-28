@@ -24,3 +24,5 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v1
+        with:
+          body: "Bump `Golden-DevOps` to latest version by @JakubSzuber"
