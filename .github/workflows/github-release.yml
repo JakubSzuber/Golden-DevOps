@@ -8,7 +8,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - 'v[0-9]{1,2}.[0-9]{1,2}.[0-9]{1,2}'
 
 permissions:
   contents: write
