@@ -6,7 +6,7 @@ For the released changes, please visit the [Releases](https://github.com/JakubSz
 <hr>
 
 
-# v1.0.0 [Unreleased]
+# [v1.0.0](https://github.com/JakubSzuber/Golden-DevOps/releases/tag/v1.0.0), XX Unknown 20XX [Unreleased]
 
 ### Breaking changes
 
@@ -32,14 +32,14 @@ easily readable and usable for the community)
 <hr>
 
 
-## v0.1.0, XX December? 20XX TODO OOOOOOOOOOOOO [Patch]
+## [v0.1.1](https://github.com/JakubSzuber/Golden-DevOps/releases/tag/v0.1.1), 28 September 2023 [Patch]
 
-- XXXX
+- Implement [github-release.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/github-release.yml) for the automated GitHub Releases
 
 <hr>
 
 
-# v0.1.0 [Initial]
+# [v0.1.0](https://github.com/JakubSzuber/Golden-DevOps/releases/tag/v0.1.0), 28 September 2023 [Initial]
 
 ### Breaking changes
 
