@@ -1,5 +1,5 @@
 ---
-# Simple workflow responsible for publishing the GitHub releases tags
+# Workflow responsible for publishing the GitHub releases tags
 
 name: Publish GitHub Release
 
