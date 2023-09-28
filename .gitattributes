@@ -1,0 +1,10 @@
+# Normalize line endings to avoid spurious failures in the core test suite on Windows
+* text=auto eol=lf
+
+# These lines are telling GitHub's Linguist tool to treat these Dockerfiles as regular, actual Dockerfiles (without extensions) for syntax highlighting and language statistics
+Dockerfile.dev linguist-language=Dockerfile
+Dockerfile.development linguist-language=Dockerfile
+Dockerfile.staging linguist-language=Dockerfile
+Dockerfile.qa linguist-language=Dockerfile
+Dockerfile.prod linguist-language=Dockerfile
+Dockerfile.production linguist-language=Dockerfile
