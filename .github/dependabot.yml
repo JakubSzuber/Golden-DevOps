@@ -1,10 +1,12 @@
 version: 2
+
 registries:
   dockerhub:
     type: docker-registry
     url: registry.hub.docker.com
     username: ${{ secrets.DOCKERHUB_USERNAME }}
     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
 updates:
   - package-ecosystem: "npm"
     directory: "/"
