@@ -5,8 +5,6 @@ name: Publish GitHub Release
 
 on:
   push:
-    branches-ignore:
-      - '!main'
     tags:
       - 'v*'
 
@@ -24,5 +22,6 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/') && github.event.base_ref == 'main'
         with:
           body: "Bump `Golden-DevOps` to latest version by @JakubSzuber"
