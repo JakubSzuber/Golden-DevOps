@@ -1,0 +1,31 @@
+---
+# Simple workflow responsible for marking issues and PR as stale and eventually closing stale issues/PRs
+
+name: Close Or Mark PRs/Issues
+
+on:
+  schedule:
+    - cron: '0 0 */4 * *'  # At 00:00 on every 4th day
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v8
+        with:
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not had
+            recent activity (at least 120 days). It will be closed if no further activity occurs.
+            Thank you for your contributions.
+          stale-pr-message: >
+            This PR has been automatically marked as stale because it has not had
+            recent activity (at least 120 days). It will be closed in 8 days if no further activity occurs.
+            Thank you for your contributions.
+          close-issue-message: >
+            'This issue was closed because it has been stalled for 128 days with no activity.'
+          close-pr-message: >
+            'This issue was closed because it has been stalled for 128 days with no activity.'
+          days-before-stale: 120
+          days-before-close: 8
+          any-of-labels: 'author-official,long-term,bug,backlog,blocker'
+          exempt-assignees: 'JakubSzuber,jakubszuber'
