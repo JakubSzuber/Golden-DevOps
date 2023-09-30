@@ -5,21 +5,21 @@
   <img src="https://cdn-icons-png.flaticon.com/512/5266/5266248.png" alt="Golden-DevOps Logo">
   <br>
   <h3>Golden-DevOps is a fully open-source project that uses all core DevOps tools</h3>
-  
-  [![release](https://img.shields.io/github/v/release/JakubSzuber/Golden-DevOps)](https://github.com/JakubSzuber/Golden-DevOps/releases) 
+
+  [![release](https://img.shields.io/github/v/release/JakubSzuber/Golden-DevOps)](https://github.com/JakubSzuber/Golden-DevOps/releases)
   [![Continuous Integration](https://github.com/JakubSzuber/Golden-DevOps/workflows/CI/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/integration.yml)
   [![Continuous Delivery](https://github.com/JakubSzuber/Golden-DevOps/workflows/CD/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/delivery.yml)
   TODO Add above badges for other workflows
 </div>
 
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia, 
+Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
 numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
 optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
 obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
 nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
 tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
+quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
@@ -91,7 +91,7 @@ Golden-DevOps/
 │   ├── logo192.png
 │   ├── logo512.png
 │   ├── manifest.json
-│   └── robots.txt 
+│   └── robots.txt
 ├── src
 │   ├── App.css
 │   ├── App.js
@@ -227,7 +227,7 @@ optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
 obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
 nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
 tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
+quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
@@ -253,10 +253,10 @@ molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum.
 
 # Development setup
 
-To dev work after cloning the repo use `docker compose -f docker-compose.dev.yml up -d --build` for the initial setup and fixing temporary errors, after executing this 
-command you can just start coding (the changes will be applied after each save) and you will see the website on [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000). 
-In order to debug code in VSC make sure that you have [.vscode/launch.json](https://github.com/JakubSzuber/test-project/blob/main/.vscode/launch.json) from that project. 
-Note that the initial start, compiling and automatic reload of the website's content can take a little more time than usual. If you encounter any problems with dev 
+To dev work after cloning the repo use `docker compose -f docker-compose.dev.yml up -d --build` for the initial setup and fixing temporary errors, after executing this
+command you can just start coding (the changes will be applied after each save) and you will see the website on [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000).
+In order to debug code in VSC make sure that you have [.vscode/launch.json](https://github.com/JakubSzuber/test-project/blob/main/.vscode/launch.json) from that project.
+Note that the initial start, compiling and automatic reload of the website's content can take a little more time than usual. If you encounter any problems with dev
 work try to restart the container, your whole Docker and eventually WSL2.
 
 To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
@@ -270,7 +270,7 @@ optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
 obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
 nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
 tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
+quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
@@ -283,11 +283,11 @@ optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
 obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
 nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
 tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
+quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
-# Rolling back 
+# Rolling back
 
 To roll back revert the right commit with a change and the GHA pipelines along with Argo CD will take care of...?
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
@@ -297,7 +297,7 @@ optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
 obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
 nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
 tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
+quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
@@ -312,7 +312,7 @@ optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
 obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
 nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
 tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
+quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
@@ -325,7 +325,7 @@ optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
 obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
 nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
 tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos 
+quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 XXXUse the destroy workflow...and then manually destroy A records (CNAME also if you want to delete the TLS certificate) of your hosted zone, DynamoDB table, S3 Bucket for the Terraform Remote State, and then you can delete the TLS certificate, xxx
@@ -353,4 +353,3 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 <!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
 <!--TODO create github kanban "Project" and write about it on readme-->
 <!--TODO Do all of TODO from every workflow and from my notes-->
-
