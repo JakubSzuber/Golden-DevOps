@@ -29,6 +29,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
+    registries:
+      - dockerhub
 
   - package-ecosystem: "github-actions"
     directory: "/.github/workflows"
