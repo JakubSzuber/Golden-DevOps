@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Print the refs
-        run: echo "${{ github.ref }} ${{ github.event.base.ref }}"
+        run: echo "${{ github.ref }} 1| ${{ github.event.base.ref }} 2| ${{ github.base_ref }} 3| ${{ github.head_ref }} 4| ${{ github.ref_name }} 5| ${{ github.workflow_ref }}"
 
       - name: Release
         uses: softprops/action-gh-release@v1
