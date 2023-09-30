@@ -1,12 +1,5 @@
 version: 2
 
-registries:
-  dockerhub:
-    type: docker-registry
-    url: registry.hub.docker.com
-    username: ${{ secrets.DOCKERHUB_USERNAME }}
-    password: ${{ secrets.DOCKERHUB_TOKEN }}
-
 updates:
   - package-ecosystem: "npm"
     directory: "/"
@@ -31,8 +24,6 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
-    registries:
-      - dockerhub
 
   - package-ecosystem: "github-actions"
     directory: "/.github/workflows"
