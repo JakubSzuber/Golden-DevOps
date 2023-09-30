@@ -5,10 +5,8 @@ name: Publish GitHub Release
 
 on:
   push:
-    branches:
-      - main
     branches-ignore:
-      - '**'
+      - '!main'
     tags:
       - 'v*'
 
