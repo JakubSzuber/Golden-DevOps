@@ -1,9 +1,9 @@
 ---
 # Note:
-# You can uncomment "if" statements in all steps but by leaving that comments we ensure that each time this workflow will run we will test the Helm 
+# You can uncomment "if" statements in all steps but by leaving that comments we ensure that each time this workflow will run we will test the Helm
 # chart even if the chart itself hasn't changed. By doing this we ensure that the potentially changed source code still works along with the Helm chart.
 
-name: Helm-Test
+name: Helm Chart
 # TODO Restrict permissions
 # TODO make this workflow universal so it will be able to work for each helm chart within the helm-charts directory
 # TODO change this file if you decided to use separete namespace for main application's resources
@@ -86,7 +86,7 @@ jobs:
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           helm plugin install https://github.com/jtyr/kubeconform-helm
 
-      # Each step has "if: always()" in order to execute despite of result of the previous step. 
+      # Each step has "if: always()" in order to execute despite of result of the previous step.
       # This gives us more comprehensive debugging in case of a fail.
 
       - name: Run basic Kubeconform command
@@ -282,8 +282,8 @@ jobs:
           cp "rendered-changed-files/golden-devops-chart/templates/$file" ../helm-charts/main-chart/templates
         done
 
-# TODO Uncomment below 2 steps when the releases of https://github.com/kubescape/github-action will catch up 
-# on https://github.com/kubescape/kubescape so the issues https://github.com/kubescape/kubescape/issues/1271 and 
+# TODO Uncomment below 2 steps when the releases of https://github.com/kubescape/github-action will catch up
+# on https://github.com/kubescape/kubescape so the issues https://github.com/kubescape/kubescape/issues/1271 and
 # https://github.com/kubescape/kubescape/issues/1255 will be resolved also on Kubescape's GHA action
 #    - name: Scan file(s) from PR
 #      if: github.event_name == 'pull_request'

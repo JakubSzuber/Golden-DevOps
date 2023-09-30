@@ -1,7 +1,7 @@
 ---
-name: Reusable Deploy
+name: Reusable Deploy (Change K8s Deployment's Image Tag)
 
-on: 
+on:
   workflow_call:
     inputs:
       environment:
@@ -35,7 +35,7 @@ jobs:
       ENV: ${{ inputs.environment }}
       IMAGE_TAG: ${{ inputs.img_tag }}
 
-    environment: 
+    environment:
       name: ${{ inputs.gh-environment-name }}
       url: ${{ inputs.gh-environment-url }}
 
