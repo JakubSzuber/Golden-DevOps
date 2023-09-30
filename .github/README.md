@@ -143,7 +143,7 @@ Golden-DevOps/
 │       ├── providers.tf
 │       ├── terraform-dev.tfvars
 │       ├── terraform-prod.tfvars
-│       ├── terraform-staging.tfvars
+│       ├──  terraform-staging.tfvars
 │       ├── variables.tf
 │       └── versions.tf
 ├── .dockerignore
