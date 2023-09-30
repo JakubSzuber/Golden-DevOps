@@ -58,7 +58,7 @@ Golden-DevOps/
 │   └── gh-actions-inline-policy.json
 ├── healthchecks
 │   └── postgres-healthcheck
-├──   helm-charts
+├──    helm-charts
 │   └── main-chart
 │       ├── templates
 │       │   ├── tests
