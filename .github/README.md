@@ -42,23 +42,35 @@ Golden-DevOps/
 │   │   └── .hadolint.yaml
 │   ├── workflows
 │   │   ├── delivery.yml
+│   │   ├── github-release.yml
 │   │   ├── helm-test.yml
 │   │   ├── infra-cleanup.yml
 │   │   ├── integration.yml
 │   │   ├── playground.yml
+│   │   ├── reusable-change-tag.yml
+│   │   ├── stale.yml
 │   │   └── terraform.yml
+│   ├── CHANGELOG.md
+│   ├── CODEOWNERS
+│   ├── CODE_OF_CONDUCT.md
 │   ├── CONTRIBUTING.md
-│   └── pull_request_template.md
+│   ├── FUNDING.yml
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── README.md
+│   ├── SECURITY.md
+│   └── dependabot.yml
 ├── .nginx
 │   └── nginx.conf
 ├── .vscode
-│   └── launch.json
+│   ├── extensions.json
+│   ├── launch.json
+│   └── settings.json
 ├── aws
 │   ├── gh-action-role.json
 │   └── gh-actions-inline-policy.json
 ├── healthchecks
 │   └── postgres-healthcheck
-├──     helm-charts
+├── helm-charts
 │   └── main-chart
 │       ├── templates
 │       │   ├── tests
@@ -84,6 +96,7 @@ Golden-DevOps/
 │       ├── values-staging.yaml
 │       └── values.yaml
 ├── images
+│   ├── compose.png
 │   └── output.png
 ├── public
 │   ├── favicon.ico
@@ -143,14 +156,14 @@ Golden-DevOps/
 │       ├── providers.tf
 │       ├── terraform-dev.tfvars
 │       ├── terraform-prod.tfvars
-│       ├──  terraform-staging.tfvars
+│       ├── terraform-staging.tfvars
 │       ├── variables.tf
 │       └── versions.tf
 ├── .dockerignore
+├── .gitattributes
 ├── .gitignore
 ├── Dockerfile
 ├── LICENSE
-├── README.md
 ├── docker-compose.dev.yml
 ├── docker-compose.test.yml
 ├── package-lock.json
