@@ -40,5 +40,7 @@
             "path": "/bin/bash"
         }
     },
-    "terminal.integrated.defaultProfile.linux": "bash"
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "editor.tabSize": 2,
+    "yaml.extension.recommendations": true
 }
