@@ -11,7 +11,8 @@ name: Helm Chart
 on:
   workflow_dispatch:  # Step "Run chart-testing (list-changed)" will always return that there are no changes while workflow is executed manually
   pull_request:
-    branches: ['main', 'dev_*', 'snyk-upgrade-*']
+    # Most frequent branches that will be trying merge into main include: 'dev_*', 'snyk-upgrade-*'
+    branches: ['main']
     paths:
       - 'helm-charts/**'
   push:

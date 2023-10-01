@@ -8,7 +8,8 @@ concurrency: integration
 on:
   workflow_dispatch:
   pull_request:
-    branches: ['main', 'dev_*', 'snyk-upgrade-*']
+    # Most frequent branches that will be trying merge into main include: 'dev_*', 'snyk-upgrade-*', 'dependabot/*'
+    branches: ['main']
     paths:
       - 'Dockerfile'
       - 'src/**'
@@ -24,7 +25,6 @@ env:
 jobs:
   lint:
     name: Lint Repo
-    if: github.event_name != 'push'
     runs-on: ubuntu-22.04
 
     permissions:
@@ -57,7 +57,6 @@ jobs:
 
   build-unit-test-image:
     name: Build Unit Test Image
-    if: github.event_name != 'push'
     runs-on: ubuntu-22.04
 
     permissions:
@@ -87,7 +86,6 @@ jobs:
 
   build-test-image:
     name: Build Test Image (Candidate)
-    if: github.event_name != 'push'
     runs-on: ubuntu-22.04
 
     permissions:
@@ -185,7 +183,6 @@ jobs:
         issue-number: ${{ github.event.number }}
 
   test-unit:
-    if: github.event_name != 'push'
     name: Unit Tests In Docker
     needs: [build-unit-test-image]
     runs-on: ubuntu-latest
@@ -207,7 +204,6 @@ jobs:
 
 # You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
 #  test-integration:
-#    if: github.event_name != 'push'
 #    name: Integration Tests In Compose
 #    needs: [build-test-image]
 #    runs-on: ubuntu-latest
@@ -239,7 +235,6 @@ jobs:
 #          docker compose -f docker-compose.test.yml up --exit-code-from main-end-service
 
   test-k3d:
-    if: github.event_name != 'push'
     name: Test Deployment In Kubernetes
     needs: [build-test-image]
     runs-on: ubuntu-latest
@@ -313,7 +308,6 @@ jobs:
           fi
 
   scan-image-Trivy:
-    if: github.event_name != 'push'
     name: Scan Image With Trivy
     needs: [build-test-image]
     runs-on: ubuntu-latest
@@ -362,7 +356,6 @@ jobs:
           format: table
 
   scan-code-Snyk:
-    if: github.event_name != 'push'
     name: Scan Code With Snyk
     runs-on: ubuntu-latest
 
@@ -388,7 +381,6 @@ jobs:
           args: --severity-threshold=critical
 
   scan-image-Snyk:
-    if: github.event_name != 'push'
     name: Scan Image With Snyk
     needs: [build-test-image]
     runs-on: ubuntu-latest
@@ -428,10 +420,47 @@ jobs:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           args: --file=Dockerfile --severity-threshold=critical
 
+# You can uncomment the below job if you want to have automatic PR merges for Dependabot's PR (in this case
+# if uncomment below job and don't change anything then automatic PR merges would take place if the PR
+# is created by the Dependabot and the bump if for a patch update of dependency called "my-dependency").
+# Of course, the PR merge will take place if all of the tests succeed.
+#
+#  dependabot-auto-merge:
+#    name: Do automatic PR merge (for Dependabot's PR)
+#    needs:  # Add "test-integration" if you use this job
+#      - lint
+#      - test-unit
+#      - test-k3d
+#      - scan-image-Trivy
+#      - scan-image-Snyk
+#      - scan-code-Snyk
+#    runs-on: ubuntu-latest
+#    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+#
+#    permissions:
+#      contents: write
+#      pull-requests: write
+#
+#    steps:
+#      - name: Dependabot metadata
+#        id: metadata
+#        uses: dependabot/fetch-metadata@v1
+#        with:
+#          github-token: "${{ secrets.GITHUB_TOKEN }}"
+#
+#      - name: Enable auto-merge for Dependabot PRs
+#        if: >-
+#          ${{contains(steps.metadata.outputs.dependency-names, 'my-dependency') &&
+#          steps.metadata.outputs.update-type == 'version-update:semver-patch'}}
+#        run: gh pr merge --auto --merge "$PR_URL"
+#        env:
+#          PR_URL: ${{github.event.pull_request.html_url}}
+#          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
     name: Notify Slack (Final CI Result)
-    needs:  # Add "test-integration" if you use this job
+    needs:  # Add "test-integration" and/or "dependabot-auto-merge" if you use this job(s)
       - lint
       - test-unit
       - test-k3d
@@ -440,7 +469,7 @@ jobs:
       - scan-code-Snyk
     if: always()
     runs-on: ubuntu-latest
-    env:
+    env:  # Add "test-integration" and/or "dependabot-auto-merge" if you use this job(s)
       STAT: >
         "${{ needs.lint.result }}",
         "${{ needs.test-unit.result }}",
