@@ -1,0 +1,221 @@
+---
+name: Reusable Terraform # (Deploy all of 3 modules (vpc -> eks -> argocd) to a specific environment)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: The environment to which deploy (required to use right Helm values.yaml file)
+        required: true
+        default: ""
+        type: string
+      gh-environment-name:
+        description: GitHub environment's name (required to associate job with right GitHub environment)
+        required: true
+        type: string
+      gh-environment-url:
+        description: GitHub environment's URL (required to associate job with right GitHub environment)
+        required: true
+        type: string
+    outputs:
+      result:
+        description: The result of the the workflow operation
+        value: ${{ jobs.deploy-to-env.outputs.outcome }}
+
+jobs:
+  deploy-to-env:
+    name: Deploy All 3 Modules (vpc -> eks -> argocd) To A Specific Environment
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.set-result.outputs.outcome }}
+    env:
+      ENV: ${{ inputs.environment }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform-infrastructure
+
+    environment:
+      name: ${{ inputs.gh-environment-name }}
+      url: ${{ inputs.gh-environment-url }}
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from the AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role" # TODO ?
+          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
+          aws-region: us-east-1
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.5
+
+      - name: Terraform Init
+        id: init
+        run: |
+          cd vpc
+          terraform init
+          terraform workspace new $ENV || terraform workspace select $ENV
+          cd ../eks
+          terraform init
+          terraform workspace new $ENV || terraform workspace select $ENV
+          cd ../argocd
+          terraform init
+          terraform workspace new $ENV || terraform workspace select $ENV
+
+      - name: Terraform Plan for VPC
+        id: plan-vpc
+        #run: terraform plan -no-color
+        run: |
+          pwd
+          cd vpc
+          terraform plan -var-file terraform-$ENV.tfvars
+        continue-on-error: true
+
+      - name: Comment PR about status of Terraform plan
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        env:
+          PLAN: "terraform\n${{ steps.plan-vpc.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status for VPC
+        if: steps.plan-vpc.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply for VPC
+        run: |
+          pwd
+          cd vpc
+          terraform apply -var-file terraform-$ENV.tfvars -auto-approve -input=false
+
+      - name: Terraform Plan for EKS
+        id: plan-eks
+        #run: terraform plan -no-color
+        run: |
+          pwd
+          cd eks
+          terraform plan -var-file terraform-$ENV.tfvars
+        continue-on-error: true
+
+      - name: Comment PR about status of Terraform plan
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        env:
+          PLAN: "terraform\n${{ steps.plan-vpc.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status for EKS
+        if: steps.plan-eks.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply for EKS
+        run: |
+          pwd
+          cd eks
+          terraform apply -var-file terraform-$ENV.tfvars -auto-approve -input=false
+
+      - name: Terraform Plan for ArgoCD
+        id: plan-argocd
+        #run: terraform plan -no-color
+        run: |
+          pwd
+          cd argocd
+          terraform plan -var-file terraform-$ENV.tfvars
+        continue-on-error: true
+
+      - name: Comment PR about status of Terraform plan
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        env:
+          PLAN: "terraform\n${{ steps.plan-vpc.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status for ArgoCD
+        if: steps.plan-argocd.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply for ArgoCD
+        run: |
+          pwd
+          cd argocd
+          terraform apply -var-file terraform-$ENV.tfvars -auto-approve -input=false
+
+      - name: Set result output and print it
+        id: set-result
+        run: |
+          echo "outcome=success" >> $GITHUB_OUTPUT
+          echo "The workflow's result is: ${{ steps.set-result.outputs.outcome }}"

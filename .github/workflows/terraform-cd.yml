@@ -1,0 +1,127 @@
+---
+# Complete workflow responsible for the CD in the Terraform CI/CD pipeline
+
+name: Terraform CI
+
+concurrency: terraform-delivery
+
+on:
+  workflow_dispatch:
+  push: # Trigger automatically on merged pull request or direct push
+    branches: [main]
+    paths:
+      - "terraform-infrastructure/**"
+
+permissions: # TODO make sure that those permissions make sense
+  id-token: write # This is required for aws OIDC connection
+  contents: read # This is required for actions/checkout
+  pull-requests: write # This is required for the GitHub bot to comment on PR
+
+env:
+  TF_LOG: INFO
+  AWS_REGION: us-east-1
+
+jobs:
+  scan-results-Trivy:
+    name: Scan Image With Trivy And Upload Results
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+      security-events: write # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Trivy for all CVEs (non-blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          hide-progress: false
+          scan-ref: "terraform-infrastructure" # TODO make sure all of the 3 subdirs (modules) are checked
+          exit-code: 0
+          format: table
+
+      - name: Run Trivy for HIGH CVEs and report
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          hide-progress: false
+          scan-ref: "terraform-infrastructure" # TODO make sure all of the 3 subdirs (modules) are checked
+          exit-code: 0
+          ignore-unfixed: true
+          severity: "HIGH"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          limit-severities-for-sarif: "true"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  scan-results-Snyk:
+    if: github.event_name != 'pull_request'
+    name: Scan Helm Chart With Snyk And Upload Results
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+      security-events: write # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check the Helm chart for vulnerabilities (non-blocking)
+        continue-on-error: true
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          file: terraform-infrastructure # TODO make sure all of the 3 subdirs (modules) are checked
+          args: --report
+
+      - name: Run Snyk for HIGH CVEs and report
+        if: github.event_name != 'push'
+        continue-on-error: true
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          file: terraform-infrastructure # TODO make sure all of the 3 subdirs (modules) are checked
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "snyk.sarif"
+
+  deploy-development:
+    name: Deploy To Development
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      environment: dev
+      gh-environment-name: Development
+      gh-environment-url: https://dev.goldendevops.com/
+
+  deploy-staging:
+    needs: [deploy-development]
+    name: Deploy To Staging
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      environment: staging
+      gh-environment-name: Staging
+      gh-environment-url: https://staging.goldendevops.com/
+
+  deploy-production:
+    needs: [deploy-staging]
+    name: Deploy To Production
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      environment: prod
+      gh-environment-name: Production
+      gh-environment-url: https://goldendevops.com/

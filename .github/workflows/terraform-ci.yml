@@ -1,0 +1,173 @@
+---
+# Complete workflow responsible for the CI in the Terraform CI/CD pipeline
+
+name: Terraform CI
+
+concurrency: terraform-integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    # Most frequent branches that will be trying merge into main include: 'dev_*', 'snyk-upgrade-*', 'dependabot/*'
+    branches: ["main"]
+    paths:
+      - "terraform-infrastructure/**"
+
+env:
+  TF_LOG: INFO
+  AWS_REGION: us-east-1
+
+jobs:
+  syntax-format-tests:
+    name: Formating And Syntax Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform-infrastructure # TODO make sure all of the 3 subdirs (modules) are checked
+
+    permissions:
+      contents: read # This is required for actions/checkout
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform fmt # TODO if there is an error then probably you just have to enter the right dir
+        id: fmt
+        run: pwd && terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Validate # TODO if there is an error then probably you just have to enter the right dir
+        id: validate
+        run: pwd && terraform validate
+
+  test-Trivy:
+    name: Scan Terraform Files With Trivy
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Trivy for all CVEs (non-blocking)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          hide-progress: false
+          scan-ref: "terraform-infrastructure" # TODO make sure all of the 3 subdirs (modules) are checked
+          exit-code: 0
+          format: table
+
+      - name: Run Trivy for all CVEs (blocking)
+        id: trivy-test
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "config"
+          hide-progress: false
+          scan-ref: "terraform-infrastructure" # TODO make sure all of the 3 subdirs (modules) are checked
+          exit-code: 1
+          severity: "CRITICAL"
+          format: table
+
+  test-Snyk:
+    name: Scan Terraform Files With Snyk
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Snyk to check the Terraform Files for vulnerabilities (non-blocking)
+        continue-on-error: true
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          file: terraform-infrastructure # TODO make sure all of the 3 subdirs (modules) are checked
+
+      - name: Run Snyk to check the Terraform Files for vulnerabilities (blocking)
+        id: snyk-test
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          file: terraform-infrastructure # TODO make sure all of the 3 subdirs (modules) are checked
+          args: --severity-threshold=critical
+
+  comment-pr:
+    if: github.event_name == 'pull_request'
+    needs: [syntax-format-tests, test-Trivy, test-Snyk]
+    name: Comment the PR about the results of the tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write # This is required for the GitHub bot to comment on PR
+
+    steps:
+      - name: Comment PR about results of t0eh tests
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Syntax and format test\`${{ needs.syntax-format-tests.outcome }}\`
+            <details><summary>Format output</summary>
+
+            \`\`\`\n
+            ${{ needs.syntax-format-tests.steps.fmt.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            <details><summary>Syntax output</summary>
+
+            \`\`\`\n
+            ${{ needs.syntax-format-tests.steps.validate.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            const output = `#### Trivy test\`${{ needs.test-Trivy.outcome }}\`
+            <details><summary>Trivy output</summary>
+
+            \`\`\`\n
+            ${{ needs.test-Trivy.steps.trivy-test.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            const output = `#### Snyk test\`${{ needs.test-Snyk.outcome }}\`
+            <details><summary>Snyk output</summary>
+
+            \`\`\`\n
+            ${{ needs.test-Snyk.steps.snyk-test.outputs.stdout }}
+            \`\`\`
+
+            </details>`;
+
+  deploy-development:
+    needs: [syntax-format-tests, test-Trivy, test-Snyk]
+    name: Deploy To Development
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      environment: dev
+      gh-environment-name: Development
+      gh-environment-url: https://dev.goldendevops.com/
+
+    permissions:
+      id-token: write # This is required for aws OIDC connection
+      contents: read # This is required for actions/checkout
+      pull-requests: write # This is required for the GitHub bot to comment on PR
