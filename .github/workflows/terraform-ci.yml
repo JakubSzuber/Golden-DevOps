@@ -38,12 +38,12 @@ jobs:
         with:
           terraform_version: 1.5.7
 
-      - name: Terraform fmt # TODO if there is an error then probably you just have to enter the right dir
+      - name: Terraform fmt # TODO if there is an error/strange logs then probably you just have to enter the right dir
         id: fmt
         run: pwd && terraform fmt -check
         continue-on-error: true
 
-      - name: Terraform Validate # TODO if there is an error then probably you just have to enter the right dir
+      - name: Terraform Validate # TODO if there is an error/strange logs then probably you just have to enter the right dir
         id: validate
         run: pwd && terraform validate
 
@@ -123,7 +123,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Syntax and format test\`${{ needs.syntax-format-tests.outcome }}\`
+            const output = `#### Syntax and format test 🖌\`${{ needs.syntax-format-tests.outcome }}\`
             <details><summary>Format output</summary>
 
             \`\`\`\n
@@ -140,7 +140,7 @@ jobs:
 
             </details>
 
-            const output = `#### Trivy test\`${{ needs.test-Trivy.outcome }}\`
+            #### Trivy test\`${{ needs.test-Trivy.outcome }} 🛡️\`
             <details><summary>Trivy output</summary>
 
             \`\`\`\n
@@ -149,7 +149,7 @@ jobs:
 
             </details>
 
-            const output = `#### Snyk test\`${{ needs.test-Snyk.outcome }}\`
+            #### Snyk test\`${{ needs.test-Snyk.outcome }} 🛡️\`
             <details><summary>Snyk output</summary>
 
             \`\`\`\n
@@ -157,6 +157,13 @@ jobs:
             \`\`\`
 
             </details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
   deploy-development:
     needs: [syntax-format-tests, test-Trivy, test-Snyk]
