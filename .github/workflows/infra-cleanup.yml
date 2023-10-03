@@ -1,8 +1,7 @@
 ---
 # Complete workflow responsible for destroying entire terraform infrastructure
-# TODO OOOOOo: Resolve all TODO from this workflow
 
-name: Infra-cleanup
+name: Infrastructure Cleanup
 
 concurrency: infra-cleanup
 
@@ -23,13 +22,15 @@ jobs:
   remove-development:
     name: Remove the Development
     runs-on: ubuntu-latest
-    environment: 
-      name: Development
-      url: https://dev.goldendevops.com/
     defaults:
       run:
         shell: bash
         working-directory: terraform-infrastructure
+
+    environment:
+      name: Development
+      url: https://dev.goldendevops.com/
+
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -111,13 +112,15 @@ jobs:
     needs: [remove-development]
     name: Remove the Staging
     runs-on: ubuntu-latest
-    environment: 
-      name: Staging
-      url: https://staging.goldendevops.com/
     defaults:
       run:
         shell: bash
         working-directory: terraform-infrastructure
+
+    environment:
+      name: Staging
+      url: https://staging.goldendevops.com/
+
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -199,13 +202,15 @@ jobs:
     needs: [remove-staging]
     name: Remove the Production
     runs-on: ubuntu-latest
-    environment: 
-      name: Production
-      url: https://goldendevops.com/
     defaults:
       run:
         shell: bash
         working-directory: terraform-infrastructure
+
+    environment:
+      name: Production
+      url: https://goldendevops.com/
+
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
