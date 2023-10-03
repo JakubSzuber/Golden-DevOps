@@ -9,9 +9,6 @@
     "vscode-pets.theme": "forest",
     "vscode-pets.position": "explorer",
     "editor.accessibilitySupport": "on",
-    "settingsSync.ignoredExtensions": [
-        "shalldie.background"
-    ],
     "[html]": {
         "editor.defaultFormatter": "mohd-akram.vscode-html-format"
     },
