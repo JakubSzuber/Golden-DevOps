@@ -8,284 +8,37 @@ concurrency: infra-cleanup
 on:
   workflow_dispatch:
 
-permissions:  # TODO maybe change those permissions
-  id-token: write       # This is required for aws OIDC connection
-  contents: read        # This is required for actions/checkout
-  pull-requests: write  # This is required for the GitHub bot to comment on PR
+permissions:
+  id-token: write # This is required for aws OIDC connection
+  contents: read # This is required for actions/checkout
 
 env:
   TF_LOG: INFO
-  #AWS_REGION: ${{ secrets.AWS_REGION }}  #?
-  AWS_REGION: us-east-2
+  AWS_REGION: us-east-1
 
 jobs:
   remove-development:
     name: Remove the Development
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: terraform-infrastructure
-
-    environment:
-      name: Development
-      url: https://dev.goldendevops.com/
-
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials from the AWS account
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
-          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
-          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
-          aws-region: us-east-1
-          role-session-name: GitHub-OIDC-TERRAFORM
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.2.5
-
-      - name: Terraform Init  # TODO Maybe it doesn't make sense
-        id: init
-        run: |
-          cd vpc
-          terraform init
-          terraform workspace select dev
-          cd ../eks
-          terraform init
-          terraform workspace select dev
-          cd ../argocd
-          terraform init
-          terraform workspace select dev
-
-      - name: Terraform Plan
-        id: plan
-        #run: terraform plan -no-color
-        run: |
-          cd argocd
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-dev.tfvars
-          cd ../eks
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-dev.tfvars
-          cd ../vpc
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-dev.tfvars
-        continue-on-error: true
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: Terraform Destroy ArgoCD
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd argocd
-          terraform workspace list
-          terraform workspace select dev
-          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
-
-      - name: Terraform Destroy EKS
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd eks
-          terraform workspace list
-          terraform workspace select dev
-          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
-
-      - name: Terraform Destroy VPC
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd vpc
-          terraform workspace list
-          terraform workspace select dev
-          terraform destroy -var-file terraform-dev.tfvars -auto-approve -input=false
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      environment: dev
+      gh-environment-name: Development
+      gh-environment-url: https://dev.goldendevops.com/
 
   remove-staging:
     needs: [remove-development]
     name: Remove the Staging
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: terraform-infrastructure
-
-    environment:
-      name: Staging
-      url: https://staging.goldendevops.com/
-
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials from the AWS account
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
-          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
-          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
-          aws-region: us-east-1
-          role-session-name: GitHub-OIDC-TERRAFORM
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.2.5
-
-      - name: Terraform Init  # TODO Maybe it doesn't make sense
-        id: init
-        run: |
-          cd vpc
-          terraform init
-          terraform workspace select staging
-          cd ../eks
-          terraform init
-          terraform workspace select staging
-          cd ../argocd
-          terraform init
-          terraform workspace select staging
-
-      - name: Terraform Plan
-        id: plan
-        #run: terraform plan -no-color
-        run: |
-          cd argocd
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-staging.tfvars
-          cd ../eks
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-staging.tfvars
-          cd ../vpc
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-staging.tfvars
-        continue-on-error: true
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: Terraform Destroy ArgoCD
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd argocd
-          terraform workspace list
-          terraform workspace select staging
-          terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
-
-      - name: Terraform Destroy EKS
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd eks
-          terraform workspace list
-          terraform workspace select staging
-          terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
-
-      - name: Terraform Destroy VPC
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd vpc
-          terraform workspace list
-          terraform workspace select staging
-          terraform destroy -var-file terraform-staging.tfvars -auto-approve -input=false
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      environment: staging
+      gh-environment-name: Staging
+      gh-environment-url: https://staging.goldendevops.com/
 
   remove-production:
     needs: [remove-staging]
     name: Remove the Production
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: terraform-infrastructure
-
-    environment:
-      name: Production
-      url: https://goldendevops.com/
-
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials from the AWS account
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
-          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
-          #aws-region: ${{ secrets.AWS_REGION }} TODO ??
-          aws-region: us-east-1
-          role-session-name: GitHub-OIDC-TERRAFORM
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.2.5
-
-      - name: Terraform Init  # TODO Maybe it doesn't make sense
-        id: init
-        run: |
-          cd vpc
-          terraform init
-          terraform workspace select prod
-          cd ../eks
-          terraform init
-          terraform workspace select prod
-          cd ../argocd
-          terraform init
-          terraform workspace select prod
-
-      - name: Terraform Plan
-        id: plan
-        #run: terraform plan -no-color
-        run: |
-          cd argocd
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-prod.tfvars
-          cd ../eks
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-prod.tfvars
-          cd ../vpc
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-prod.tfvars
-        continue-on-error: true
-
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: Terraform Destroy ArgoCD
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd argocd
-          terraform workspace list
-          terraform workspace select prod
-          terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
-
-      - name: Terraform Destroy EKS
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd eks
-          terraform workspace list
-          terraform workspace select prod
-          terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
-
-      - name: Terraform Destroy VPC
-        #if: github.ref == 'refs/heads/main'  # TODO TEMPORARILY TURNED OFF FOR TESTING PURPOSES
-        #run: terraform apply -auto-approve -input=false  # TODO OOOOOOOOOO CHANGE THAT
-        run: |
-          cd vpc
-          terraform workspace list
-          terraform workspace select prod
-          terraform destroy -var-file terraform-prod.tfvars -auto-approve -input=false
-
-# TODO Meybe use reusable workflow or sth like that for removing
+    uses: ./.github/workflows/reusable-terraform.yml
+    with:
+      environment: prod
+      gh-environment-name: Production
+      gh-environment-url: https://goldendevops.com/

@@ -1,0 +1,111 @@
+---
+name: Reusable Terraform # (Deploy all of 3 modules (vpc -> eks -> argocd) to a specific environment)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: The environment to which deploy (required to e.g. choose the right Terraform workspace)
+        required: true
+        type: string
+      gh-environment-name:
+        description: GitHub environment's name (required to associate job with right GitHub environment)
+        required: true
+        type: string
+      gh-environment-url:
+        description: GitHub environment's URL (required to associate job with right GitHub environment)
+        required: true
+        type: string
+    outputs:
+      result:
+        description: The result of the the workflow operation
+        value: ${{ jobs.deploy-to-env.outputs.outcome }}
+
+jobs:
+  deploy-to-env:
+    if: github.ref == 'refs/heads/main'
+    name: Apply Changes Of All 3 Modules (vpc -> eks -> argocd) To A Specific Environment
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.set-result.outputs.outcome }}
+    env:
+      ENV: ${{ inputs.environment }}
+      GITHUB_ENV: ${{ inputs.gh-environment-name }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform-infrastructure
+
+    environment:
+      name: ${{ inputs.gh-environment-name }}
+      url: ${{ inputs.gh-environment-url }}
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from the AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          #role-to-assume: ${{ secrets.AWS_ROLE }} #TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
+          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
+          aws-region: us-east-1
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.5
+
+      - name: Terraform Init # TODO Maybe it doesn't make sense
+        id: init
+        run: |
+          cd vpc
+          terraform init
+          terraform workspace select $ENV
+          cd ../eks
+          terraform init
+          terraform workspace select $ENV
+          cd ../argocd
+          terraform init
+          terraform workspace select $ENV
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd argocd
+          terraform workspace list
+          terraform plan -destroy -var-file terraform-$ENV.tfvars
+          cd ../eks
+          terraform workspace list
+          terraform plan -destroy -var-file terraform-$ENV.tfvars
+          cd ../vpc
+          terraform workspace list
+          terraform plan -destroy -var-file terraform-$ENV.tfvars
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Destroy ArgoCD
+        run: |
+          cd argocd
+          terraform workspace list
+          terraform workspace select $ENV
+          terraform destroy -var-file terraform-$ENV.tfvars -auto-approve -input=false
+
+      - name: Terraform Destroy EKS
+        run: |
+          cd eks
+          terraform workspace list
+          terraform workspace select $ENV
+          terraform destroy -var-file terraform-$ENV.tfvars -auto-approve -input=false
+
+      - name: Terraform Destroy VPC
+        run: |
+          cd vpc
+          terraform workspace list
+          terraform workspace select $ENV
+          terraform destroy -var-file terraform-$ENV.tfvars -auto-approve -input=false
