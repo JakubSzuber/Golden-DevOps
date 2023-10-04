@@ -1,4 +1,4 @@
-FROM node:20.5.1-bullseye-slim AS development
+FROM node:20.8.0-bullseye-slim AS development
 
 # Set working directory
 WORKDIR /app
