@@ -166,6 +166,7 @@ jobs:
             })
 
   deploy-development:
+    if: 1==2 # TODO disable workflow for testing purposes
     needs: [syntax-format-tests, test-Trivy, test-Snyk]
     name: Deploy To Development
     uses: ./.github/workflows/reusable-terraform.yml
