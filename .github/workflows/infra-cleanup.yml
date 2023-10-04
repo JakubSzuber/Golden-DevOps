@@ -17,28 +17,30 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  remove-development:
-    name: Remove the Development
+  remove-environment:
+    name: Remove the ${{ matrix.environment.name }}
     uses: ./.github/workflows/reusable-terraform.yml
+    strategy:
+      matrix:
+        environment:
+          [
+            {
+              name: "Development",
+              value: "dev",
+              url: "https://dev.goldendevops.com/",
+            },
+            {
+              name: "Staging",
+              value: "staging",
+              url: "https://staging.goldendevops.com/",
+            },
+            {
+              name: "Production",
+              value: "prod",
+              url: "https://goldendevops.com/",
+            },
+          ]
     with:
-      environment: dev
-      gh-environment-name: Development
-      gh-environment-url: https://dev.goldendevops.com/
-
-  remove-staging:
-    needs: [remove-development]
-    name: Remove the Staging
-    uses: ./.github/workflows/reusable-terraform.yml
-    with:
-      environment: staging
-      gh-environment-name: Staging
-      gh-environment-url: https://staging.goldendevops.com/
-
-  remove-production:
-    needs: [remove-staging]
-    name: Remove the Production
-    uses: ./.github/workflows/reusable-terraform.yml
-    with:
-      environment: prod
-      gh-environment-name: Production
-      gh-environment-url: https://goldendevops.com/
+      environment: ${{ matrix.environment.value }}
+      gh-environment-name: ${{ matrix.environment.name }}
+      gh-environment-url: ${{ matrix.environment.url }}
