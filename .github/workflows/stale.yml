@@ -5,7 +5,7 @@ name: Close Or Mark PRs/Issues
 
 on:
   schedule:
-    - cron: '0 0 */4 * *'  # At 00:00 on every 4th day
+    - cron: "0 0 */4 * *" # At 00:00 on every 4th day
 
 jobs:
   stale:
@@ -27,5 +27,5 @@ jobs:
             'This issue was closed because it has been stalled for 128 days with no activity.'
           days-before-stale: 120
           days-before-close: 8
-          any-of-labels: 'author-official,long-term,bug,backlog,blocker'
-          exempt-assignees: 'JakubSzuber,jakubszuber'
+          any-of-labels: "author-official,long-term,bug,backlog,blocker"
+          exempt-assignees: "JakubSzuber,jakubszuber"

@@ -9,16 +9,16 @@ name: Helm Chart
 # TODO change this file if you decided to use separete namespace for main application's resources
 
 on:
-  workflow_dispatch:  # Step "Run chart-testing (list-changed)" will always return that there are no changes while workflow is executed manually
+  workflow_dispatch: # Step "Run chart-testing (list-changed)" will always return that there are no changes while workflow is executed manually
   pull_request:
     # Most frequent branches that will be trying merge into main include: 'dev_*', 'snyk-upgrade-*'
-    branches: ['main']
+    branches: ["main"]
     paths:
-      - 'helm-charts/**'
+      - "helm-charts/**"
   push:
     branches: [main]
     paths:
-      - 'helm-charts/**'
+      - "helm-charts/**"
 
 jobs:
   test-kubeconform-dry-run:
@@ -39,7 +39,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.9"
           check-latest: true
 
       - name: Set up chart-testing
@@ -55,7 +55,7 @@ jobs:
 
       - name: Run micro Kubernetes cluster for testing purposes
         uses: AbsaOSS/k3d-action@v2
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         with:
           cluster-name: "test-cluster-1"
           args: >-
@@ -64,22 +64,22 @@ jobs:
             --k3s-arg "--no-deploy=traefik,servicelb,metrics-server@server:*"
 
       - name: Login to Docker Hub
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set up Kubernetes tools
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         uses: yokawasa/action-setup-kube-tools@v0.9.2
         with:
-          kubectl: '1.27.1'
-          helm: '3.12.2'
-          kubeconform: '0.6.2'
+          kubectl: "1.27.1"
+          helm: "3.12.2"
+          kubeconform: "0.6.2"
 
       - name: Prepare environment for testing Helm chart
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         run: |
           kubectl create secret docker-registry regcred \
             --docker-server=ghcr.io \
@@ -150,7 +150,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.9"
           check-latest: true
 
       - name: Set up chart-testing
@@ -170,7 +170,7 @@ jobs:
 
       - name: Run micro Kubernetes cluster for testing purposes
         uses: AbsaOSS/k3d-action@v2
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         with:
           cluster-name: "test-cluster-1"
           args: >-
@@ -183,14 +183,14 @@ jobs:
         run: ct install --target-branch ${{ github.event.pull_request.head.ref }}
 
       - name: Login to Docker Hub
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Run Helm resources
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         run: |
           kubectl create secret docker-registry regcred \
             --docker-server=ghcr.io \
@@ -206,7 +206,7 @@ jobs:
 
       # TODO Later, when you move from the self-signed certificates delete "-k" flag
       - name: Test Helm resources (curl command)
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         run: |
           if ! kubectl exec deploy/golden-devops-helm-release --namespace=argocd -- curl -k -f https://localhost:8080; then
             echo "Failed to retrieve data from localhost!"
@@ -214,7 +214,7 @@ jobs:
           fi
 
       - name: Test Helm resources (wget with testing container)
-#        if: steps.list-changed.outputs.changed == 'true'
+        #if: steps.list-changed.outputs.changed == 'true'
         run: |
           if ! helm test golden-devops-helm-release; then
             echo "Testing of Helm golden-devops-helm-release failed!"
@@ -239,80 +239,80 @@ jobs:
       security-events: write
 
     steps:
-    - name: Checkout git repo
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    - name: Setup Helm
-      uses: azure/setup-helm@v3
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
-    - name: Template Helm chart's files
-      run: |
-        cd helm-charts/main-chart
-        helm dependency update
-        helm template . -f values.yaml -f values-prod.yaml --output-dir ../../rendered-main-chart
+      - name: Template Helm chart's files
+        run: |
+          cd helm-charts/main-chart
+          helm dependency update
+          helm template . -f values.yaml -f values-prod.yaml --output-dir ../../rendered-main-chart
 
-    - name: Get changed files
-      if: github.event_name == 'pull_request'
-      id: changed-files
-      uses: tj-actions/changed-files@v35
+      - name: Get changed files
+        if: github.event_name == 'pull_request'
+        id: changed-files
+        uses: tj-actions/changed-files@v35
 
-    - run: |
-        echo "${{ steps.changed-files.outputs.all_changed_files }}"
-        mkdir -p changed-files/templates
-        cp helm-charts/main-chart/values.yaml changed-files
-        cp helm-charts/main-chart/values-prod.yaml changed-files
-        echo -e "apiVersion: v2\n\nname: golden-devops-chart\n\nversion: 0.1.0" > changed-files/Chart.yaml
-        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-          mv $file changed-files/templates/
-        done
+      - run: |
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+          mkdir -p changed-files/templates
+          cp helm-charts/main-chart/values.yaml changed-files
+          cp helm-charts/main-chart/values-prod.yaml changed-files
+          echo -e "apiVersion: v2\n\nname: golden-devops-chart\n\nversion: 0.1.0" > changed-files/Chart.yaml
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            mv $file changed-files/templates/
+          done
 
-    - name: Clear content of helm-charts/main-chart/templates to contain only changed files
-      run: |
-        find helm-charts/main-chart/templates -type f -delete
+      - name: Clear content of helm-charts/main-chart/templates to contain only changed files
+        run: |
+          find helm-charts/main-chart/templates -type f -delete
 
-    - name: Template Helm chart's files
-      run: |
-        cd changed-files
-        helm dependency update
-        helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-changed-files
-        ls -l rendered-changed-files/golden-devops-chart/templates
-        for file in $(ls rendered-changed-files/golden-devops-chart/templates); do
-          cat "rendered-changed-files/golden-devops-chart/templates/$file"
-          cp "rendered-changed-files/golden-devops-chart/templates/$file" ../helm-charts/main-chart/templates
-        done
+      - name: Template Helm chart's files
+        run: |
+          cd changed-files
+          helm dependency update
+          helm template . -f values.yaml -f values-prod.yaml --output-dir rendered-changed-files
+          ls -l rendered-changed-files/golden-devops-chart/templates
+          for file in $(ls rendered-changed-files/golden-devops-chart/templates); do
+            cat "rendered-changed-files/golden-devops-chart/templates/$file"
+            cp "rendered-changed-files/golden-devops-chart/templates/$file" ../helm-charts/main-chart/templates
+          done
 
-# TODO Uncomment below 2 steps when the releases of https://github.com/kubescape/github-action will catch up
-# on https://github.com/kubescape/kubescape so the issues https://github.com/kubescape/kubescape/issues/1271 and
-# https://github.com/kubescape/kubescape/issues/1255 will be resolved also on Kubescape's GHA action
-#    - name: Scan file(s) from PR
-#      if: github.event_name == 'pull_request'
-#      uses: kubescape/github-action@main
-#      with:
-#        files: ${{ steps.changed-files.outputs.all_changed_files }}
-#        fixFiles: true
-#        format: "sarif"
-#
-#    - name: PR Suggester according to SARIF file
-#      if: github.event_name == 'pull_request'
-#      uses: HollowMan6/sarif4reviewdog@v1.0.0
-#      with:
-#        file: 'results.sarif'
-#        level: warning
+      # TODO Uncomment below 2 steps when the releases of https://github.com/kubescape/github-action will catch up
+      # on https://github.com/kubescape/kubescape so the issues https://github.com/kubescape/kubescape/issues/1271 and
+      # https://github.com/kubescape/kubescape/issues/1255 will be resolved also on Kubescape's GHA action
+      #    - name: Scan file(s) from PR
+      #      if: github.event_name == 'pull_request'
+      #      uses: kubescape/github-action@main
+      #      with:
+      #        files: ${{ steps.changed-files.outputs.all_changed_files }}
+      #        fixFiles: true
+      #        format: "sarif"
+      #
+      #    - name: PR Suggester according to SARIF file
+      #      if: github.event_name == 'pull_request'
+      #      uses: HollowMan6/sarif4reviewdog@v1.0.0
+      #      with:
+      #        file: 'results.sarif'
+      #        level: warning
 
-    # Gain an additional overview of the vulnerabilities
-    - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
-      uses: kubescape/github-action@main
-      continue-on-error: true
-      with:
-        files: "rendered-main-chart"
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
+        uses: kubescape/github-action@main
+        continue-on-error: true
+        with:
+          files: "rendered-main-chart"
 
-    - name: Run Kubeconform for all CVEs (blocking)
-      uses: kubescape/github-action@main
-      with:
-        files: "rendered-main-chart"
-        severityThreshold: critical
+      - name: Run Kubeconform for all CVEs (blocking)
+        uses: kubescape/github-action@main
+        with:
+          files: "rendered-main-chart"
+          severityThreshold: critical
 
   scan-Trivy:
     if: github.event_name != 'push'
@@ -320,8 +320,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read          # Obtain permission needed for actions/checkout to fetch code
-      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+      security-events: write # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
 
     steps:
       - name: Checkout git repo
@@ -331,20 +331,20 @@ jobs:
       - name: Run Trivy for all CVEs (non-blocking)
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
+          scan-type: "config"
           hide-progress: false
-          scan-ref: 'helm-charts/main-chart'
+          scan-ref: "helm-charts/main-chart"
           exit-code: 0
           format: table
 
       - name: Run Trivy for all CVEs (blocking)
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
+          scan-type: "config"
           hide-progress: false
-          scan-ref: 'helm-charts/main-chart'
+          scan-ref: "helm-charts/main-chart"
           exit-code: 1
-          severity: 'CRITICAL'
+          severity: "CRITICAL"
           format: table
 
   test-Snyk:
@@ -353,8 +353,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read          # Obtain permission needed for actions/checkout to fetch code
-      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+      security-events: write # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
 
     steps:
       - name: Checkout git repo
@@ -392,8 +392,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read          # Obtain permission needed for actions/checkout to fetch code
-      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+      security-events: write # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
 
     steps:
       - name: Checkout git repo
@@ -403,29 +403,29 @@ jobs:
       - name: Run Trivy for all CVEs (non-blocking)
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
+          scan-type: "config"
           hide-progress: false
-          scan-ref: 'helm-charts/main-chart'
+          scan-ref: "helm-charts/main-chart"
           exit-code: 0
           format: table
 
       - name: Run Trivy for HIGH CVEs and report
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
+          scan-type: "config"
           hide-progress: false
-          scan-ref: 'helm-charts/main-chart'
+          scan-ref: "helm-charts/main-chart"
           exit-code: 0
           ignore-unfixed: true
-          severity: 'HIGH'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          limit-severities-for-sarif: 'true'
+          severity: "HIGH"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          limit-severities-for-sarif: "true"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   scan-results-Snyk:
     if: github.event_name != 'pull_request'
@@ -433,8 +433,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read          # Obtain permission needed for actions/checkout to fetch code
-      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+      security-events: write # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
 
     steps:
       - name: Checkout git repo
@@ -472,7 +472,7 @@ jobs:
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: 'snyk.sarif'
+          sarif_file: "snyk.sarif"
 
   scan-results-Kubeconform:
     if: github.event_name != 'pull_request'
@@ -480,41 +480,41 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read          # Obtain permission needed for actions/checkout to fetch code
-      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+      security-events: write # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
 
     steps:
-    - name: Checkout git repo
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    - name: Setup Helm
-      uses: azure/setup-helm@v3
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
-    - name: Template Helm chart's files
-      run: |
-        cd helm-charts/main-chart
-        helm dependency update
-        helm template . -f values.yaml -f values-prod.yaml --output-dir ../../rendered-main-chart
+      - name: Template Helm chart's files
+        run: |
+          cd helm-charts/main-chart
+          helm dependency update
+          helm template . -f values.yaml -f values-prod.yaml --output-dir ../../rendered-main-chart
 
-    # Gain an additional overview of the vulnerabilities
-    - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
-      continue-on-error: true
-      uses: kubescape/github-action@main
-      with:
-        files: "rendered-main-chart"
+      # Gain an additional overview of the vulnerabilities
+      - name: Run Kubeconform to check the Helm chart for vulnerabilities (non-blocking)
+        continue-on-error: true
+        uses: kubescape/github-action@main
+        with:
+          files: "rendered-main-chart"
 
-    - name: Run Kubeconform for HIGH CVEs and report
-      continue-on-error: true
-      uses: kubescape/github-action@main
-      with:
-        format: sarif
-        outputFile: results
-        files: "rendered-main-chart"
-        severityThreshold: high
+      - name: Run Kubeconform for HIGH CVEs and report
+        continue-on-error: true
+        uses: kubescape/github-action@main
+        with:
+          format: sarif
+          outputFile: results
+          files: "rendered-main-chart"
+          severityThreshold: high
 
-    - name: Upload Kubescape scan results to Github Code Scanning
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: results.sarif
+      - name: Upload Kubescape scan results to Github Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif

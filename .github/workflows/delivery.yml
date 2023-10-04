@@ -92,7 +92,7 @@ jobs:
   #  Optionally you can additionally push the image to ECR (this will require additional configuration of ECR, permissions, etc.)
   #      - name: Configure AWS credentials
   #        uses: aws-actions/configure-aws-credentials@v2
-  #        with:  # TODO make sure this is right after terraform.yml workflow will be finished
+  #        with:
   #          role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
   #          role-session-name: GitHub-OIDC-ECR
   #          aws-region: ${{ env.AWS_REGION }}

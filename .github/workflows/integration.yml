@@ -9,15 +9,15 @@ on:
   workflow_dispatch:
   pull_request:
     # Most frequent branches that will be trying merge into main include: 'dev_*', 'snyk-upgrade-*', 'dependabot/*'
-    branches: ['main']
+    branches: ["main"]
     paths:
-      - 'Dockerfile'
-      - 'src/**'
-      - '!src/**/README.md'
-      - 'public/**'
-      - '!public/**/README.md'
-      - 'package.json'
-      - 'package-lock.json'
+      - "Dockerfile"
+      - "src/**"
+      - "!src/**/README.md"
+      - "public/**"
+      - "!public/**/README.md"
+      - "package.json"
+      - "package-lock.json"
 
 env:
   AWS_REGION: us-east-1
@@ -42,7 +42,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: 'npm'
+          cache: "npm"
 
       - run: npm ci
 
@@ -51,7 +51,7 @@ jobs:
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_ALL_CODEBASE: false  # TODO This line should be set only if the repository is first properly linted before first usage of this line
+          VALIDATE_ALL_CODEBASE: false # TODO This line should be set only if the repository is first properly linted before first usage of this line
           #FILTER_REGEX_INCLUDE: .*src/.*  # Uncomment to inlude only files within /src
           #FILTER_REGEX_EXCLUDE: .*/.github/workflows/.*  # Uncomment to exclude workflow files
 
@@ -60,127 +60,127 @@ jobs:
     runs-on: ubuntu-22.04
 
     permissions:
-      packages: write  # Obtain permission needed to push docker image to ghcr.io
+      packages: write # Obtain permission needed to push docker image to ghcr.io
 
     steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Login to ghcr.io registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    # Use GHCR as a register for test images
-    - name: Build and Push to GHCR
-      uses: docker/build-push-action@v4
-      with:
-        target: unit-test
-        push: true
-        tags: ghcr.io/jakubszuber/react-nginx-image-unit-test:${{ github.run_id }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        platforms: linux/amd64
+      # Use GHCR as a register for test images
+      - name: Build and Push to GHCR
+        uses: docker/build-push-action@v4
+        with:
+          target: unit-test
+          push: true
+          tags: ghcr.io/jakubszuber/react-nginx-image-unit-test:${{ github.run_id }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
 
   build-test-image:
     name: Build Test Image (Candidate)
     runs-on: ubuntu-22.04
 
     permissions:
-      packages: write       # Obtain permission needed to push docker image to ghcr.io
-      pull-requests: write  # Obtain permission needed to comment on PR
+      packages: write # Obtain permission needed to push docker image to ghcr.io
+      pull-requests: write # Obtain permission needed to comment on PR
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-    - name: Login to ghcr.io registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to ghcr.io registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Docker meta for the candidate image  # Add multiple tags to the image
-      id: docker_meta
-      uses: docker/metadata-action@v4
-      with:
-        images: ghcr.io/jakubszuber/react-nginx-image
-        flavor: |
-          latest=true
-        tags: |
-          type=semver,pattern={{version}},value=v1.0.0
-          type=semver,pattern={{major}}.{{minor}},value=v1.0.0
-          type=ref,event=pr
-          type=sha,format=long
-          type=raw,value=${{ github.run_id }}
-          type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}}
+      - name: Docker meta for the candidate image # Add multiple tags to the image
+        id: docker_meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/jakubszuber/react-nginx-image
+          flavor: |
+            latest=true
+          tags: |
+            type=semver,pattern={{version}},value=v1.0.0
+            type=semver,pattern={{major}}.{{minor}},value=v1.0.0
+            type=ref,event=pr
+            type=sha,format=long
+            type=raw,value=${{ github.run_id }}
+            type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}}
 
-    # Use GHCR as a register for test images
-    - name: Build and Push to GHCR
-      uses: docker/build-push-action@v4
-      with:
-        push: true
-        tags: ${{ steps.docker_meta.outputs.tags }}
-        labels: ${{ steps.docker_meta.outputs.labels }}
-        cache-from: type=gha  # Use cached image layers to reduce image building time
-        cache-to: type=gha,mode=max
-        platforms: linux/amd64  # You can change to "linux/amd64,linux/arm/v7,linux/arm64"
+      # Use GHCR as a register for test images
+      - name: Build and Push to GHCR
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha # Use cached image layers to reduce image building time
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64 # You can change to "linux/amd64,linux/arm/v7,linux/arm64"
 
-    - name: 1. Comment to PR that the candidate image was pushed to GHCR and with which tags, labels
-      if: github.event_name == 'pull_request'
-      uses: thollander/actions-comment-pull-request@v2
-      with:
-        message: |
-          Candidate image was pushed to GHCR
-          Tags added to images (final image will have similar tags):
-          ```text
-          ${{ steps.docker_meta.outputs.tags }}
-          ```
-          Labels added to images (final image will have similar tags):
-          ```text
-          ${{ steps.docker_meta.outputs.labels }}
-          ```
+      - name: 1. Comment to PR that the candidate image was pushed to GHCR and with which tags, labels
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Candidate image was pushed to GHCR
+            Tags added to images (final image will have similar tags):
+            ```text
+            ${{ steps.docker_meta.outputs.tags }}
+            ```
+            Labels added to images (final image will have similar tags):
+            ```text
+            ${{ steps.docker_meta.outputs.labels }}
+            ```
 
-          This is a multi-line comment
-          - With GitHub **Markdown** :sparkles:
-          - Created by [actions-comment-pull-request][1]
+            This is a multi-line comment
+            - With GitHub **Markdown** :sparkles:
+            - Created by [actions-comment-pull-request][1]
 
-          [1]: https://github.com/thollander/actions-comment-pull-request
-        reactions: eyes, rocket
+            [1]: https://github.com/thollander/actions-comment-pull-request
+          reactions: eyes, rocket
 
-    - name: 2. Comment to PR that the candidate image was pushed to GHCR and with which tags, labels
-      if: github.event_name == 'pull_request'
-      uses: peter-evans/create-or-update-comment@v3
-      with:
-        body: |
-          Candidate image was pushed to GHCR
-          Tags added to images (final image will have similar tags):
-          ```text
-          ${{ steps.docker_meta.outputs.tags }}
-          ```
-          Labels added to images (final image will have similar tags):
-          ```text
-          ${{ steps.docker_meta.outputs.labels }}
-          ```
+      - name: 2. Comment to PR that the candidate image was pushed to GHCR and with which tags, labels
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          body: |
+            Candidate image was pushed to GHCR
+            Tags added to images (final image will have similar tags):
+            ```text
+            ${{ steps.docker_meta.outputs.tags }}
+            ```
+            Labels added to images (final image will have similar tags):
+            ```text
+            ${{ steps.docker_meta.outputs.labels }}
+            ```
 
-          This is a multi-line comment
-          - With GitHub **Markdown** :sparkles:
-          - Created by [create-or-update-comment][1]
+            This is a multi-line comment
+            - With GitHub **Markdown** :sparkles:
+            - Created by [create-or-update-comment][1]
 
-          [1]: https://github.com/peter-evans/create-or-update-comment
-        reactions: |
+            [1]: https://github.com/peter-evans/create-or-update-comment
+          reactions: |
             heart
             hooray
-        issue-number: ${{ github.event.number }}
+          issue-number: ${{ github.event.number }}
 
   test-unit:
     name: Unit Tests In Docker
@@ -188,7 +188,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      packages: read  # Obtain permission needed to pull docker image to ghcr.io
+      packages: read # Obtain permission needed to pull docker image to ghcr.io
 
     steps:
       - name: Login to ghcr.io registry
@@ -202,37 +202,37 @@ jobs:
         run: |
           docker run --rm ghcr.io/jakubszuber/react-nginx-image-unit-test:"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
 
-# You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
-#  test-integration:
-#    name: Integration Tests In Compose
-#    needs: [build-test-image]
-#    runs-on: ubuntu-latest
-#
-#    permissions:
-#      packages: read  # Obtain permission needed to pull docker image to ghcr.io
-#
-#    steps:
-#      - name: Checkout git repo
-#        uses: actions/checkout@v3
-#
-#      - name: Login to Docker Hub
-#        uses: docker/login-action@v2
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_TOKEN }}
-#
-#      - name: Login to ghcr.io registry
-#        uses: docker/login-action@v2
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-#
-#      - name: Test healthcheck in Docker Compose
-#        run: |
-#          export TESTING_IMAGE=ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
-#          echo Testing image: "$TESTING_IMAGE"
-#          docker compose -f docker-compose.test.yml up --exit-code-from main-end-service
+  # You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
+  #  test-integration:
+  #    name: Integration Tests In Compose
+  #    needs: [build-test-image]
+  #    runs-on: ubuntu-latest
+  #
+  #    permissions:
+  #      packages: read  # Obtain permission needed to pull docker image to ghcr.io
+  #
+  #    steps:
+  #      - name: Checkout git repo
+  #        uses: actions/checkout@v3
+  #
+  #      - name: Login to Docker Hub
+  #        uses: docker/login-action@v2
+  #        with:
+  #          username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #
+  #      - name: Login to ghcr.io registry
+  #        uses: docker/login-action@v2
+  #        with:
+  #          registry: ghcr.io
+  #          username: ${{ github.actor }}
+  #          password: ${{ secrets.GITHUB_TOKEN }}
+  #
+  #      - name: Test healthcheck in Docker Compose
+  #        run: |
+  #          export TESTING_IMAGE=ghcr.io/jakubszuber/react-nginx-image:"$GITHUB_RUN_ID"
+  #          echo Testing image: "$TESTING_IMAGE"
+  #          docker compose -f docker-compose.test.yml up --exit-code-from main-end-service
 
   test-k3d:
     name: Test Deployment In Kubernetes
@@ -240,7 +240,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      packages: read  # Obtain permission needed to pull docker image to ghcr.io
+      packages: read # Obtain permission needed to pull docker image to ghcr.io
 
     steps:
       - name: Checkout git repo
@@ -271,7 +271,7 @@ jobs:
             --no-lb
             --k3s-arg "--no-deploy=traefik,servicelb,metrics-server@server:*"
 
-      - name: Smoke test deployment in k3d Kubernetes  # We use here the testing image from GitHub registry
+      - name: Smoke test deployment in k3d Kubernetes # We use here the testing image from GitHub registry
         run: |
           kubectl create secret docker-registry regcred \
             --docker-server=ghcr.io \
@@ -313,9 +313,9 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read          # Obtain permission needed for actions/checkout to fetch code
-      packages: read          # Obtain permission needed to push docker image to ghcr.io
-      security-events: write  # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
+      contents: read # Obtain permission needed for actions/checkout to fetch code
+      packages: read # Obtain permission needed to push docker image to ghcr.io
+      security-events: write # Obtain permission needed for github/codeql-action/upload-sarif to upload SARIF results
 
     steps:
       - name: Checkout git repo
@@ -352,7 +352,7 @@ jobs:
           hide-progress: false
           image-ref: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           exit-code: 1
-          severity: 'CRITICAL'
+          severity: "CRITICAL"
           format: table
 
   scan-code-Snyk:
@@ -420,47 +420,47 @@ jobs:
           image: ghcr.io/jakubszuber/react-nginx-image:${{ github.run_id }}
           args: --file=Dockerfile --severity-threshold=critical
 
-# You can uncomment the below job if you want to have automatic PR merges for Dependabot's PR (in this case
-# if uncomment below job and don't change anything then automatic PR merges would take place if the PR
-# is created by the Dependabot and the bump if for a patch update of dependency called "my-dependency").
-# Of course, the PR merge will take place if all of the tests succeed.
-#
-#  dependabot-auto-merge:
-#    name: Do automatic PR merge (for Dependabot's PR)
-#    needs:  # Add "test-integration" if you use this job
-#      - lint
-#      - test-unit
-#      - test-k3d
-#      - scan-image-Trivy
-#      - scan-image-Snyk
-#      - scan-code-Snyk
-#    runs-on: ubuntu-latest
-#    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
-#
-#    permissions:
-#      contents: write
-#      pull-requests: write
-#
-#    steps:
-#      - name: Dependabot metadata
-#        id: metadata
-#        uses: dependabot/fetch-metadata@v1
-#        with:
-#          github-token: "${{ secrets.GITHUB_TOKEN }}"
-#
-#      - name: Enable auto-merge for Dependabot PRs
-#        if: >-
-#          ${{contains(steps.metadata.outputs.dependency-names, 'my-dependency') &&
-#          steps.metadata.outputs.update-type == 'version-update:semver-patch'}}
-#        run: gh pr merge --auto --merge "$PR_URL"
-#        env:
-#          PR_URL: ${{github.event.pull_request.html_url}}
-#          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  # You can uncomment the below job if you want to have automatic PR merges for Dependabot's PR (in this case
+  # if uncomment below job and don't change anything then automatic PR merges would take place if the PR
+  # is created by the Dependabot and the bump if for a patch update of dependency called "my-dependency").
+  # Of course, the PR merge will take place if all of the tests succeed.
+  #
+  #  dependabot-auto-merge:
+  #    name: Do automatic PR merge (for Dependabot's PR)
+  #    needs:  # Add "test-integration" if you use this job
+  #      - lint
+  #      - test-unit
+  #      - test-k3d
+  #      - scan-image-Trivy
+  #      - scan-image-Snyk
+  #      - scan-code-Snyk
+  #    runs-on: ubuntu-latest
+  #    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+  #
+  #    permissions:
+  #      contents: write
+  #      pull-requests: write
+  #
+  #    steps:
+  #      - name: Dependabot metadata
+  #        id: metadata
+  #        uses: dependabot/fetch-metadata@v1
+  #        with:
+  #          github-token: "${{ secrets.GITHUB_TOKEN }}"
+  #
+  #      - name: Enable auto-merge for Dependabot PRs
+  #        if: >-
+  #          ${{contains(steps.metadata.outputs.dependency-names, 'my-dependency') &&
+  #          steps.metadata.outputs.update-type == 'version-update:semver-patch'}}
+  #        run: gh pr merge --auto --merge "$PR_URL"
+  #        env:
+  #          PR_URL: ${{github.event.pull_request.html_url}}
+  #          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
   notify-slack:
     # Setup guide https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
     name: Notify Slack (Final CI Result)
-    needs:  # Add "test-integration" and/or "dependabot-auto-merge" if you use this job(s)
+    needs: # Add "test-integration" and/or "dependabot-auto-merge" if you use this job(s)
       - lint
       - test-unit
       - test-k3d
@@ -469,7 +469,7 @@ jobs:
       - scan-code-Snyk
     if: always()
     runs-on: ubuntu-latest
-    env:  # Add "test-integration" and/or "dependabot-auto-merge" if you use this job(s)
+    env: # Add "test-integration" and/or "dependabot-auto-merge" if you use this job(s)
       STAT: >
         "${{ needs.lint.result }}",
         "${{ needs.test-unit.result }}",
