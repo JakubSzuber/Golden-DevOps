@@ -18,8 +18,7 @@
             "Sid": "Infrastructure",
             "Effect": "Allow",
             "Action": [
-                "iam:PassRole",
-                "ecs:*"
+                "iam:PassRole"
             ],
             "Resource": [
                 "*"
