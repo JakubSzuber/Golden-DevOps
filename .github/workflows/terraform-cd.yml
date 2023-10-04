@@ -101,6 +101,7 @@ jobs:
       environment: dev
       gh-environment-name: Development
       gh-environment-url: https://dev.goldendevops.com/
+      aws-region: us-east-1
 
     permissions:
       id-token: write # This is required for aws OIDC connection
@@ -115,6 +116,7 @@ jobs:
       environment: staging
       gh-environment-name: Staging
       gh-environment-url: https://staging.goldendevops.com/
+      aws-region: us-east-1
 
     permissions:
       id-token: write # This is required for aws OIDC connection
@@ -129,6 +131,7 @@ jobs:
       environment: prod
       gh-environment-name: Production
       gh-environment-url: https://goldendevops.com/
+      aws-region: us-east-1
 
     permissions:
       id-token: write # This is required for aws OIDC connection

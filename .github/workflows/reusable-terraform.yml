@@ -1,5 +1,5 @@
 ---
-name: Reusable Terraform # (Deploy all of 3 modules (vpc -> eks -> argocd) to a specific environment)
+name: Reusable Terraform Apply # (Deploy all of 3 modules (vpc -> eks -> argocd) to a specific environment)
 
 on:
   workflow_call:
@@ -16,10 +16,17 @@ on:
         description: GitHub environment's URL (required to associate job with right GitHub environment)
         required: true
         type: string
+      aws-region:
+        description: AWS region that will be used within workflow
+        required: true
+        type: string
     outputs:
       result:
         description: The result of the the workflow operation
         value: ${{ jobs.deploy-to-env.outputs.outcome }}
+
+env:
+  AWS_REGION: ${{ inputs.aws-region }}
 
 jobs:
   deploy-to-env:
@@ -47,9 +54,8 @@ jobs:
       - name: Configure AWS credentials from the AWS account
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          #role-to-assume: ${{ secrets.AWS_ROLE }} #TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
           role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHub-OIDC-TERRAFORM
 
       - name: Setup Terraform

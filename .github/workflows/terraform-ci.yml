@@ -173,6 +173,7 @@ jobs:
       environment: dev
       gh-environment-name: Development
       gh-environment-url: https://dev.goldendevops.com/
+      aws-region: us-east-1
 
     permissions:
       id-token: write # This is required for aws OIDC connection

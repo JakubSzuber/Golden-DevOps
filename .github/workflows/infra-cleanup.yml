@@ -44,3 +44,4 @@ jobs:
       environment: ${{ matrix.environment.value }}
       gh-environment-name: ${{ matrix.environment.name }}
       gh-environment-url: ${{ matrix.environment.url }}
+      aws-region: us-east-1
