@@ -5,9 +5,8 @@ on:
   workflow_call:
     inputs:
       environment:
-        description: The environment to which deploy (required to use right Helm values.yaml file)
+        description: The environment to which deploy (required to e.g. choose the right Terraform workspace)
         required: true
-        default: ""
         type: string
       gh-environment-name:
         description: GitHub environment's name (required to associate job with right GitHub environment)
@@ -24,12 +23,13 @@ on:
 
 jobs:
   deploy-to-env:
-    name: Deploy All 3 Modules (vpc -> eks -> argocd) To A Specific Environment
+    name: Apply Changes Of All 3 Modules (vpc -> eks -> argocd) To A Specific Environment
     runs-on: ubuntu-latest
     outputs:
       outcome: ${{ steps.set-result.outputs.outcome }}
     env:
       ENV: ${{ inputs.environment }}
+      GITHUB_ENV: ${{ inputs.gh-environment-name }}
 
     defaults:
       run:
@@ -47,7 +47,7 @@ jobs:
       - name: Configure AWS credentials from the AWS account
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          #role-to-assume: ${{ secrets.AWS_ROLE }} TODO ?? "arn:aws:iam::152691795422:role/gh-action-role" # TODO ?
+          #role-to-assume: ${{ secrets.AWS_ROLE }} #TODO ?? "arn:aws:iam::152691795422:role/gh-action-role"
           role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
           aws-region: us-east-1
           role-session-name: GitHub-OIDC-TERRAFORM
@@ -72,7 +72,6 @@ jobs:
 
       - name: Terraform Plan for VPC
         id: plan-vpc
-        #run: terraform plan -no-color
         run: |
           pwd
           cd vpc
@@ -89,7 +88,7 @@ jobs:
           script: |
             const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
 
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan-vpc.outcome }}\`
 
             <details><summary>Show Plan</summary>
 
@@ -120,7 +119,6 @@ jobs:
 
       - name: Terraform Plan for EKS
         id: plan-eks
-        #run: terraform plan -no-color
         run: |
           pwd
           cd eks
@@ -131,13 +129,13 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         env:
-          PLAN: "terraform\n${{ steps.plan-vpc.outputs.stdout }}"
+          PLAN: "terraform\n${{ steps.plan-eks.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
 
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan-eks.outcome }}\`
 
             <details><summary>Show Plan</summary>
 
@@ -168,7 +166,6 @@ jobs:
 
       - name: Terraform Plan for ArgoCD
         id: plan-argocd
-        #run: terraform plan -no-color
         run: |
           pwd
           cd argocd
@@ -179,13 +176,13 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         env:
-          PLAN: "terraform\n${{ steps.plan-vpc.outputs.stdout }}"
+          PLAN: "terraform\n${{ steps.plan-argocd.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
 
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan-argocd.outcome }}\`
 
             <details><summary>Show Plan</summary>
 
@@ -219,3 +216,4 @@ jobs:
         run: |
           echo "outcome=success" >> $GITHUB_OUTPUT
           echo "The workflow's result is: ${{ steps.set-result.outputs.outcome }}"
+          echo "Deployment to $GITHUB_ENV was made successfully for all modules!"

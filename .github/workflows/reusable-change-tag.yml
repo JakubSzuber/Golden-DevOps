@@ -7,7 +7,6 @@ on:
       environment:
         description: The environment to which deploy (required to use right Helm values.yaml file)
         required: true
-        default: ""
         type: string
       img_tag:
         description: Tag of the image (required to insert right image's tag to Helm values.yaml file)
@@ -49,7 +48,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Replace image tag  # Git commands require granting the permissions for read and write for the workflow
+      - name: Replace image tag # Git commands require granting the permissions for read and write for the workflow
         run: |
           echo "Helm values-$ENV.yaml file before change:" && cat helm-charts/main-chart/values-$ENV.yaml
           sed -i "s/stable-.*/$IMAGE_TAG/" helm-charts/main-chart/values-$ENV.yaml
