@@ -68,7 +68,7 @@ module "eks" {
       type        = "ingress"
       self        = true
     }
-    ingress_all = {  # TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+    ingress_all = { # TESTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
       description      = "Node all ingress"
       protocol         = "-1"
       from_port        = 0
@@ -94,7 +94,7 @@ module "eks" {
       platform      = "bottlerocket"
       min_size      = 1
       max_size      = 2
-      desired_size  = 1      # TODO change those 3 numbers
+      desired_size  = 1 # TODO change those 3 numbers
       capacity_type = "SPOT"
 
       # this will get added to what AWS provides

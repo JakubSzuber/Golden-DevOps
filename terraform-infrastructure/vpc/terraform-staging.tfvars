@@ -1,2 +1,2 @@
-project = "eks-staging-cluster"
+project      = "eks-staging-cluster"
 cluster_name = "eks-staging-cluster"

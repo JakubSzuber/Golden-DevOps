@@ -13,7 +13,7 @@ module "lb_role" {
 
   # TODO Uncomment those 3 lines when Karpenter will be finished
   depends_on = [
-    module.eks#,
+    module.eks #,
     #kubectl_manifest.karpenter_node_template,
     #kubectl_manifest.karpenter_provisioner
   ]

@@ -2,11 +2,11 @@ data "terraform_remote_state" "eks" {
   backend = "s3"
 
   config = {
-    bucket          = "golden-devops-bucket"
-    key             = "env:/${terraform.workspace}/eks.tfstate"
-    region          = "us-east-1"
-    dynamodb_table  = "golden-devops-dynamodb"
-    encrypt         = true
+    bucket         = "golden-devops-bucket"
+    key            = "env:/${terraform.workspace}/eks.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "golden-devops-dynamodb"
+    encrypt        = true
   }
 }
 
@@ -27,11 +27,11 @@ data "kubectl_file_documents" "repos" {
 }
 
 data "kubectl_file_documents" "ingress" {
-  content = templatefile("${path.module}/manifests/ingress.tpl", 
+  content = templatefile("${path.module}/manifests/ingress.tpl",
   { env_prefix = terraform.workspace == "prod" ? "" : format("%s.", terraform.workspace) })
 }
 
 data "kubectl_file_documents" "appset" {
-  content = templatefile("${path.module}/manifests/app-set.tpl", 
+  content = templatefile("${path.module}/manifests/app-set.tpl",
   { env_prefix = format("%s.", terraform.workspace) })
 }
