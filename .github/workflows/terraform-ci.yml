@@ -190,7 +190,7 @@ jobs:
             ${{ needs.test-Snyk.outputs.stdout }}
             \`\`\`
 
-            </details>`;
+            </details>
 
             *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
 
