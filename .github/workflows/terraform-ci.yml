@@ -53,7 +53,8 @@ jobs:
         id: fmt
         run: |
           pwd
-          terraform fmt -check -recursive
+          output=$(terraform fmt -check -recursive)
+          echo "fmt-stdout=$output" >> $GITHUB_OUTPUT
 
       - name: Terraform Init
         id: init
@@ -71,9 +72,10 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: |
-          pwd && cd vpc && terraform validate
-          pwd && cd ../eks && terraform validate
-          pwd && cd ../argocd && terraform validate
+          pwd && cd vpc && output1=$(terraform validate)
+          pwd && cd ../eks && output2=$(terraform validate)
+          pwd && cd ../argocd && output3=$(terraform validate)
+          echo "validate-stdout=$output1 $output2 $output3" >> $GITHUB_OUTPUT
 
   test-Trivy:
     name: Scan Terraform Files With Trivy
@@ -157,7 +159,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Syntax and format test 🖌\`${{ needs.syntax-format-tests.status }}\`
+            const output = `## Syntax and format test 🖌\`${{ needs.syntax-format-tests.result }}\`
             <details><summary>Format output</summary>
 
             \`\`\`\n
@@ -174,7 +176,7 @@ jobs:
 
             </details>
 
-            #### Trivy test 🛡\`${{ needs.test-Trivy.status }}\`
+            ## Trivy test 🛡\`${{ needs.test-Trivy.result }}\`
             <details><summary>Trivy output</summary>
 
             \`\`\`\n
@@ -183,7 +185,7 @@ jobs:
 
             </details>
 
-            #### Trivy test 🛡\`${{ needs.test-Snyk.status }}\`
+            ## Snyk test 🛡\`${{ needs.test-Snyk.result }}\`
             <details><summary>Snyk output</summary>
 
             \`\`\`\n
