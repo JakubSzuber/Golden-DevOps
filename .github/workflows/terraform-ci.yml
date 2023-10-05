@@ -150,11 +150,6 @@ jobs:
     needs: [syntax-format-tests, test-Trivy, test-Snyk]
     name: Comment the PR about the results of the tests
     runs-on: ubuntu-latest
-    env:
-      FMT-STDOUT: ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
-      VALIDATE-STDOUT: ${{ needs.syntax-format-tests.outputs.validate-stdout }}
-      SNYK-STDOUT: ${{ needs.test-Snyk.outputs.stdout }}
-      TRIVY-STDOUT: ${{ needs.test-Trivy.outputs.stdout }}
 
     permissions:
       pull-requests: write # This is required for the GitHub bot to comment on PR
@@ -162,6 +157,11 @@ jobs:
     steps:
       - name: Comment PR about results of the tests
         uses: actions/github-script@v6
+        env:
+          FMT-STDOUT: ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
+          VALIDATE-STDOUT: ${{ needs.syntax-format-tests.outputs.validate-stdout }}
+          SNYK-STDOUT: ${{ needs.test-Snyk.outputs.stdout }}
+          TRIVY-STDOUT: ${{ needs.test-Trivy.outputs.stdout }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
