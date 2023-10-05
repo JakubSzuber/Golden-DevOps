@@ -21,6 +21,9 @@ jobs:
   syntax-format-tests:
     name: Formating And Syntax Tests
     runs-on: ubuntu-latest
+    outputs:
+      validate-stdout: ${{ steps.fmt.outputs.stdout }}
+      fmt-stdout: ${{ steps.validate.outputs.stdout }}
     defaults:
       run:
         shell: bash
@@ -75,6 +78,8 @@ jobs:
   test-Trivy:
     name: Scan Terraform Files With Trivy
     runs-on: ubuntu-latest
+    outputs:
+      stdout: ${{ steps.overview-test.outputs.stdout }}
 
     permissions:
       contents: read # Obtain permission needed for actions/checkout to fetch code
@@ -85,6 +90,7 @@ jobs:
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
+        id: overview-test
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: "config"
@@ -107,6 +113,8 @@ jobs:
   test-Snyk:
     name: Scan Terraform Files With Snyk
     runs-on: ubuntu-latest
+    outputs:
+      stdout: ${{ steps.overview-test.outputs.stdout }}
 
     permissions:
       contents: read # Obtain permission needed for actions/checkout to fetch code
@@ -117,6 +125,7 @@ jobs:
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check the Terraform Files for vulnerabilities (non-blocking)
+        id: overview-test
         continue-on-error: true
         uses: snyk/actions/iac@master
         env:
@@ -135,7 +144,7 @@ jobs:
 
   comment-pr:
     if: github.event_name == 'pull_request'
-    needs: [syntax-format-tests] # TODO temporarly disable workflow for testing purposes
+    needs: [syntax-format-tests, test-Snyk] # TODO temporarly disable workflow for testing purposes
     name: Comment the PR about the results of the tests
     runs-on: ubuntu-latest
 
@@ -148,11 +157,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Syntax and format test 🖌\`${{ needs.syntax-format-tests.outcome }}\`
+            const output = `#### Syntax and format test 🖌\`${{ needs.syntax-format-tests.status }}\`
             <details><summary>Format output</summary>
 
             \`\`\`\n
-            ${{ needs.syntax-format-tests.steps.fmt.outputs.stdout }}
+            ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
             \`\`\`
 
             </details>
@@ -160,28 +169,30 @@ jobs:
             <details><summary>Syntax output</summary>
 
             \`\`\`\n
-            ${{ needs.syntax-format-tests.steps.validate.outputs.stdout }}
+            ${{ needs.syntax-format-tests.outputs.validate-stdout }}
             \`\`\`
 
             </details>
 
-            #### Trivy test\`${{ needs.test-Trivy.outcome }} 🛡️\`
+            #### Trivy test 🛡\`${{ needs.test-Trivy.status }}\`
             <details><summary>Trivy output</summary>
 
             \`\`\`\n
-            ${{ needs.test-Trivy.steps.trivy-test.outputs.stdout }}
+            ${{ needs.test-Trivy.outputs.stdout }}
             \`\`\`
 
             </details>
 
-            #### Snyk test\`${{ needs.test-Snyk.outcome }} 🛡️\`
+            #### Trivy test 🛡\`${{ needs.test-Snyk.status }}\`
             <details><summary>Snyk output</summary>
 
             \`\`\`\n
-            ${{ needs.test-Snyk.steps.snyk-test.outputs.stdout }}
+            ${{ needs.test-Snyk.outputs.stdout }}
             \`\`\`
 
             </details>`;
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
