@@ -13,8 +13,8 @@ Provide a brief summary of the changes in this PR
 
 ### References (to any related issues or pull requests)
 
-[Example](https://github.com/JakubSzuber/test-project/pull/7)
+[Example](https://github.com/JakubSzuber/Golden-DevOps/pull/7)
 
 ### Additional Notes/PR details
 
-Add any additional information, notes, or more comprehensive description of the pull request-->
+Add any additional information, notes, or a more comprehensive description of the pull request-->
