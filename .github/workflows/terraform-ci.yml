@@ -54,7 +54,7 @@ jobs:
         run: |
           pwd
           output=$(terraform fmt -check -recursive)
-          echo "fmt-stdout=$output" >> $GITHUB_OUTPUT
+          echo "::set-output name=fmt-stdout::$output"
 
       - name: Terraform Init
         id: init
@@ -75,7 +75,7 @@ jobs:
           pwd && cd vpc && output1=$(terraform validate)
           pwd && cd ../eks && output2=$(terraform validate)
           pwd && cd ../argocd && output3=$(terraform validate)
-          echo "validate-stdout=$output1 $output2 $output3" >> $GITHUB_OUTPUT
+          echo "::set-output name=validate-stdout::$output1 $output2 $output3"
 
   test-Trivy:
     name: Scan Terraform Files With Trivy
@@ -116,7 +116,7 @@ jobs:
     name: Scan Terraform Files With Snyk
     runs-on: ubuntu-latest
     outputs:
-      stdout: ${{ steps.overview-test.outputs.stdout }}
+      stdout: ${{ steps.overview-test.stdout }}
 
     permissions:
       contents: read # Obtain permission needed for actions/checkout to fetch code
@@ -145,14 +145,15 @@ jobs:
           args: --severity-threshold=critical
 
   comment-pr:
-    if: github.event_name == 'pull_request'
+    if: always()
+    #if: github.event_name == 'pull_request' # TODO temporarly disable workflow for testing purposes
     needs: [syntax-format-tests, test-Snyk] # TODO temporarly disable workflow for testing purposes
     name: Comment the PR about the results of the tests
     runs-on: ubuntu-latest
     env:
       FMT-STDOUT: ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
       VALIDATE-STDOUT: ${{ needs.syntax-format-tests.outputs.validate-stdout }}
-    #      FMT-STDOUT: ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
+      SNYK-STDOUT: ${{ needs.test-Snyl.outputs.stdout }}
     #      FMT-STDOUT: ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
 
     permissions:
@@ -194,7 +195,7 @@ jobs:
             <details><summary>Snyk output</summary>
 
             \`\`\`\n
-            ${{ needs.test-Snyk.outputs.stdout }}
+            ${{ env.SNYK-STDOUT }}
             \`\`\`
 
             </details>
