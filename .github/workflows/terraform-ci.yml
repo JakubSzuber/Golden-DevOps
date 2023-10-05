@@ -53,8 +53,8 @@ jobs:
         id: fmt
         run: |
           pwd
-          output=$(terraform fmt -check -recursive)
-          echo "::set-output name=fmt-stdout::$output"
+          OUTPUT=$(terraform fmt -check -recursive)
+          echo "::set-output name=fmt-stdout::$OUTPUT"
 
       - name: Terraform Init
         id: init
@@ -72,10 +72,10 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: |
-          pwd && cd vpc && output1=$(terraform validate)
-          pwd && cd ../eks && output2=$(terraform validate)
-          pwd && cd ../argocd && output3=$(terraform validate)
-          echo "::set-output name=validate-stdout::$output1 $output2 $output3"
+          pwd && cd vpc && OUTPUTt1=$(terraform validate)
+          pwd && cd ../eks && OUTPUT2=$(terraform validate)
+          pwd && cd ../argocd && OUTPUT3=$(terraform validate)
+          echo "::set-output name=validate-stdout::$OUTPUT1 $OUTPUTt2 $OUTPUT3"
 
   test-Trivy:
     name: Scan Terraform Files With Trivy
@@ -147,14 +147,14 @@ jobs:
   comment-pr:
     if: always()
     #if: github.event_name == 'pull_request' # TODO temporarly disable workflow for testing purposes
-    needs: [syntax-format-tests, test-Snyk] # TODO temporarly disable workflow for testing purposes
+    needs: [syntax-format-tests, test-Trivy, test-Snyk]
     name: Comment the PR about the results of the tests
     runs-on: ubuntu-latest
     env:
       FMT-STDOUT: ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
       VALIDATE-STDOUT: ${{ needs.syntax-format-tests.outputs.validate-stdout }}
-      SNYK-STDOUT: ${{ needs.test-Snyl.outputs.stdout }}
-    #      FMT-STDOUT: ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
+      SNYK-STDOUT: ${{ needs.test-Snyk.outputs.stdout }}
+      TRIVY-STDOUT: ${{ needs.test-Trivy.outputs.stdout }}
 
     permissions:
       pull-requests: write # This is required for the GitHub bot to comment on PR
@@ -186,7 +186,7 @@ jobs:
             <details><summary>Trivy output</summary>
 
             \`\`\`\n
-            ${{ needs.test-Trivy.outputs.stdout }}
+            $TRIVY-STDOUT
             \`\`\`
 
             </details>
