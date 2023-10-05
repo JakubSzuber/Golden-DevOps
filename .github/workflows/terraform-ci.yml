@@ -72,10 +72,10 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: |
-          pwd && cd vpc && OUTPUTt1=$(terraform validate)
+          pwd && cd vpc && OUTPUT1=$(terraform validate)
           pwd && cd ../eks && OUTPUT2=$(terraform validate)
           pwd && cd ../argocd && OUTPUT3=$(terraform validate)
-          echo "::set-output name=validate-stdout::$OUTPUT1 $OUTPUTt2 $OUTPUT3"
+          echo "::set-output name=validate-stdout::$OUTPUT1 $OUTPUT2 $OUTPUT3"
 
   test-Trivy:
     name: Scan Terraform Files With Trivy
@@ -177,7 +177,7 @@ jobs:
             <details><summary>Syntax output</summary>
 
             \`\`\`\n
-            ${{ env.VALIDATE-STDOUT }}
+            ${{ process.env.VALIDATE-STDOUT }}
             \`\`\`
 
             </details>
@@ -186,7 +186,7 @@ jobs:
             <details><summary>Trivy output</summary>
 
             \`\`\`\n
-            $TRIVY-STDOUT
+            ${{ env.TRIVY-STDOUT }}
             \`\`\`
 
             </details>
@@ -195,7 +195,7 @@ jobs:
             <details><summary>Snyk output</summary>
 
             \`\`\`\n
-            ${{ env.SNYK-STDOUT }}
+            ${{ process.env.SNYK-STDOUT }}
             \`\`\`
 
             </details>
