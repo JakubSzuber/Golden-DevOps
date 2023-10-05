@@ -68,7 +68,7 @@ module "eks" {
       type        = "ingress"
       self        = true
     }
-    ingress_all = { # TESTTTTTTTTTTTTTTTTTTTTTTT
+    ingress_all = { # TESTTTTTTTTTTTTTTTTTTTTTT
       description      = "Node all ingress"
       protocol         = "-1"
       from_port        = 0
