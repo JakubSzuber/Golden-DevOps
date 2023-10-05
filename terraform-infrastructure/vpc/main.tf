@@ -30,7 +30,5 @@ module "vpc" {
   }
 
   # Explicitly specify the delete timeout to make sure that VPC will be deleted (usually it takes more than the default 5 minutes timeout)
-  timeouts {
-    delete = "45m"
-  }
+
 }
