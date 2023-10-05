@@ -28,6 +28,7 @@ jobs:
 
     permissions:
       contents: read # This is required for actions/checkout
+      id-token: write # This is required for aws oidc connection
 
     steps:
       - name: Git checkout
