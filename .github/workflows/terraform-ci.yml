@@ -1,5 +1,6 @@
 ---
 # Complete workflow responsible for the CI in the Terraform CI/CD pipeline
+# TODO think about using flag "-no-color" in this and terraform-cd.yml workflow so in PR comment won't be any strange characters"
 
 name: Terraform CI
 
@@ -21,9 +22,6 @@ jobs:
   syntax-format-tests:
     name: Formating And Syntax Tests
     runs-on: ubuntu-latest
-    outputs:
-      validate-stdout: ${{ steps.fmt.outputs.validate-stdout }}
-      fmt-stdout: ${{ steps.validate.outputs.fmt-stdout }}
     defaults:
       run:
         shell: bash
@@ -53,8 +51,7 @@ jobs:
         id: fmt
         run: |
           pwd
-          OUTPUT=$(terraform fmt -check -recursive)
-          echo "::set-output name=fmt-stdout::$OUTPUT"
+          terraform fmt -check -recursive
 
       - name: Terraform Init
         id: init
@@ -72,16 +69,13 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: |
-          pwd && cd vpc && OUTPUT1=$(terraform validate)
-          pwd && cd ../eks && OUTPUT2=$(terraform validate)
-          pwd && cd ../argocd && OUTPUT3=$(terraform validate)
-          echo "::set-output name=validate-stdout::$OUTPUT1 $OUTPUT2 $OUTPUT3"
+          pwd && cd vpc && terraform validate
+          pwd && cd ../eks && terraform validate
+          pwd && cd ../argocd && terraform validate
 
   test-Trivy:
     name: Scan Terraform Files With Trivy
     runs-on: ubuntu-latest
-    outputs:
-      stdout: ${{ steps.overview-test.outputs.stdout }}
 
     permissions:
       contents: read # Obtain permission needed for actions/checkout to fetch code
@@ -92,7 +86,7 @@ jobs:
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
-        id: overview-test
+        id: test-trivy
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: "config"
@@ -115,8 +109,6 @@ jobs:
   test-Snyk:
     name: Scan Terraform Files With Snyk
     runs-on: ubuntu-latest
-    outputs:
-      stdout: ${{ steps.overview-test.stdout }}
 
     permissions:
       contents: read # Obtain permission needed for actions/checkout to fetch code
@@ -127,7 +119,7 @@ jobs:
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check the Terraform Files for vulnerabilities (non-blocking)
-        id: overview-test
+        id: test-snyk
         continue-on-error: true
         uses: snyk/actions/iac@master
         env:
@@ -157,47 +149,37 @@ jobs:
     steps:
       - name: Comment PR about results of the tests
         uses: actions/github-script@v6
-        env:
-          FMT-STDOUT: ${{ needs.syntax-format-tests.outputs.fmt-stdout }}
-          VALIDATE-STDOUT: ${{ needs.syntax-format-tests.outputs.validate-stdout }}
-          SNYK-STDOUT: ${{ needs.test-Snyk.outputs.stdout }}
-          TRIVY-STDOUT: ${{ needs.test-Trivy.outputs.stdout }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `## Syntax and format test 🖌\`${{ needs.syntax-format-tests.result }}\`
+            const output = `## Syntax and format test 🖌\`${{ needs.syntax-format-tests.outcome }}\`
+
             <details><summary>Format output</summary>
-
             \`\`\`\n
-            ${{ env.FMT-STDOUT }}
+            ${{ needs.syntax-format-tests.steps.fmt.outputs.stdout }}
             \`\`\`
-
             </details>
 
             <details><summary>Syntax output</summary>
-
             \`\`\`\n
-            ${{ process.env.VALIDATE-STDOUT }}
+            ${{ needs.syntax-format-tests.steps.validate.outputs.stdout }}
             \`\`\`
-
             </details>
 
             ## Trivy test 🛡\`${{ needs.test-Trivy.result }}\`
+
             <details><summary>Trivy output</summary>
-
             \`\`\`\n
-            ${{ env.TRIVY-STDOUT }}
+            ${{ needs.test-Trivy.steps.test-trivy.outputs.stdout }}
             \`\`\`
-
             </details>
 
             ## Snyk test 🛡\`${{ needs.test-Snyk.result }}\`
+
             <details><summary>Snyk output</summary>
-
             \`\`\`\n
-            ${{ process.env.SNYK-STDOUT }}
+            ${{ needs.test-Snyk.steps.test-snyk.outputs.stdout }}
             \`\`\`
-
             </details>
 
             *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
