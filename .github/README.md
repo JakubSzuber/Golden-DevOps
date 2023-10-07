@@ -48,8 +48,11 @@ Golden-DevOps/
 │   │   ├── integration.yml
 │   │   ├── playground.yml
 │   │   ├── reusable-change-tag.yml
+│   │   ├── reusable-infra-cleanup.yml
+│   │   ├── reusable-terraform.yml
 │   │   ├── stale.yml
-│   │   └── terraform.yml
+│   │   ├── terraform-cd.yml
+│   │   └── terraform-ci.yml
 │   ├── CHANGELOG.md
 │   ├── CODEOWNERS
 │   ├── CODE_OF_CONDUCT.md
