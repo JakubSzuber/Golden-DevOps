@@ -19,7 +19,7 @@ env:
 jobs:
   remove-environment:
     name: Remove the ${{ matrix.environment.name }}
-    uses: ./.github/workflows/reusable-terraform.yml
+    uses: ./.github/workflows/reusable-infra-cleanup.yml
     strategy:
       matrix:
         environment:
