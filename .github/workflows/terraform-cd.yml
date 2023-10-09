@@ -33,7 +33,7 @@ jobs:
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.12.0
         with:
           scan-type: "config"
           hide-progress: false
@@ -42,7 +42,7 @@ jobs:
           format: table
 
       - name: Run Trivy for HIGH CVEs and report
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.12.0
         with:
           scan-type: "config"
           hide-progress: false
