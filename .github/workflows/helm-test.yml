@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -139,7 +139,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -240,7 +240,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -325,7 +325,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
@@ -358,7 +358,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
@@ -397,7 +397,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Trivy for all CVEs (non-blocking)
@@ -438,7 +438,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
@@ -485,7 +485,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 

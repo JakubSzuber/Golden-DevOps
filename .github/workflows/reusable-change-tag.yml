@@ -46,7 +46,7 @@ jobs:
         run: echo "Changing the image's tag in the manifest to $IMAGE_TAG"
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Replace image tag # Git commands require granting the permissions for read and write for the workflow
         run: |
