@@ -79,7 +79,7 @@ jobs:
 
       - name: Terraform Plan
         run: |
-          cd ../vpc
+          cd vpc
           terraform workspace list
           terraform plan -destroy -var-file terraform-$ENV.tfvars
 
