@@ -35,8 +35,8 @@ ENV NODE_ENV=development
 RUN apt-get update && apt-get install -y --no-install-recommends git=1:2.30.2-1+deb11u2
 
 RUN useradd -s /bin/bash -m vscode && \
-groupadd docker && \
-usermod -aG docker vscode
+    groupadd docker && \
+    usermod -aG docker vscode
 
 # Install Docker tools (cli, buildx, compose)
 COPY --from=gloursdocker/docker / /
@@ -64,9 +64,9 @@ FROM nginxinc/nginx-unprivileged:1.25
 ## Switch to root user for setup
 USER root
 
-## Install curl for healthchecks
+## Setup package(s)
 RUN apt-get update; \
-    apt-get install -y --no-install-recommends curl=7.88.1-10+deb12u1
+    apt-get install -y --no-install-recommends iputils-ping=3:20221126-1
 
 # Copy config nginx
 COPY --from=build /app/.nginx/nginx.conf /etc/nginx/nginx.conf
