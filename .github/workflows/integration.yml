@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -94,7 +94,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -213,7 +213,7 @@ jobs:
   #
   #    steps:
   #      - name: Checkout git repo
-  #        uses: actions/checkout@v3
+  #        uses: actions/checkout@v4
   #
   #      - name: Login to Docker Hub
   #        uses: docker/login-action@v2
@@ -244,7 +244,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Helm
         uses: azure/setup-helm@v3
@@ -319,7 +319,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -364,7 +364,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Gain an additional overview of the vulnerabilities
       - name: Run Snyk to check the code for vulnerabilities (non-blocking)
@@ -390,7 +390,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Login to ghcr.io registry
         uses: docker/login-action@v2
