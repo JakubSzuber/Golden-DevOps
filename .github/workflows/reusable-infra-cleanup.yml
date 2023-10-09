@@ -79,12 +79,6 @@ jobs:
 
       - name: Terraform Plan
         run: |
-          cd argocd
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-$ENV.tfvars
-          cd ../eks
-          terraform workspace list
-          terraform plan -destroy -var-file terraform-$ENV.tfvars
           cd ../vpc
           terraform workspace list
           terraform plan -destroy -var-file terraform-$ENV.tfvars
@@ -96,12 +90,12 @@ jobs:
       #     terraform workspace select $ENV
       #     terraform destroy -var-file terraform-$ENV.tfvars -auto-approve -input=false
 
-      - name: Terraform Destroy EKS
-        run: |
-          cd eks
-          terraform workspace list
-          terraform workspace select $ENV
-          terraform destroy -var-file terraform-$ENV.tfvars -auto-approve -input=false
+      # - name: Terraform Destroy EKS
+      #   run: |
+      #     cd eks
+      #     terraform workspace list
+      #     terraform workspace select $ENV
+      #     terraform destroy -var-file terraform-$ENV.tfvars -auto-approve -input=false
 
       - name: Terraform Destroy VPC
         run: |
