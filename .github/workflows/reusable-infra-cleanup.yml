@@ -89,12 +89,12 @@ jobs:
           terraform workspace list
           terraform plan -destroy -var-file terraform-$ENV.tfvars
 
-      - name: Terraform Destroy ArgoCD
-        run: |
-          cd argocd
-          terraform workspace list
-          terraform workspace select $ENV
-          terraform destroy -var-file terraform-$ENV.tfvars -auto-approve -input=false
+      # - name: Terraform Destroy ArgoCD
+      #   run: |
+      #     cd argocd
+      #     terraform workspace list
+      #     terraform workspace select $ENV
+      #     terraform destroy -var-file terraform-$ENV.tfvars -auto-approve -input=false
 
       - name: Terraform Destroy EKS
         run: |

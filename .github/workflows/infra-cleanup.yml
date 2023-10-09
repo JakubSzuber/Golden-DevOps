@@ -22,23 +22,22 @@ jobs:
     uses: ./.github/workflows/reusable-infra-cleanup.yml
     strategy:
       matrix:
-        environment:
-          [
-            {
-              name: "Development",
-              value: "dev",
-              url: "https://dev.goldendevops.com/",
-            },
+        environment: [
+            # {
+            #   name: "Development",
+            #   value: "dev",
+            #   url: "https://dev.goldendevops.com/",
+            # },
             {
               name: "Staging",
               value: "staging",
               url: "https://staging.goldendevops.com/",
-            },
-            {
-              name: "Production",
-              value: "prod",
-              url: "https://goldendevops.com/",
-            },
+            }, #,
+            # {
+            #   name: "Production",
+            #   value: "prod",
+            #   url: "https://goldendevops.com/",
+            # },
           ]
     with:
       environment: ${{ matrix.environment.value }}
