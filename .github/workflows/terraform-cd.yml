@@ -52,10 +52,14 @@ jobs:
           severity: "HIGH"
           format: "sarif"
           output: "trivy-results.sarif"
-          limit-severities-for-sarif: "true"
+          # TODO Below property currently causes an error (the bug responsible for this error was resolved in
+          # https://github.com/aquasecurity/trivy/issues/5003 and first Trivy version after v0.45.1 shouldn't contain this bug so
+          # you can uncomment below property when https://github.com/aquasecurity/trivy-action/releases will catch up to the regular
+          # version of Trivy (first after v0.45.1).
+          #limit-severities-for-sarif: "true"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2.14.6
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: "trivy-results.sarif"
 
