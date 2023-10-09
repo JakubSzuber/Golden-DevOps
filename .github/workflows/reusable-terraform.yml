@@ -27,16 +27,15 @@ on:
 
 env:
   AWS_REGION: ${{ inputs.aws-region }}
+  ENV: ${{ inputs.environment }}
+  GITHUB_ENV: ${{ inputs.gh-environment-name }}
 
 jobs:
   deploy-to-env:
     name: Apply Changes Of All 3 Modules (vpc -> eks -> argocd) To A Specific Environment
     runs-on: ubuntu-latest
     outputs:
-      outcome: ${{ steps.set-result.outputs.outcome }}
-    env:
-      ENV: ${{ inputs.environment }}
-      GITHUB_ENV: ${{ inputs.gh-environment-name }}
+      result: ${{ steps.set-result.outputs.outcome }}
 
     defaults:
       run:
@@ -226,8 +225,9 @@ jobs:
           terraform apply -var-file terraform-$ENV.tfvars -auto-approve -input=false
 
       - name: Set result output and print it
+        if: always()
         id: set-result
         run: |
           echo "outcome=success" >> $GITHUB_OUTPUT
-          echo "The workflow's result is: ${{ steps.set-result.outputs.outcome }}"
-          echo "Deployment to $GITHUB_ENV was made successfully for all modules!"
+          echo "The workflow's result is: $outcome"
+          echo "Deployment to ${{ env.GITHUB_ENV }} was made successfully for all modules!"

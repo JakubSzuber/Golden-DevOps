@@ -95,47 +95,47 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: "snyk.sarif"
+# TODO temporarly commented out for testing purposes
+# deploy-development:
+#   name: Deploy To Development
+#   uses: ./.github/workflows/reusable-terraform.yml
+#   with:
+#     environment: dev
+#     gh-environment-name: Development
+#     gh-environment-url: https://dev.goldendevops.com/
+#     aws-region: us-east-1
 
-  deploy-development:
-    name: Deploy To Development
-    uses: ./.github/workflows/reusable-terraform.yml
-    with:
-      environment: dev
-      gh-environment-name: Development
-      gh-environment-url: https://dev.goldendevops.com/
-      aws-region: us-east-1
+#   permissions:
+#     id-token: write # This is required for aws OIDC connection
+#     contents: read # This is required for actions/checkout
+#     pull-requests: write # This is required for the GitHub bot to comment on PR
 
-    permissions:
-      id-token: write # This is required for aws OIDC connection
-      contents: read # This is required for actions/checkout
-      pull-requests: write # This is required for the GitHub bot to comment on PR
+# deploy-staging:
+#   needs: [deploy-development]
+#   name: Deploy To Staging
+#   uses: ./.github/workflows/reusable-terraform.yml
+#   with:
+#     environment: staging
+#     gh-environment-name: Staging
+#     gh-environment-url: https://staging.goldendevops.com/
+#     aws-region: us-east-1
 
-  deploy-staging:
-    needs: [deploy-development]
-    name: Deploy To Staging
-    uses: ./.github/workflows/reusable-terraform.yml
-    with:
-      environment: staging
-      gh-environment-name: Staging
-      gh-environment-url: https://staging.goldendevops.com/
-      aws-region: us-east-1
+#   permissions:
+#     id-token: write # This is required for aws OIDC connection
+#     contents: read # This is required for actions/checkout
+#     pull-requests: write # This is required for the GitHub bot to comment on PR
 
-    permissions:
-      id-token: write # This is required for aws OIDC connection
-      contents: read # This is required for actions/checkout
-      pull-requests: write # This is required for the GitHub bot to comment on PR
+# deploy-production:
+#   needs: [deploy-staging]
+#   name: Deploy To Production
+#   uses: ./.github/workflows/reusable-terraform.yml
+#   with:
+#     environment: prod
+#     gh-environment-name: Production
+#     gh-environment-url: https://goldendevops.com/
+#     aws-region: us-east-1
 
-  deploy-production:
-    needs: [deploy-staging]
-    name: Deploy To Production
-    uses: ./.github/workflows/reusable-terraform.yml
-    with:
-      environment: prod
-      gh-environment-name: Production
-      gh-environment-url: https://goldendevops.com/
-      aws-region: us-east-1
-
-    permissions:
-      id-token: write # This is required for aws OIDC connection
-      contents: read # This is required for actions/checkout
-      pull-requests: write # This is required for the GitHub bot to comment on PR
+#   permissions:
+#     id-token: write # This is required for aws OIDC connection
+#     contents: read # This is required for actions/checkout
+#     pull-requests: write # This is required for the GitHub bot to comment on PR
