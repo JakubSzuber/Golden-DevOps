@@ -256,7 +256,7 @@ jobs:
       - name: Get changed files
         if: github.event_name == 'pull_request'
         id: changed-files
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v35
 
       - run: |
           echo "${{ steps.changed-files.outputs.all_changed_files }}"
