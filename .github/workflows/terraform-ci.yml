@@ -41,7 +41,7 @@ jobs:
           terraform_version: 1.5.7
 
       - name: Configure AWS credentials from the AWS account
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: "arn:aws:iam::152691795422:role/gh-action-role"
           aws-region: ${{ env.AWS_REGION }}
