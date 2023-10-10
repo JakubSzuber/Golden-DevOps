@@ -13,7 +13,7 @@ module "eks" {
   cluster_name                    = var.cluster_name
   cluster_version                 = var.cluster_version
   cluster_endpoint_private_access = true
-  cluster_endpoint_public_access  = true
+  cluster_endpoint_public_access  = true # TODO OOOOOOOOOOO
   enable_irsa                     = true
   cluster_enabled_log_types       = ["api", "authenticator", "audit", "scheduler", "controllerManager"]
 
@@ -41,6 +41,20 @@ module "eks" {
       groups   = ["system:masters"]
     },
   ]
+
+  cluster_endpoint_public_access_cidrs = ["5.184.0.0/15", "31.60.0.0/14", "37.47.0.0/16", "37.108.0.0/16", "37.225.0.0/16", "37.228.0.0/18"]
+
+  # node_security_group_additional_rules = {
+  #   egress_specific = {
+  #     description      = "Node specific egress"
+  #     protocol         = "-1"
+  #     from_port        = 0
+  #     to_port          = 0
+  #     type             = "egress"
+  #     cidr_blocks      = ["0.0.0.0/0"]
+  #     ipv6_cidr_blocks = ["::/0"]
+  #   }
+  # }
 
   eks_managed_node_groups = {
     bottlerocket_nodes = {
