@@ -15,6 +15,7 @@ module "eks" {
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
   enable_irsa                     = true
+  cluster_enabled_log_types       = ["api", "authenticator", "audit", "scheduler", "controllerManager"]
 
   cluster_addons = {
     coredns = {
