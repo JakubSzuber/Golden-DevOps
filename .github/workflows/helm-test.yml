@@ -159,7 +159,7 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --target-branch ${{ github.ref_name}})
+          changed=$(ct list-changed --target-branch ${{ github.ref_name }})
           if [[ -n "$changed" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
@@ -253,26 +253,34 @@ jobs:
           helm dependency update
           helm template . -f values.yaml -f values-prod.yaml --output-dir ../../rendered-main-chart
 
-      - name: Get changed files
+      - name: Get changed K8s resources
         if: github.event_name == 'pull_request'
         id: changed-files
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v39
+        with:
+          files_yaml: |
+            templates:
+              - '**/templates/*.yaml'
 
-      - run: |
-          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+      - name: Create dir (with only changed K8s resources) agains which will be executed "helm template" command
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "${{ steps.changed-files.outputs.templates_all_changed_files }}"
           mkdir -p changed-files/templates
           cp helm-charts/main-chart/values.yaml changed-files
           cp helm-charts/main-chart/values-prod.yaml changed-files
           echo -e "apiVersion: v2\n\nname: golden-devops-chart\n\nversion: 0.1.0" > changed-files/Chart.yaml
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          for file in ${{ steps.changed-files.outputs.templates_all_changed_files }}; do
             mv $file changed-files/templates/
           done
 
       - name: Clear content of helm-charts/main-chart/templates to contain only changed files
+        if: github.event_name == 'pull_request'
         run: |
           find helm-charts/main-chart/templates -type f -delete
 
       - name: Template Helm chart's files
+        if: github.event_name == 'pull_request'
         run: |
           cd changed-files
           helm dependency update
@@ -290,7 +298,7 @@ jobs:
       #      if: github.event_name == 'pull_request'
       #      uses: kubescape/github-action@main
       #      with:
-      #        files: ${{ steps.changed-files.outputs.all_changed_files }}
+      #        files: ${{ steps.changed-files.outputs.templates_all_changed_files }}
       #        fixFiles: true
       #        format: "sarif"
       #
