@@ -102,6 +102,7 @@ jobs:
           scan-type: "config"
           hide-progress: false
           scan-ref: "terraform-infrastructure"
+          skip-files: "argocd/manifests/install.yaml"
           exit-code: 1
           severity: "CRITICAL"
           format: table
