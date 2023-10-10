@@ -106,6 +106,7 @@ jobs:
           exit-code: 1
           severity: "CRITICAL"
           format: table
+          trivyignores: "../.trivyignore"
 
   test-Snyk:
     name: Scan Terraform Files With Snyk
