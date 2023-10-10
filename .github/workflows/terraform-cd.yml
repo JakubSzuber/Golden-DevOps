@@ -51,6 +51,7 @@ jobs:
   #         scan-type: "config"
   #         hide-progress: false
   #         scan-ref: "terraform-infrastructure"
+  #         skip-files: "argocd/manifests/install.yaml"
   #         exit-code: 0
   #         ignore-unfixed: true
   #         severity: "HIGH"
