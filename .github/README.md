@@ -1,6 +1,3 @@
-# Repository in progress, don't use yet!
-<!-- TODO change above header to something similar to below -->
-<!--
 <div align="center" class="no-border">
   <img src="https://cdn-icons-png.flaticon.com/512/5266/5266248.png" alt="Golden-DevOps Logo">
   <br>
@@ -24,7 +21,7 @@ sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
 ***Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo***
--->
+
 
 <details>
 <summary><b>Click to see the project structure:</b></summary>
