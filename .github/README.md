@@ -1,26 +1,53 @@
 <div align="center" class="no-border">
   <img src="https://cdn-icons-png.flaticon.com/512/5266/5266248.png" alt="Golden-DevOps Logo">
   <br>
-  <h3>Golden-DevOps is a fully open-source project that uses all core DevOps tools</h3>
+  <h3>Golden-DevOps is a fully open-source project that uses all core DevOps tools and best practices</h3>
 
   [![release](https://img.shields.io/github/v/release/JakubSzuber/Golden-DevOps)](https://github.com/JakubSzuber/Golden-DevOps/releases)
   [![Continuous Integration](https://github.com/JakubSzuber/Golden-DevOps/workflows/CI/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/integration.yml)
   [![Continuous Delivery](https://github.com/JakubSzuber/Golden-DevOps/workflows/CD/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/delivery.yml)
-  TODO Add above badges for other workflows
+  [![Terraform Continuous Integration](https://github.com/JakubSzuber/Golden-DevOps/workflows/Terraform%20CI/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/terraform-ci.yml)
+  [![Terraform Continuous Delivery](https://github.com/JakubSzuber/Golden-DevOps/workflows/Terraform%20CD/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/terraform-cd.yml)
+  [![Helm CI/CD](https://github.com/JakubSzuber/Golden-DevOps/workflows/Helm%20Chart/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/helm-test.yml)
+  <!-- TODO Maybe add badge for all workflow -->
 </div>
 
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
-numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
-optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
-obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
-nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
-tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
-sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
-recusandae alias error harum maxime adipisci amet laborum.
+Golden-DevOps is a fully open-source project that uses all core DevOps tools and practices. It is a complete example of the repository with the implementation of automation, scalability, containerization, availability, and DevOps/GitOps philosophy. From the perspective of the application logic, it's the simplest React-Nginx app with one static page. Using code from this repo and with help of instructions and tips in this README you can very easily deploy this app in AWS EKS through Terraform.
 
-***Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo***
+The purpose of this repo is to showcase how to set up an app and everything related to it in the most modern way with usage of DevOps/GitOps tools and best practises, so at the end you will have working 3 separete and practically identical environment (Development, Staging/QA, Production) and each o them will have two domains, one with TLS secured React page and the second one for TLS secured ArgoCD Dashboard.
+
+After the right setup (mostly changing the values for your particular case - more [here](https://github.com/JakubSzuber/Golden-DevOps#reuired-modifications)) it's only a matter of a single click to set up absolutely everything (above described infrastructure with 3 environments and a bunch of repository, development stuff that got a lot of automation in it) and also single click to clear the entire infrastructure (except few very simple stuff that was created manually like e.g. Route 53 record).
+
+### Characteristics of an app that would use this repo:
+
+- <b>Full scability</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>High availability</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Automated updates with zero downtime</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Ease of replication and short Mean Time to Recovery (MTTR)</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Great development experience</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Other automations</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Easy rollbacks</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Low latency</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Security</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Easy of extensibility</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>Great resource utilization</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
+molestiae quas vel sint commodi repudiandae.)
+- <b>And a lot more...</b>
+
+Automation and development experience
+XXX
+
+***Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo, and i would be so thanksful for any feedback and GitHub stars, regards!***
 
 
 <details>
