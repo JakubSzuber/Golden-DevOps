@@ -9,7 +9,6 @@
   [![Terraform Continuous Integration](https://github.com/JakubSzuber/Golden-DevOps/workflows/Terraform%20CI/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/terraform-ci.yml)
   [![Terraform Continuous Delivery](https://github.com/JakubSzuber/Golden-DevOps/workflows/Terraform%20CD/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/terraform-cd.yml)
   [![Helm CI/CD](https://github.com/JakubSzuber/Golden-DevOps/workflows/Helm%20Chart/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/helm-test.yml)
-  <!-- TODO Maybe add badge for all workflow -->
 </div>
 
 Golden-DevOps is a fully open-source project that uses all core DevOps tools and practices. It is a complete example of the repository with the implementation of automation, scalability, containerization, availability, and DevOps/GitOps philosophy. From the perspective of the application logic, it's the simplest React-Nginx app with one static page. Using code from this repo and with help of instructions and tips in this README you can very easily deploy this app in AWS EKS through Terraform.
@@ -18,14 +17,15 @@ The purpose of this repo is to showcase how to set up an app and everything rela
 
 After the right setup (mostly changing the values for your particular case - more [here](https://github.com/JakubSzuber/Golden-DevOps#required-modifications)) it's only a matter of a single click to set up absolutely everything (above described infrastructure with 3 environments and a bunch of repository, development stuff that got a lot of automation in it) and also single click to clear the entire infrastructure (except few very simple stuff that was created manually like e.g. Route 53 record).
 
+> **Note**
+> Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo, and i would be so thanksful for any feedback and GitHub stars, regards!
+
 ### Characteristics of an app that would use this repo:
 
-- <b>Full scability</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae.)
-- <b>High availability</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae.)
-- <b>Automated updates with zero downtime</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae.)
+- <b>Full scability</b> - This project has implemented the Horizontal Pod Autoscaler (HPA) that ensure the right amount od pod based on teh current traffic load. Furthermore there is Karpeneter that in case of a overwhem on the EC2 instances can spin up the new onces in the right size depending on the needs. This project is fully scalable but of course you are able to controll the minimum and maxim number of EC2 instances that you want or able to run. In [eks/main.tf](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure/eks/main.tf) file you can set the "min_size", "max_size", "desired_size" and other configuration of your EC2 instances (EKS managed nodes).
+- <b>High availability</b> - This project place EC2 instances across different VPC Subnets what ensures that in case of a failure of the Availability Zone our app will be still running. Furthermore full scability also ensures that our app has no downtime because of the traffic overload.
+- <b>Automated updates with zero downtime</b> - This project is created along with DevOps practices. In a nutshell application lifecycle ([more here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)) looks like that: developer merge a PR with changes and the [workflow](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml) responsible for CD builds a new container with the newest applied changes and push it to DockerHub Registry, and after that changes the used tag in K8s deployments for each environment so in their cnfiguration is used the newest container's tag with applied changes. Then Argo CD running within each cluster automatical notices that change and deploy the new container gradually - in each pod but not on all of them at the same time, so there is practically no downtime because the traffic is
+continually roited to either the pod with changes or old pod that waits for it turn. This gives us extremly easy and potentially very freaquest updates for our app (for both Development and Operations team) whenever we want.
 - <b>Ease of replication and short Mean Time to Recovery (MTTR)</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae.)
 - <b>Great development experience</b> (Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
@@ -46,8 +46,6 @@ molestiae quas vel sint commodi repudiandae.)
 
 ### Automation and development experience
 XXX
-
-***Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo, and i would be so thanksful for any feedback and GitHub stars, regards!***
 
 
 <details>
@@ -202,45 +200,25 @@ Golden-DevOps/
 
 <div align="center">
 <h1 style="margin:-10px;margin-bottom:0">Infrastructure:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg"/>&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg"/>&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg"/>&nbsp;<img width="55" src="https://raw.githubusercontent.com/gilbarbara/logos/master/logos/eslint.svg"/>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="AWS"/>&nbsp;&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" alt="terraform"/>&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" alt="linux"/>
 
-
-<!-- - AWS <img align="center" alt="AWS" width="60px" src=>
-- Terraform <img align="center" alt="terraform" width="36px" src=>
-- Linux <img align="center" alt="linux" width="36px" src=> -->
 <br>
 <h1 style="margin:-10px;margin-bottom:0">Deployment:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg"/>&nbsp;<img width="55" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/compose.png"/>&nbsp;<img width="55" src="https://helm.sh/img/helm.svg"/>&nbsp;&nbsp;&nbsp;&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg"/>&nbsp;
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/argocd/argocd-original.svg"/>&nbsp;
-<img width="55" src="https://avatars.githubusercontent.com/u/54465427?v=4"/>
-
-
-<!-- - Docker <img align="center" alt="docker" width="36px" src="">
-- Docker Compose <img align="center" alt="docker compose" width="36px" src="">
-- Helm <img align="center" alt="Helm Charts" width="36px" src="">
-- Kubernetes <img align="center" alt="kubernetes" width="36px" src="">
-- Argo CD <img align="center" alt="Argo CD" width="36px" src="">
-- GitHub Actions <img align="center" alt="github actions" width="36px" src=""> -->
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="docker"/>&nbsp;&nbsp;<img width="55" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/compose.png" alt="docker compose"/>&nbsp;&nbsp;<img width="55" src="https://helm.sh/img/helm.svg" alt="Helm Charts"/>&nbsp;&nbsp;&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" alt="kubernetes"/>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/argocd/argocd-original.svg" alt="Argo CD"/>&nbsp;
+<img width="55" src="https://avatars.githubusercontent.com/u/54465427?v=4" alt="github actions"/>
 
 <br>
 <h1 style="margin:-10px;margin-bottom:0">Application Logic:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg"/>&nbsp;&nbsp;<img width="55" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png"/>
-
-<!-- - Nginx <img align="center" alt="Nginx" width="36px" src="">
-- React <img align="center" alt="React" width="36px" src=""> -->
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg" alt="Nginx"/>&nbsp;&nbsp;&nbsp;<img width="55" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png" alt="React"/>
 
 <br>
 <h1 style="margin:-10px;margin-bottom:0">Configuration Management:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ansible/ansible-original.svg"/>
-
-<!-- - Ansible <img align="center" alt="ansible" width="36px" src=""> -->
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ansible/ansible-original.svg" alt="ansible"/>
 
 <br>
 <h1 style="margin:-10px;margin-bottom:0">Monitoring:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prometheus/prometheus-original.svg"/>&nbsp;&nbsp;<img width="55" src="https://github.com/devicons/devicon/blob/master/icons/grafana/grafana-original.svg"/>
-
-<!-- - Prometheus <img align="center" alt="prometheus" width="36px" src="">
-- Grafana <img align="center" alt="grafana" width="36px" src=""> -->
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prometheus/prometheus-original.svg" alt="prometheus"/>&nbsp;&nbsp;<img width="55" src="https://github.com/devicons/devicon/blob/master/icons/grafana/grafana-original.svg" alt="grafana"/>
 </div>
 
 # How to use the repo
@@ -272,7 +250,8 @@ Configure Snyk account with repo
 Create "Staging" and "Production" GitHub environments and then add a protection role for "Production" so this environment will require reviewers (add some reviews that will be able to allow for changes deployment)
 Create the Identity provider in AWS IAM with Provider type "OpenID Connect", Provider URL "https://token.action.githubcontent.com", Audience "sts.amazonaws.com". Then create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json) (remember to change the IAM user number and name of the GitHub user and repo), then add an IAM Policy with a content similar to [this](create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json).
 
-> Note: By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
+> **Note**
+> By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
 
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
@@ -411,3 +390,4 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 <!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
 <!--TODO create github kanban "Project" and write about it on readme-->
 <!--TODO Do all of TODO from every workflow and from my notes-->
+<!--TODO Fix the typos-->
