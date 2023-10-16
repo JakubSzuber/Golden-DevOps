@@ -202,7 +202,7 @@ Golden-DevOps/
 
 <div align="center">
 <h1 style="margin:-10px;margin-bottom:0">Infrastructure:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg"  style="margin-right:2px"/><img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" style="margin-right:2px"/><img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" style="margin-right:2px"/><img width="55" src="https://raw.githubusercontent.com/gilbarbara/logos/master/logos/eslint.svg" style="margin-right:2px"/>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg"/>&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg"/>&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg"/>&nbsp;<img width="55" src="https://raw.githubusercontent.com/gilbarbara/logos/master/logos/eslint.svg"/>
 
 
 <!-- - AWS <img align="center" alt="AWS" width="60px" src=>
@@ -210,9 +210,9 @@ Golden-DevOps/
 - Linux <img align="center" alt="linux" width="36px" src=> -->
 <br>
 <h1 style="margin:-10px;margin-bottom:0">Deployment:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" style="margin-right:2px"/><img width="55" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/compose.png" style="margin-right:2px"/><img width="55" src="https://helm.sh/img/helm.svg" style="margin-right:13px"/><img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" style="margin-right:2px"/>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/argocd/argocd-original.svg" style="margin-right:2px"/>
-<img width="55" src="https://avatars.githubusercontent.com/u/54465427?v=4" style="margin-right:2px"/>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg"/>&nbsp;<img width="55" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/compose.png"/>&nbsp;<img width="55" src="https://helm.sh/img/helm.svg"/>&nbsp;&nbsp;&nbsp;&nbsp;<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg"/>&nbsp;
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/argocd/argocd-original.svg"/>&nbsp;
+<img width="55" src="https://avatars.githubusercontent.com/u/54465427?v=4"/>
 
 
 <!-- - Docker <img align="center" alt="docker" width="36px" src="">
@@ -224,7 +224,7 @@ Golden-DevOps/
 
 <br>
 <h1 style="margin:-10px;margin-bottom:0">Application Logic:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg" style="margin-right:12px"/><img width="55" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png"/>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg"/>&nbsp;&nbsp;<img width="55" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png"/>
 
 <!-- - Nginx <img align="center" alt="Nginx" width="36px" src="">
 - React <img align="center" alt="React" width="36px" src=""> -->
@@ -237,10 +237,11 @@ Golden-DevOps/
 
 <br>
 <h1 style="margin:-10px;margin-bottom:0">Monitoring:</h1>
-<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prometheus/prometheus-original.svg" style="margin-right:2px"/><img width="55" src="https://github.com/devicons/devicon/blob/master/icons/grafana/grafana-original.svg"/>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prometheus/prometheus-original.svg"/>&nbsp;&nbsp;<img width="55" src="https://github.com/devicons/devicon/blob/master/icons/grafana/grafana-original.svg"/>
 
 <!-- - Prometheus <img align="center" alt="prometheus" width="36px" src="">
 - Grafana <img align="center" alt="grafana" width="36px" src=""> -->
+</div>
 
 # How to use the repo
 > **Note**
