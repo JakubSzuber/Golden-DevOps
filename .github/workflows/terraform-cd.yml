@@ -5,7 +5,7 @@
 
 name: Terraform CD
 
-concurrency: terraform-delivery
+cconcurrency: terraform-delivery # TODO Temporarily disable workflow (in order to not pay for AWS resources)
 
 on:
   workflow_dispatch:
