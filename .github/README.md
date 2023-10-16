@@ -16,7 +16,7 @@ Golden-DevOps is a fully open-source project that uses all core DevOps tools and
 
 The purpose of this repo is to showcase how to set up an app and everything related to it in the most modern way with usage of DevOps/GitOps tools and best practises, so at the end you will have working 3 separete and practically identical environment (Development, Staging/QA, Production) and each o them will have two domains, one with TLS secured React page and the second one for TLS secured ArgoCD Dashboard.
 
-After the right setup (mostly changing the values for your particular case - more [here](https://github.com/JakubSzuber/Golden-DevOps#reuired-modifications)) it's only a matter of a single click to set up absolutely everything (above described infrastructure with 3 environments and a bunch of repository, development stuff that got a lot of automation in it) and also single click to clear the entire infrastructure (except few very simple stuff that was created manually like e.g. Route 53 record).
+After the right setup (mostly changing the values for your particular case - more [here](https://github.com/JakubSzuber/Golden-DevOps#required-modifications)) it's only a matter of a single click to set up absolutely everything (above described infrastructure with 3 environments and a bunch of repository, development stuff that got a lot of automation in it) and also single click to clear the entire infrastructure (except few very simple stuff that was created manually like e.g. Route 53 record).
 
 ### Characteristics of an app that would use this repo:
 
@@ -44,7 +44,7 @@ molestiae quas vel sint commodi repudiandae.)
 molestiae quas vel sint commodi repudiandae.)
 - <b>And a lot more...</b>
 
-Automation and development experience
+### Automation and development experience
 XXX
 
 ***Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo, and i would be so thanksful for any feedback and GitHub stars, regards!***
@@ -199,35 +199,48 @@ Golden-DevOps/
 </details>
 
 # Stack
-<h3>Infrastructure:</h3>
 
-- AWS <img align="center" alt="AWS" width="60px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg">
-- Terraform <img align="center" alt="terraform" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg">
-- Linux <img align="center" alt="linux" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg">
+<div align="center">
+<h1 style="margin:-10px;margin-bottom:0">Infrastructure:</h1>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg"  style="margin-right:2px"/><img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" style="margin-right:2px"/><img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" style="margin-right:2px"/><img width="55" src="https://raw.githubusercontent.com/gilbarbara/logos/master/logos/eslint.svg" style="margin-right:2px"/>
 
-<h3>Deployment:</h3>
 
-- Docker <img align="center" alt="docker" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg">
-- Docker Compose <img align="center" alt="docker compose" width="36px" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/compose.png">
-- Helm <img align="center" alt="Helm Charts" width="36px" src="https://helm.sh/img/helm.svg">
-- Kubernetes <img align="center" alt="kubernetes" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg">
-- Argo CD <img align="center" alt="Argo CD" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/argocd/argocd-original.svg">
-- GitHub Actions <img align="center" alt="github actions" width="36px" src="https://avatars.githubusercontent.com/u/54465427?v=4">
+<!-- - AWS <img align="center" alt="AWS" width="60px" src=>
+- Terraform <img align="center" alt="terraform" width="36px" src=>
+- Linux <img align="center" alt="linux" width="36px" src=> -->
+<br>
+<h1 style="margin:-10px;margin-bottom:0">Deployment:</h1>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" style="margin-right:2px"/><img width="55" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/compose.png" style="margin-right:2px"/><img width="55" src="https://helm.sh/img/helm.svg" style="margin-right:13px"/><img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" style="margin-right:2px"/>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/argocd/argocd-original.svg" style="margin-right:2px"/>
+<img width="55" src="https://avatars.githubusercontent.com/u/54465427?v=4" style="margin-right:2px"/>
 
-<h3>Application Logic:</h3>
 
-- Nginx <img align="center" alt="Nginx" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg">
-- React <img align="center" alt="React" width="36px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png">
+<!-- - Docker <img align="center" alt="docker" width="36px" src="">
+- Docker Compose <img align="center" alt="docker compose" width="36px" src="">
+- Helm <img align="center" alt="Helm Charts" width="36px" src="">
+- Kubernetes <img align="center" alt="kubernetes" width="36px" src="">
+- Argo CD <img align="center" alt="Argo CD" width="36px" src="">
+- GitHub Actions <img align="center" alt="github actions" width="36px" src=""> -->
 
-<h3>Configuration Management:</h3>
+<br>
+<h1 style="margin:-10px;margin-bottom:0">Application Logic:</h1>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg" style="margin-right:12px"/><img width="55" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png"/>
 
-- Ansible <img align="center" alt="ansible" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ansible/ansible-original.svg">
+<!-- - Nginx <img align="center" alt="Nginx" width="36px" src="">
+- React <img align="center" alt="React" width="36px" src=""> -->
 
-<!--TODO
-<h3>Monitoring:</h3>
+<br>
+<h1 style="margin:-10px;margin-bottom:0">Configuration Management:</h1>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ansible/ansible-original.svg"/>
 
-- Prometheus <img align="center" alt="prometheus" width="36px" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prometheus/prometheus-original.svg">
-- Grafana <img align="center" alt="grafana" width="36px" src="https://github.com/devicons/devicon/blob/master/icons/grafana/grafana-original.svg">-->
+<!-- - Ansible <img align="center" alt="ansible" width="36px" src=""> -->
+
+<br>
+<h1 style="margin:-10px;margin-bottom:0">Monitoring:</h1>
+<img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prometheus/prometheus-original.svg" style="margin-right:2px"/><img width="55" src="https://github.com/devicons/devicon/blob/master/icons/grafana/grafana-original.svg"/>
+
+<!-- - Prometheus <img align="center" alt="prometheus" width="36px" src="">
+- Grafana <img align="center" alt="grafana" width="36px" src=""> -->
 
 # How to use the repo
 > **Note**
@@ -285,7 +298,7 @@ XX AWS account, dockerhub account?, etc
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum.
 
-# Reuired modifications
+# Required modifications
 
 XXYou have to modify following things, specific for your case environment variables, secrets, dockerhub repository, domain name, s3 bucket's name, dynamodb tables's name, etc
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
