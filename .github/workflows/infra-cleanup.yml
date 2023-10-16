@@ -29,16 +29,6 @@ jobs:
               value: "dev",
               url: "https://dev.goldendevops.com/",
             },
-            {
-              name: "Staging",
-              value: "staging",
-              url: "https://staging.goldendevops.com/",
-            },
-            {
-              name: "Production",
-              value: "prod",
-              url: "https://goldendevops.com/",
-            },
           ]
     with:
       environment: ${{ matrix.environment.value }}
