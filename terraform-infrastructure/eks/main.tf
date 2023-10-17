@@ -47,6 +47,8 @@ module "eks" {
   eks_managed_node_groups = {
     bottlerocket_nodes = {
       ami_type      = "BOTTLEROCKET_x86_64"
+      # You can uncomment below line to specify concrete size(s) of the nodes that you want to possibly use
+      #instance_types = ["t3.micro", "m5.4xlarge", "m5n.large", "c7g.medium"]
       platform      = "bottlerocket"
       min_size      = 1
       max_size      = 2
