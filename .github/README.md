@@ -376,7 +376,9 @@ kubectl get secrets -n argocd
 kubectl get secret argocd-initial-admin-secret -n argocd --template={{.data.password}} | base64 -d
 ```
 
-Now you can log in as "admin" to <b>https://<disable link>argo.\<yourdomain>.com</b> or <b>https://\<environment>.argo.\<yourdomain>.com</b> depends on the cluster.
+Now you can log in as "admin" to <b>https://<disable link>argo.\<yourdomain>.com</b> or <b>https://\<environment>.argo.\<yourdomain>.com</b> depends on the cluster and see similar Argo CD Dashboard:
+
+<img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/argocd-dashboard.jpg?raw=true" alt="A type aliases records" alt="Argo CD Dashboard preview"/>
 
 
 # Development setup
@@ -394,16 +396,16 @@ work try to restart the container, your whole Docker and eventually WSL2.
 https://user-images.githubusercontent.com/90647840/213922371-848ff6b3-60a8-4db2-94fb-7b11dbf41b42.mov
 </details>
 
-<br>On the initial run you should see a similar website on either [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000):
+On the initial run you should see a similar website on either [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000):
 
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/local-preview.png?raw=true" alt="Local website preview"/>
 
-<br>To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
+To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
 
 > **Note**
 > By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
 
-
+<!-- TODO in proggress from below -->
 # Source code pipeline
 
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
@@ -449,7 +451,7 @@ recusandae alias error harum maxime adipisci amet laborum.
 
 # Infrastructure
 
-![](https://d2slcw3kip6qmk.cloudfront.net/marketing/blog/2019Q1/aws/aws-web-application-hosting.png)
+![](https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg)
 
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
