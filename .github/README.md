@@ -24,22 +24,21 @@ After the right setup (mostly changing the values for your particular case - mor
 
 - <b>Full scability</b> - This project has implemented the Horizontal Pod Autoscaler (HPA) that ensures the right amount of pod based on the current traffic load. Furthermore, there is Karpeneter that in case of an overwhelm on the EC2 instances can spin up the new ones in the right size depending on the needs. This project is fully scalable but of course, you are able to control the minimum and maximum number of EC2 instances that you want or are able to run. In [eks/main.tf](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure/eks/main.tf) file you can set the "min_size", "max_size", "desired_size" and other configuration of your EC2 instances (EKS managed nodes).
 - <b>High availability</b> - This project places EC2 instances across different VPC Subnets which ensures that in case of a failure of the Availability Zone our app will be still running. Furthermore, full scalability also ensures that our app has no downtime because of the traffic overload.
-- <b>Automated updates with zero downtime</b> - This project is created along with DevOps practices. In a nutshell application lifecycle ([more here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)) looks like that: developer merge a PR with changes and the [workflow](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml) responsible for CD builds a new container with the newest applied changes and push it to DockerHub Registry, and after that changes the used tag in K8s deployments for each environment so in their configuration is used the newest container's tag with applied changes. Then Argo CD running within each cluster automatical notices that change and deploy the new container gradually - in each pod but not on all of them at the same time, so there is practically no downtime because the traffic is
+- <b>Automated and rapid updates with zero downtime</b> - This project is created along with DevOps practices. In a nutshell application lifecycle ([more here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)) looks like that: developer merge a PR with changes and the [workflow](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml) responsible for CD builds a new container with the newest applied changes and push it to DockerHub Registry, and after that changes the used tag in K8s deployments for each environment so in their configuration is used the newest container's tag with applied changes. Then Argo CD running within each cluster automatical notices that change and deploy the new container gradually - in each pod but not on all of them at the same time, so there is practically no downtime because the traffic is
 continually routed to either the pod with changes or old pod that waits for its turn. This gives us extremely easy and potentially very frequent updates for our app (for both the Development and Operations teams) whenever we want.
 - <b>Ease of replication and short Mean Time to Recovery (MTTR)</b> - This project has defined the entire infrastructure in Terraform files that don't replicate themselves (to manage multiple env Terraform Workspaces is used). This gives us the ability to very easily and rapidly deploy some new environment or spin up the environment that was already created but for some reason failed. We don't have to create anything manually in some cloud provider's console and we don't have to make any new files/directories to spin up a new environment from scratch.
-- <b>Great development experience</b> - This project has a load of features that significantly help the development team. First of all, when a developer wants to start the work with that project it's only a matter of cloning a repo and executing a single command (docker compose up) to spin up everything required to run a development environment to work properly. Guide about development [here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#development-setup). Furthermore, there is a [.vscode](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.vscode) directory that configures settings, debugging, and recommended useful extensions if you use VCS. After you make the setup you can modify the source code in [src](https://github.com/JakubSzuber/Golden-DevOps/tree/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/tree/main/public) and changes will be automatically applied without need to restart, rebuild the container or anything like that. After you decide that you want to apply the changes to the remote repo then create a PR. Everything related to CI will be automatically by GitHub Actions workflow made so any o both developer and operations teams don't have to worry about manually ensuring that the quality of the changes is acceptable. After your PR is reviewed and merged the GitHub Actions workflow will automatically do everything related to CD (and the only manual thing will be the review before deploying to production). Furthermore, a lot of other tasks are completely automated to reduce the work of the developers. See below point.
+- <b>Great development experience</b> - This project has a load of features that significantly help the development team by e.g. making the setup process very effortless and rapid, automating repetitive and complicated tasks, helping with configuring IDE. More about development experience ([here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)). Furthermore, a lot of other tasks are completely automated to reduce the work of the developers. See below point.
 - <b>Other automations</b> - This project uses a lot of GHA workflow to automate numerous tasks. Examples of automated tasks are - publishing new releases, marking/deleting old PR and Issues, version updates of GHA workflows' actions, Terraform modules and providers, dependencies in package.json and package-lock.json, and obviously lifecycles of source code, Terraform files, and Helm Chart. To insight more about what things are automated through GHA workflows see [.github/workflows](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/workflows).
-TODO OOOOOOOOOO typos unchecked below:
 - <b>Easy rollbacks</b> - This project has implemented Argo CD and stores everything as a code within Git repo. This gives us very easy rollbacks because it's only a matter of undoing a particular commit by `git revert` or `git remove` and the previous state of everything will be restored, no matter if is it a thing related to Terraform file(s), source code or anything else. For example when you undo a commit that was doing a change in Terraform files then GHA workflows responsible for Terraform CI/CD will apply the changes. Another example is that you want to go back to the previous version of your main application (actually the previous container's tag), then you just have to undo a commit(s) that was pushed automatically by [delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/workflows/delivery.yml) and Argo CD will automatically notice that tags of the main application container changed and apply the changes. So a real state of everything related to the application will reflect the exact state of current files stored within the repo.
-- <b>Low latency</b> - This project uses static content served by Nginx which is later cached by AWS CDN - Amazon CloudFront, so the latency of the application should be minimal (also bacause the source code in this project is very simple, in order to only showcase how to create React app).
-- <b>Security</b> - This project uses HTTPS for bot connection between clients and AWS ALB and between AWS ALB and containers. The certificates for the encryption between AWS ALB and the containers are automatically managed by K8s cert-manager. Furthermore every sensitive data is stored as GitHub Secret what enusre safesty for data like passwords and sensitive URLs. Moreover there are a lot of security-related automations within GHA workflows, like e.g. blocking teh PR if critical vulnerabilities are found, uploading a security results after each newly deployed change, etc.
-- <b>Ease of extensibility</b> - This project showcase how to create and maintain modern application and everything around it, instead of createding complex and comprehensive application logic. The source code of the project itself is very simple, and everyyhing is pretty easy to modify and maintain because of parameterization in core elements.
-- <b>Great resource utilization</b> - This project is fully scalable (in term of both the nodes and containers) to meet the exact needed depand. Moreover the desired, minimal, maximal number of nodes are based on the [calculator](https://learnk8s.io/kubernetes-instance-calculator) that shows most efficient configurations (you can also set the EC2 instance types that can be possibly used).
+- <b>Low latency</b> - This project uses static content served by Nginx which is later cached by AWS CDN - Amazon CloudFront, so the latency of the application should be minimal (also because the source code in this project is very simple, in order to only showcase how to create React app).
+- <b>Security</b> - This project uses HTTPS for bot connection between clients and AWS ALB and between AWS ALB and containers. The certificates for the encryption between AWS ALB and the containers are automatically managed by the K8s cert-manager. Furthermore, every sensitive data is stored as GitHub Secret which ensures safety for data like passwords and sensitive URLs. Moreover, there is a lot of security-related automation within GHA workflows, like e.g. blocking the PR if critical vulnerabilities are found, uploading security results after each newly deployed change, etc.
+- <b>Ease of extensibility</b> - This project showcases how to create and maintain modern application and everything around it, instead of creating complex and comprehensive application logic. The source code of the project itself is very simple, and everything is pretty easy to modify and maintain because of parameterization in core elements.
+- <b>Great resource utilization</b> - This project is fully scalable (in terms of both the nodes and containers) to meet the exact needed demand. Moreover, the desired, minimal, maximal number of nodes is based on the [calculator](https://learnk8s.io/kubernetes-instance-calculator) that shows the most efficient configurations (you can also set the EC2 instance types that can be possibly used).
 - <b>And a lot more...</b>
 
-### Automation and development experience
-XXXprzenies moze texkst z tych 2 punktow??
+### Development experience
 
+This project has a load of features that significantly help the development team. First of all, when a developer wants to start the work with that project it's only a matter of cloning a repo and executing a single command (docker compose up) to spin up everything required to run a development environment to work properly. Guide about development [here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#development-setup). Furthermore, there is a [.vscode](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.vscode) directory that configures settings, debugging, and recommended useful extensions if you use VCS. After you make the setup you can modify the source code in [src](https://github.com/JakubSzuber/Golden-DevOps/tree/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/tree/main/public) and changes will be automatically applied without need to restart, rebuild the container or anything like that. After you decide that you want to apply the changes to the remote repo then create a PR. Everything related to CI will be automatically by GitHub Actions workflow made so any o both developer and operations teams don't have to worry about manually ensuring that the quality of the changes is acceptable. After your PR is reviewed and merged the GitHub Actions workflow will automatically do everything related to CD (and the only manual thing will be the review before deploying to production). Furthermore, a lot of other tasks are completely automated to reduce the work of the developers. Examples of automated tasks are - publishing new releases, marking/deleting old PR and Issues, version updates of GHA workflows' actions, Terraform modules and providers, dependencies in package.json and package-lock.json, and obviously lifecycles of source code, Terraform files, and Helm Chart.
 
 <details>
 <summary><b>Click to see the project structure:</b></summary>
@@ -214,15 +213,74 @@ Golden-DevOps/
 <img width="55" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prometheus/prometheus-original.svg" alt="prometheus"/>&nbsp;&nbsp;<img width="55" src="https://github.com/devicons/devicon/blob/master/icons/grafana/grafana-original.svg" alt="grafana"/>
 </div>
 
-# How to use the repo
-> **Note**
-> Example note...If you encounter any problems using this repo to create your own infrastructure, try deleting everything and starting over. When creating several complex infrastructures sometimes there may be a temporary problem that may be at fault with AWS. However, if that doesn't help feel free to use the [issue](https://github.com/JakubSzuber/Golden-DevOps/issues/new/choose) or [discussions](https://github.com/JakubSzuber/Golden-DevOps/discussions) section.
 
-If you don't have any internet domain then register one manually e.g. in the AWS console from Route 53 interface and create a hosted zone for in Route 53 (if you register a domain through Route 53 then the hosted zone is automatically created for that domain)
-Create an ACM cert issued for domains yourdomain.com, *.yourdomain.com, and *.argo.yourdomain.com (you can do this e.g. in the AWS console from ACM 53 interface). After that create CNAME record for each domain (in the AWS console from ACM 53 interface there is a button "Create records in Route 53") in order to allow AWS to validate your domains.
-Create an S3 Bucket for a Terraform remote state. It should have enabled versioning, default encryption, and object lock setting (under "Advanced settings").
-Create a DynamoDB table with a partition key "LockID" type string.
-XXSetup Terrafom infra
+# Requirements
+
+You don't need to have everything from described below "Full usage" point to use the repo for some of the basic purposes like e.g. having automated pipeline(s) or having a development environment for React-Nginx app. Below there is described what is required for which kind of usage of this repo:
+
+<b>Full usage</b>:
+- Git, Node.js, Docker and Docker Compose (highly recommended to have Docker Desktop) installed on the local computer.
+- GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+
+<b>Have automated pipelines</b> (GHA that will automate lifecycle of the source code, Terraform files, Helm Chart, and other less important tasks):
+- GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+
+<b>Spin up the infrastructure</b> (deploy 3 environments with main website and Argo CD Dashboard for each one):
+- GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+
+<b>Have development environment for React-Nginx app</b> (be able to use a single command to be able to develop React-Nginx app Docker container):
+- Git, Node.js, Docker and Docker Compose (highly recommended to have Docker Desktop) installed on the local computer.
+
+<b>Have GitHub file for the repo</b> (have configured GitHub files that help to use repo):
+- GitHub Account.
+- Git installed on the local computer.
+
+
+# Required modifications
+
+If you want to use all of the repository functionalities then there are some of the variables that will be specific for your case. Files and directories that require the most changes are listed at the end of this section (those are not the only places where you have to change values).
+
+This repo is a real-world working example so it contains values specific only to this repo, so for your usage, you have to change below values (or some of them if you don't use the entire repo):
+- S3 bucket's name (in this repo "golden-devops-bucket")
+- DynamoDB table's name (in this repo "golden-devops-dynamodb")
+- Domain name (in this repo "goldendevops.com")
+- AWS Region (in this repo "us-east-1")
+- Whole IAM Role (in this repo [gh-action-role.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json))
+- Whole IAM Policy (in this repo [gh-actions-inline-policy.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-actions-inline-policy.json))
+- Whole Helm values.yaml file (in this repo [values.yaml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/helm-charts/main-chart/values.yaml))
+- Whole argocd/manifests directory (in this repo [argocd/manifests](https://github.com/JakubSzuber/Golden-DevOps/tree/main/terraform-infrastructure/argocd/manifests))
+- Minimal, maximal, and desired number of nodes specified in eks/main.tf (in this repo [eks/main.tf](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure/eks/main.tf))
+- Privacy of the VPC Subnets specified in vpc/main.tf (in this repo [vpc/main.tf](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure/vpc/main.tf))
+- Name of Helm Chart specified in Chart.yaml (in this repo "golden-devops-chart")
+- Docker container name and its tag (in this repo "jakubszuber/react-nginx-image" and "stable-DATE-SHORT-SHA")
+- All of the links for the GitHub repo (in this repo "https://github.com/JakubSzuber/Golden-DevOp")
+- GitHub user used within files of [.github dir](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github) (in this repo "JakubSzuber")
+- GitHub secrets (the same, duplicated for both Actions and Dependabot secrets). Names of the secrets should be the same as: DOCKERHUB_TOKEN, DOCKERHUB_USERNAME, SLACK_WEBHOOK_URL, SLACK_WEBHOOK_URL2, SNYK_TOKEN
+- And obviosly this whole README.md is unique for this repository.
+
+The files/dirs that contain a lot of those "your-specific" values are:
+- All of terraform-infrastructure/\<MODULE>/main.tf files
+- All of terraform-infrastructure/\<MODULE>/data.tf files
+- Chart.yaml and all of 4 Helm values files within [helm-charts/main-chart](https://github.com/JakubSzuber/Golden-DevOps/blob/main/helm-charts/main-chart) directory
+- Entire [argocd/manifests](https://github.com/JakubSzuber/Golden-DevOps/tree/main/terraform-infrastructure/argocd/manifests) directory
+- Entire [aws](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws) directory
+- Entire [.github](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github) directory directory
+
+
+# How to use the repo (spin up everything)
+> **Note**
+> If you encounter any problems using this repo to create your own infrastructure, try deleting everything and starting over. When creating several complex infrastructures sometimes there may be a temporary problem that may be caused by e.g. AWS. However, if that doesn't help feel free to use the [issue](https://github.com/JakubSzuber/Golden-DevOps/issues/new/choose) or [discussions](https://github.com/JakubSzuber/Golden-DevOps/discussions) section.
+
+### A few initial manual steps
+
+First of all you need a internet domain. If you don't have one then register one manually e.g. in the AWS console from Route 53 interface and create a hosted zone for in Route 53 (if you register a domain through Route 53 then the hosted zone is automatically created for that domain).
+
+Then create an TLS cert issued for domains yourdomain.com, *.yourdomain.com, and *.argo.yourdomain.com (you can do this e.g. in the AWS console from ACM 53 interface). After that create CNAME record for each domain (in the AWS console from ACM 53 interface there is a button "Create records in Route 53") in order to allow AWS to validate your domains.
+
+Next step is creation of an S3 Bucket for the Remote State. It should have enabled versioning, default encryption, and object lock setting (under "Advanced settings"). Then create a DynamoDB table with a partition key "LockID" type string.
+
+### Spinning up the infrastructure (3 environments)
+
 XXXAdd 6 A type aliases records with the right Ingress Load Balancer URL (each pair of aliases for the specific environment should have the right specific Load Balancer URL assigned). AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
 XXXThen make sure you have right configured ~/.aws/credentials file on XXX so you have configured a default IAM user and IAM user that is used to access Argo CD (in this repo jakubszuber-admin). Both can be the same IAM user with the same AWS Access Key. MAYBE JUST OPENID SO THE BELOW LINE WON'T BE NEEDED.
 Then Add your IAM user (eksadmin in my case) to the AWS configuration. Then update the kubeconfig to get access to your brand new EKS cluster and grab the ArgoCD default password from the argocd-initial-admin-secret.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
@@ -264,18 +322,6 @@ recusandae alias error harum maxime adipisci amet laborum.
 https://user-images.githubusercontent.com/90647840/213922371-848ff6b3-60a8-4db2-94fb-7b11dbf41b42.mov
 </details>
 -->
-
-# Requirements
-
-XX AWS account, dockerhub account?, etc
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum.
-
-# Required modifications
-
-XXYou have to modify following things, specific for your case environment variables, secrets, dockerhub repository, domain name, s3 bucket's name, dynamodb tables's name, etc
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum.
 
 # Development setup
 
@@ -374,6 +420,7 @@ If you find an issue, please report it on the
 This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blob/main/LICENSE) and was entirely created by myself. If you want to publically use this repo in any way I would be so thankful to leave a reference to my GitHub profile, thanks!
 
 
+<!--TODO Add more sections (e.g. about the pipeline of terraform)-->
 <!--TODO give somewhere link to docker hub project-->
 <!--TODO write somewhere that the website for the project may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to ;). But every relevant website's appearance should be available to see in this README.md-->
 <!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
@@ -383,4 +430,5 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 <!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
 <!--TODO create github kanban "Project" and write about it on readme-->
 <!--TODO Do all of TODO from every workflow and from my notes-->
+<!--TODO test does every link works right-->
 <!--TODO Fix the typos-->
