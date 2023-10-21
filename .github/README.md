@@ -38,7 +38,13 @@ continually routed to either the pod with changes or old pod that waits for its 
 
 ### Development experience
 
-This project has a load of features that significantly help the development team. First of all, when a developer wants to start the work with that project it's only a matter of cloning a repo and executing a single command (docker compose up) to spin up everything required to run a development environment to work properly. Guide about development [here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#development-setup). Furthermore, there is a [.vscode](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.vscode) directory that configures settings, debugging, and recommended useful extensions if you use VCS. After you make the setup you can modify the source code in [src](https://github.com/JakubSzuber/Golden-DevOps/tree/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/tree/main/public) and changes will be automatically applied without need to restart, rebuild the container or anything like that. After you decide that you want to apply the changes to the remote repo then create a PR. Everything related to CI will be automatically by GitHub Actions workflow made so any o both developer and operations teams don't have to worry about manually ensuring that the quality of the changes is acceptable. After your PR is reviewed and merged the GitHub Actions workflow will automatically do everything related to CD (and the only manual thing will be the review before deploying to production). Furthermore, a lot of other tasks are completely automated to reduce the work of the developers. Examples of automated tasks are - publishing new releases, marking/deleting old PR and Issues, version updates of GHA workflows' actions, Terraform modules and providers, dependencies in package.json and package-lock.json, and obviously lifecycles of source code, Terraform files, and Helm Chart.
+This project has a load of features that significantly help the development team. First of all, when a developer wants to start the work with that project it's only a matter of cloning a repo and executing a single command (docker compose up) to spin up everything required to run a development environment to work properly. Guide about development [here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#development-setup).
+
+Furthermore, there is a [.vscode](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.vscode) directory that configures settings, debugging, and recommended useful extensions if you use VCS. After you make the setup you can modify the source code in [src](https://github.com/JakubSzuber/Golden-DevOps/tree/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/tree/main/public) and changes will be automatically applied without need to restart, rebuild the container or anything like that.
+
+After you decide that you want to apply the changes to the remote repo then create a PR. Everything related to CI will be automatically by GitHub Actions workflow made so any o both developer and operations teams don't have to worry about manually ensuring that the quality of the changes is acceptable. After your PR is reviewed and merged the GitHub Actions workflow will automatically do everything related to CD (and the only manual thing will be the review before deploying to production).
+
+Moreover, a lot of other tasks are completely automated to reduce the work of the developers. Examples of automated tasks are - publishing new releases, marking/deleting old PR and Issues, version updates of GHA workflows' actions, Terraform modules and providers, dependencies in package.json and package-lock.json, and obviously lifecycles of source code, Terraform files, and Helm Chart.
 
 <details>
 <summary><b>Click to see the project structure:</b></summary>
@@ -188,6 +194,7 @@ Golden-DevOps/
 ```
 </details>
 
+
 # Stack
 
 <div align="center">
@@ -218,20 +225,37 @@ Golden-DevOps/
 
 You don't need to have everything from described below "Full usage" point to use the repo for some of the basic purposes like e.g. having automated pipeline(s) or having a development environment for React-Nginx app. Below there is described what is required for which kind of usage of this repo:
 
-<b>Full usage</b>:
+### Full usage:
+
+(Be able to use every functionality from this project)
+
 - Git, Node.js, Docker and Docker Compose (highly recommended to have Docker Desktop) installed on the local computer.
 - GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+- Right configured AWS directory (~/.aws) on your local computer. You can use `aws configure` command to set the default AWS profile's Access Key ID and Access Key Name (data will be saved in file ~/.aws/credentials), and default AWS region (use the same as you use in other files) and format of the output (data will be saved in file ~/.aws/config). Then open ~/.aws/credentials file and create a new AWS profile, that will be used for accesing the EKS cluster from your local computer (in this repo this AWS profile is called "jakubszuber-admin"). This new AWS profile could have the same Access Key's ID and Name as your default profile but don't have to.
 
-<b>Have automated pipelines</b> (GHA that will automate lifecycle of the source code, Terraform files, Helm Chart, and other less important tasks):
+### Have automated pipelines:
+
+(GHA that will automate lifecycle of the source code, Terraform files, Helm Chart, and other less important tasks)
+
 - GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
 
-<b>Spin up the infrastructure</b> (deploy 3 environments with main website and Argo CD Dashboard for each one):
-- GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+### Spin up the infrastructure:
 
-<b>Have development environment for React-Nginx app</b> (be able to use a single command to be able to develop React-Nginx app Docker container):
+(Deploy 3 environments with main website and Argo CD Dashboard for each one)<br>(Second point if you want to have access to EKS cluster from your local computer)
+
+- GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+- Right configured AWS directory (~/.aws) on your local computer. You can use `aws configure` command to set the default AWS profile's Access Key ID and Access Key Name (data will be saved in file ~/.aws/credentials), and default AWS region (use the same as you use in other files) and format of the output (data will be saved in file ~/.aws/config). Then open ~/.aws/credentials file and create a new AWS profile, that will be used for accesing the EKS cluster from your local computer (in this repo this AWS profile is called "jakubszuber-admin"). This new AWS profile could have the same Access Key's ID and Name as your default profile but don't have to.
+
+### Have development environment for React-Nginx app
+
+(Be able to use a single command to be able to develop React-Nginx app Docker container):
+
 - Git, Node.js, Docker and Docker Compose (highly recommended to have Docker Desktop) installed on the local computer.
 
-<b>Have GitHub file for the repo</b> (have configured GitHub files that help to use repo):
+### Have GitHub file for the repo
+
+(Have configured GitHub files that help to use repo):
+
 - GitHub Account.
 - Git installed on the local computer.
 
@@ -245,6 +269,7 @@ This repo is a real-world working example so it contains values specific only to
 - DynamoDB table's name (in this repo "golden-devops-dynamodb")
 - Domain name (in this repo "goldendevops.com")
 - AWS Region (in this repo "us-east-1")
+- AWS Profile used to access the EKS cluster from your local computer (in this repo "jakubszuber-admin")
 - Whole IAM Role (in this repo [gh-action-role.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json))
 - Whole IAM Policy (in this repo [gh-actions-inline-policy.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-actions-inline-policy.json))
 - Whole Helm values.yaml file (in this repo [values.yaml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/helm-charts/main-chart/values.yaml))
@@ -281,16 +306,65 @@ Next step is creation of an S3 Bucket for the Remote State. It should have enabl
 
 ### Spinning up the infrastructure (3 environments)
 
-XXXAdd 6 A type aliases records with the right Ingress Load Balancer URL (each pair of aliases for the specific environment should have the right specific Load Balancer URL assigned). AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
-XXXThen make sure you have right configured ~/.aws/credentials file on XXX so you have configured a default IAM user and IAM user that is used to access Argo CD (in this repo jakubszuber-admin). Both can be the same IAM user with the same AWS Access Key. MAYBE JUST OPENID SO THE BELOW LINE WON'T BE NEEDED.
-Then Add your IAM user (eksadmin in my case) to the AWS configuration. Then update the kubeconfig to get access to your brand new EKS cluster and grab the ArgoCD default password from the argocd-initial-admin-secret.https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff
-export AWS_DEFAULT_PROFILE=jakubszuber-admin ALBO set AWS_DEFAULT_PROFILE=jakubszuber-admin
+To initialize the whole infrastructure (3 environments) you just have to go to Actions section in your repo, find on the left bar the workflow called "Terraform CD", click on it and click "Run worfklow" button in order to manually execute this workflow. First will be deployed development environment, then staging, then production (you have to manually approve the deployment to production in interface of this wokrflow run). Deployment proccess for each environment should take 15 minutes on average.
+
+After successfull run of the worklfow you have to create A type aliases records for the right domains and AWS ALB. If you use Amazon Route 53 go to its interface and add 6 A type alias records with the right Ingress Load Balancer URL (each pair of aliases for the specific environment should have the right specific Load Balancer URL assigned).
+
+For example there is one of 3 pairs: "dev.yourdomain.com" and traffic routed to AWS ALB "dualstack.k8s-alb-111-222.us-east-1.elb.amazonaws.com." and "dev.argo.yourdomain.com" and traffic routed to the same AWS ALB. Do similar thing for staging and production (production will have pair of domains without env-specific subdomain - "yourdomain.com" and "argo.yourdomain.com").
+
+> **Note**
+> To find the right AWS ALB for the right pair of domains you can either enter the EC2->Load balancers or VPC interface to insight the infomation about in which VPC the specific AWS ALB is placed (name of the VPC will tell you which environment is that).
+
+<!-- TODO add here screenshot of the finished Route 53 setup -->
+<img width="100%" src="https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg" alt="A type aliases records"/>
+
+<br>
+
+Now you should be able to enter the main websites and Argo CD Dashboards (login page) for each environment. It doesn't matter if you use http:// or https:// because you will still be redirected to https. If you the error then probably you have to wait for the new domain's records to propagate. If you have a VPN then turning it on, especially on USA, can significantly reduce waiting time ([I](https://github.com/JakubSzuber) personally use and recommend Chrome extension [Urban VPN](https://chrome.google.com/webstore/detail/urban-vpn-proxy/eppiocemhmnlbhjplcgkofciiegomcon?utm_source=ext_sidebar&hl=en-US)).
+
+Websites should be similar to below (but with different domain).
+
+<!-- TODO add here screenshot of the webiste from the internet (link of main website) -->
+<img width="100%" src="https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg" alt="Main website preview"/>
+<br>
+<!-- TODO add here screenshot of the webiste from the internet (link of argo cd website) -->
+<img width="100%" src="https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg" alt="A type aliases records" alt="Argo CD Dashboard preview"/>
+
+<br>Now you can connect to every EKS cluster from your local computer (below example process for connection to one of the clusters - to connect to another cluster start the process from the 4th step).
+
+1. First of all make sure you have the right configured ~/.aws directory on your local computer so you have configured the AWS profile that is used to access Argo CD (in this repo "jakubszuber-admin").
+
+2. Then create environment variable with AWS profile's name.
+
+Windows:
+```cmd
+set AWS_DEFAULT_PROFILE=jakubszuber-admin
+```
+
+Linux/macOS:
+```bash
+export AWS_DEFAULT_PROFILE=jakubszuber-admin
+```
+
+3. Make sure that the right AWS profile is set:
+
+```bash
 aws sts get-caller-identity
-aws eks update-kubeconfig --name \<name of one of the clusters> --region us-east-1 --profile jakubszuber-admin
+```
+
+4. Update the kubeconfig to get access to your newly created EKS cluster.
+```bash
+aws eks update-kubeconfig --name \<name of one of the clusters> --region \<used aws region> --profile jakubszuber-admin
+```
+
+5. Display and copy the Argo CD default password from the argocd-initial-admin-secret:
+
+```bash
 kubectl get secrets -n argocd
 kubectl get secret argocd-initial-admin-secret -n argocd --template={{.data.password}} | base64 -d
-Now you can log in as "admin" to argo.yourdomain.com or \<name of the environment>.argo.yourdomain.com
+```
 
+Now you can log in as "admin" to <b>https://argo.\<yourdomain>.com</b> or <b>https://\<name of the environment>.argo.\<yourdomain>.com</b> depends on the cluster.
 
 generate your own "cert.pem" and "key.pem" by command `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 750 -nodes`. Then you can print them by `cat cert.pem | base64 -w 0` and `cat key.pem | base64 -w 0` so you are able to copy them from the terminal and insert as values to secret.yaml file that is in Helm chart. **Currently this method of using self-signed certificates is temporary and it would be better to use some other TLS certificate approach but if you are ok with then remember to not expose the values of "cert.pem" and "key.pem" in GitHub repo (this repo is showcase example and self-signed certificates will be removed in progress for this repo). Making the better and more secure approach is in progress for that repo!**
 XXXSet up the following GitHub secrets (the same for both Actions and Dependabot): DOCKERHUB_TOKEN, DOCKERHUB_USERNAME, SNYK_TOKEN, SLACK_WEBHOOK_URL, SLACK_WEBHOOK_URL2
@@ -301,20 +375,6 @@ Configure Snyk account with repo
 Create "Staging" and "Production" GitHub environments and then add a protection role for "Production" so this environment will require reviewers (add some reviews that will be able to allow for changes deployment)
 Create the Identity provider in AWS IAM with Provider type "OpenID Connect", Provider URL "https://token.action.githubcontent.com", Audience "sts.amazonaws.com". Then create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json) (remember to change the IAM user number and name of the GitHub user and repo), then add an IAM Policy with a content similar to [this](create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json).
 
-> **Note**
-> By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
-
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
-numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
-optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
-obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
-nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
-tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
-sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
-recusandae alias error harum maxime adipisci amet laborum.
-
 <!--
 <details>
 <summary><b>Click to look at the demo process of deploying this app (example with Docker Compose):</b></summary>
@@ -322,6 +382,7 @@ recusandae alias error harum maxime adipisci amet laborum.
 https://user-images.githubusercontent.com/90647840/213922371-848ff6b3-60a8-4db2-94fb-7b11dbf41b42.mov
 </details>
 -->
+
 
 # Development setup
 
@@ -332,6 +393,14 @@ Note that the initial start, compiling and automatic reload of the website's con
 work try to restart the container, your whole Docker and eventually WSL2.
 
 To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
+
+On the initial run you should see a similar website on either [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000):
+
+<img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/output.png?raw=true" alt="Local website preview"/>
+
+> **Note**
+> By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
+
 
 # Source code pipeline
 
@@ -346,6 +415,7 @@ quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
+
 # Terraform-related files pipeline
 
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
@@ -358,6 +428,7 @@ tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
 quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
+
 
 # Rolling back
 
@@ -373,6 +444,7 @@ quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
 
+
 # Infrastructure
 
 ![](https://d2slcw3kip6qmk.cloudfront.net/marketing/blog/2019Q1/aws/aws-web-application-hosting.png)
@@ -387,6 +459,7 @@ tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
 quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
 sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
 recusandae alias error harum maxime adipisci amet laborum.
+
 
 # Clean up
 
@@ -407,6 +480,7 @@ XXXIn case of a timeout failure of workflow responsible for cleaning up the enti
 
 XXXFor example in case of a timeout error because deletion of production VPC took too long, first go to infra-cleanup.yml and comment out the json values responsible for dev and staging environments, then go to reusable-infra-cleanup.yml and in "Terraform Plan" step delete lines (in this case first 6 lines) are temporarily useless because argocd and eks modules were already deleted and attempt to do a "terraform plan" or "terraform destroy" on those modules will fail among others because the EKS Cluster endpoint is already deleted. Remember to change "cd ../vpc" to "cd vpc"). Then delete the steps responsible for deleting the argocd and eks modules. Now you can finally execute the workflow infra-cleanup.yml once again and then undo the changes that you temporarily made to infra-cleanup.yml and reusable-infra-cleanup.yml.
 
+
 ## Contributing
 
 Want to contribute to this project? Check out the
@@ -414,6 +488,7 @@ Want to contribute to this project? Check out the
 
 If you find an issue, please report it on the
 [issue tracker](https://github.com/JakubSzuber/Golden-DevOps/issues/new/choose).
+
 
 ## License and Authorship
 
@@ -425,7 +500,7 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 <!--TODO write somewhere that the website for the project may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to ;). But every relevant website's appearance should be available to see in this README.md-->
 <!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
 <!--TODO Write somewhere that: Implementation of another service like for instance new Postgres container is very facilitated. To do so uncomment and possibly modify the following files depending on your needs: [docker-compose.dev.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.dev.yml), [docker-compose.test.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.test.yml), [integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)-->
-<!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons)-->
+<!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons). Rememeber to write sth like "AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup" https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff-->
 <!--TODO write something about which and how Gitops deployment models ware implemented (push-base and pull-based)-->
 <!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
 <!--TODO create github kanban "Project" and write about it on readme-->
