@@ -17,8 +17,8 @@ The purpose of this repo is to showcase how to set up an app and everything rela
 
 After the right setup (mostly changing the values for your particular case - more [here](https://github.com/JakubSzuber/Golden-DevOps#required-modifications)) it's only a matter of a single click to set up absolutely everything (above described infrastructure with 3 environments and a bunch of repository, development stuff that got a lot of automation in it) and also single click to clear the entire infrastructure (except few very simple stuff that was created manually like e.g. Route 53 record).
 
-> **Note**
-> Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo, and i would be so thanksful for any feedback and GitHub stars, regards!
+> **Important**
+> Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo, and I would be so thanksful for any feedback and GitHub stars, regards!
 
 ### Characteristics of an app that would use this repo:
 
@@ -120,7 +120,7 @@ Golden-DevOps/
 │       └── values.yaml
 ├── images
 │   ├── compose.png
-│   └── output.png
+│   └── local-preview.png
 ├── public
 │   ├── favicon.ico
 │   ├── index.html
@@ -230,20 +230,21 @@ You don't need to have everything from described below "Full usage" point to use
 (Be able to use every functionality from this project)
 
 - Git, Node.js, Docker and Docker Compose (highly recommended to have Docker Desktop) installed on the local computer.
-- GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+- GitHub Account, AWS Account, DockerHub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels (guide on how to use Slack GHA step [here](https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook)).
 - Right configured AWS directory (~/.aws) on your local computer. You can use `aws configure` command to set the default AWS profile's Access Key ID and Access Key Name (data will be saved in file ~/.aws/credentials), and default AWS region (use the same as you use in other files) and format of the output (data will be saved in file ~/.aws/config). Then open ~/.aws/credentials file and create a new AWS profile, that will be used for accesing the EKS cluster from your local computer (in this repo this AWS profile is called "jakubszuber-admin"). This new AWS profile could have the same Access Key's ID and Name as your default profile but don't have to.
 
 ### Have automated pipelines:
 
 (GHA that will automate lifecycle of the source code, Terraform files, Helm Chart, and other less important tasks)
 
-- GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+- GitHub Account, AWS Account, DockerHub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels
+(guide on how to use Slack GHA step [here](https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook)).
 
 ### Spin up the infrastructure:
 
 (Deploy 3 environments with main website and Argo CD Dashboard for each one)<br>(Second point if you want to have access to EKS cluster from your local computer)
 
-- GitHub Account, AWS Account, DockerHub Account, Snyk Account, Slack Account and Slack App with at least 2 Webhook URLs to channels.
+- GitHub Account, AWS Account, DockerHub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels (guide on how to use Slack GHA step [here](https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook).
 - Right configured AWS directory (~/.aws) on your local computer. You can use `aws configure` command to set the default AWS profile's Access Key ID and Access Key Name (data will be saved in file ~/.aws/credentials), and default AWS region (use the same as you use in other files) and format of the output (data will be saved in file ~/.aws/config). Then open ~/.aws/credentials file and create a new AWS profile, that will be used for accesing the EKS cluster from your local computer (in this repo this AWS profile is called "jakubszuber-admin"). This new AWS profile could have the same Access Key's ID and Name as your default profile but don't have to.
 
 ### Have development environment for React-Nginx app
@@ -304,6 +305,17 @@ Then create an TLS cert issued for domains yourdomain.com, *.yourdomain.com, and
 
 Next step is creation of an S3 Bucket for the Remote State. It should have enabled versioning, default encryption, and object lock setting (under "Advanced settings"). Then create a DynamoDB table with a partition key "LockID" type string.
 
+Another step is the creation of "Development", "Staging" and "Production" GitHub environments and then adding a protection role for "Production" so this environment will require reviewers (add some reviews that will be able to allow for deployments for the production environment).
+
+One of the last steps is creation of AWS IAM Identity provider that will allow us to use OpenID Connect between GitHub Actions and AWS. To setup it go to Amazon IAM interface and create IAM Identity provider with Provider type "OpenID Connect", Provider URL "https://token.action.githubcontent.com", Audience "sts.amazonaws.com".
+
+Then create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json) (remember to change the IAM user number and name of the GitHub user and repo), then (for that IAM Role) create IAM Policy with Trusted entity type "Custom trust policy" with content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json) (limit the actions and resources to the minimal scope possible for your case).
+
+<!-- TODO Delete after implementing K8s cert-manager:-->
+Generate your own "cert.pem" and "key.pem" by command `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 750 -nodes`.
+<br>Then you can print them by `cat cert.pem | base64 -w 0` and `cat key.pem | base64 -w 0` so you are able to copy them from the terminal and insert as values to secret.yaml file that is in Helm chart.
+<br>**Currently this method of using self-signed certificates is temporary and it would be better to use some other TLS certificate approach but if you are ok with then remember to not expose the values of "cert.pem" and "key.pem" in GitHub repo (this repo is showcase example and self-signed certificates will be removed in progress for this repo). Making the better and more secure approach with using K8s cert-manager is in progress for that repo!**
+
 ### Spinning up the infrastructure (3 environments)
 
 To initialize the whole infrastructure (3 environments) you just have to go to Actions section in your repo, find on the left bar the workflow called "Terraform CD", click on it and click "Run worfklow" button in order to manually execute this workflow. First will be deployed development environment, then staging, then production (you have to manually approve the deployment to production in interface of this wokrflow run). Deployment proccess for each environment should take 15 minutes on average.
@@ -354,7 +366,7 @@ aws sts get-caller-identity
 
 4. Update the kubeconfig to get access to your newly created EKS cluster.
 ```bash
-aws eks update-kubeconfig --name \<name of one of the clusters> --region \<used aws region> --profile jakubszuber-admin
+aws eks update-kubeconfig --name <name of one of the clusters> --region <used aws region> --profile jakubszuber-admin
 ```
 
 5. Display and copy the Argo CD default password from the argocd-initial-admin-secret:
@@ -364,24 +376,7 @@ kubectl get secrets -n argocd
 kubectl get secret argocd-initial-admin-secret -n argocd --template={{.data.password}} | base64 -d
 ```
 
-Now you can log in as "admin" to <b>https://argo.\<yourdomain>.com</b> or <b>https://\<name of the environment>.argo.\<yourdomain>.com</b> depends on the cluster.
-
-generate your own "cert.pem" and "key.pem" by command `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 750 -nodes`. Then you can print them by `cat cert.pem | base64 -w 0` and `cat key.pem | base64 -w 0` so you are able to copy them from the terminal and insert as values to secret.yaml file that is in Helm chart. **Currently this method of using self-signed certificates is temporary and it would be better to use some other TLS certificate approach but if you are ok with then remember to not expose the values of "cert.pem" and "key.pem" in GitHub repo (this repo is showcase example and self-signed certificates will be removed in progress for this repo). Making the better and more secure approach is in progress for that repo!**
-XXXSet up the following GitHub secrets (the same for both Actions and Dependabot): DOCKERHUB_TOKEN, DOCKERHUB_USERNAME, SNYK_TOKEN, SLACK_WEBHOOK_URL, SLACK_WEBHOOK_URL2
-Do https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook
-Change all occurrences of "jakubszuber/react-nginx-image" and "react-nginx-image" to your image
-Setup OpenID Connect between GitHub and AWS
-Configure Snyk account with repo
-Create "Staging" and "Production" GitHub environments and then add a protection role for "Production" so this environment will require reviewers (add some reviews that will be able to allow for changes deployment)
-Create the Identity provider in AWS IAM with Provider type "OpenID Connect", Provider URL "https://token.action.githubcontent.com", Audience "sts.amazonaws.com". Then create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json) (remember to change the IAM user number and name of the GitHub user and repo), then add an IAM Policy with a content similar to [this](create an IAM Role with a Trusted entity type "Custom trust policy" and content similar to [this](https://github.com/JakubSzuber/Golden-DevOps/blob/main/aws/gh-action-role.json).
-
-<!--
-<details>
-<summary><b>Click to look at the demo process of deploying this app (example with Docker Compose):</b></summary>
-
-https://user-images.githubusercontent.com/90647840/213922371-848ff6b3-60a8-4db2-94fb-7b11dbf41b42.mov
-</details>
--->
+Now you can log in as "admin" to <b>https://<disable link>argo.\<yourdomain>.com</b> or <b>https://\<environment>.argo.\<yourdomain>.com</b> depends on the cluster.
 
 
 # Development setup
@@ -392,11 +387,18 @@ In order to debug code in VSC make sure that you have [.vscode/launch.json](http
 Note that the initial start, compiling and automatic reload of the website's content can take a little more time than usual. If you encounter any problems with dev
 work try to restart the container, your whole Docker and eventually WSL2.
 
-To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
+<!-- TODO add here demo of the right project -->
+<details>
+<summary><b>Click to see the demo</b></summary>
 
-On the initial run you should see a similar website on either [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000):
+https://user-images.githubusercontent.com/90647840/213922371-848ff6b3-60a8-4db2-94fb-7b11dbf41b42.mov
+</details>
 
-<img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/output.png?raw=true" alt="Local website preview"/>
+<br>On the initial run you should see a similar website on either [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000):
+
+<img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/local-preview.png?raw=true" alt="Local website preview"/>
+
+<br>To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
 
 > **Note**
 > By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
@@ -463,16 +465,9 @@ recusandae alias error harum maxime adipisci amet laborum.
 
 # Clean up
 
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
-numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
-optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
-obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
-nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
-tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
-sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
-recusandae alias error harum maxime adipisci amet laborum.
+> **Warning**
+> TODO XXX
+
 XXXUse the destroy workflow...and then manually destroy A records (CNAME also if you want to delete the TLS certificate) of your hosted zone, DynamoDB table, S3 Bucket for the Terraform Remote State, and then you can delete the TLS certificate, xxx
 
 XXXWhile deleting the Terraform-managed infrastructure it's good to watch the workflow's logs so in case of a long deletion process of some resource (especially VPC that can take a dozen of minutes although deletion timeout of VPC resource is only 5 minutes) go to the AWS Console and manually delete this resource. This will speed up the deletion process and prevent the workflow's errors caused by deletion timeout errors of the Terraform Resources.
@@ -495,7 +490,7 @@ If you find an issue, please report it on the
 This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blob/main/LICENSE) and was entirely created by myself. If you want to publically use this repo in any way I would be so thankful to leave a reference to my GitHub profile, thanks!
 
 
-<!--TODO Add more sections (e.g. about the pipeline of terraform)-->
+
 <!--TODO give somewhere link to docker hub project-->
 <!--TODO write somewhere that the website for the project may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to ;). But every relevant website's appearance should be available to see in this README.md-->
 <!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
@@ -506,4 +501,6 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 <!--TODO create github kanban "Project" and write about it on readme-->
 <!--TODO Do all of TODO from every workflow and from my notes-->
 <!--TODO test does every link works right-->
+<!--TODO Make sure that real repo file structure is shown at the README in tree-file structure (probably it's not because I have to at least add images in "/images folder")-->
 <!--TODO Fix the typos-->
+<!--TODO Add more sections-->
