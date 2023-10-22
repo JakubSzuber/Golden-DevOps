@@ -405,7 +405,7 @@ To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v dow
 > **Note**
 > By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
 
-<!-- TODO in proggress from below -->
+
 # Source code pipeline
 
 The CI/CD pipeline of the source code is handled by 2 GHA workflows [integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml) and [delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml) that contains steps appropriate for particular role of each workflow,and obviosly both workflows are executed by different trigger events.
@@ -414,12 +414,12 @@ The CI/CD pipeline of the source code is handled by 2 GHA workflows [integration
 
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/CI-preview.jpg?raw=true" alt="Local website preview"/>
 
-First workflow ([integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)) is triggered when a new PR is created of new commit for the PR was pushed (also it can be executed manually) for the main branch. Moreover the at least one of the commits has to contain the file that is related with the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/public) directory except README.md files).
+First workflow ([integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)) is triggered when a new PR is created of new commit for the PR was pushed (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related with the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/public) directory except README.md files).
 
 First are executed 4 jobs in parallel:
 - <b>Link Repo</b> - lint files that was changed. You can comment/uncomment right lines to turn on/off options for linting the entire repo instead of only changed files, linting only specific file(s), or excluding from linting specific file(s).
 - <b>Scan Code With Snyk</b> - perform Static Application Security Testing (SAST) testing on the entire repo to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found.
-- <b>Build Test Image (Candidate)</b> - build a Docker image with the last stage that includes only unprivileged Nginx image. This container is potential "candidate" for the new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
+- <b>Build Test Image (Candidate)</b> - build a Docker image with the last stage that includes only unprivileged Nginx image, and push it to the GitHub Registry (which is treated as the playground registry where are stored both testing and official images). This container is a potential "candidate" for the new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
 - <b>Build Unit Test Image</b> - build Docker image with the stage for unit tesing. This is the only purpose of this container as it contains more dependencies within it (compared to the container build with the last step) required only for performing unit testing.
 
 If the "Build Test Image (Candidate)" job is successful then 3 jobs are executed in parallel:
@@ -439,9 +439,32 @@ If any of the jobs fail or are canceled then the end result of the workflow is "
 
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/CD-preview.jpg?raw=true" alt="Local website preview"/>
 
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
-numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
+Second workflow ([delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml)) is triggered when a PR is merged or there was a direct push (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related with the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/public) directory except README.md files).
+
+First are executed 2 jobs in parallel:
+- <b>Build Final Image</b> - build a Docker image with the last stage that includes only unprivileged Nginx image, and push it to both GitHub Registry (the same as "candidate") and DockerHub (where are stored only official images). It is a new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
+- <b>Scan Code With Snyk And Upload Results</b> - perform vulnerability testing with the usage of Snyk for the new Docker container to display all levels of vulnerabilities and upload the test results to Snyk online app and GitHub Code Scanning.
+
+
+
+
+
+<!-- TODO in proggress from below -->
+
+
+
+
+If the "Build Final Image" job is successful then 4 jobs are executed in parallel:
+- <b>Deploy To Development / deploy-to-env</b> - XXX
+- <b>Generate SBOM (Software Bill of Materials) For The Final Image</b> - XXX
+- <b>Scan Image With Snyk</b> - perform vulnerability testing with the usage of Snyk for the "candidate" Docker container to display all levels of vulnerabilities and fail the job if any critical vulnerability was found.
+- <b>Scan Image With Trivy</b> - perform vulnerability testing with the usage of Trivy for the "candidate" Docker container to display all levels of vulnerabilities and fail the job if any critical vulnerability was found.
+
+If the "Deploy To Development / deploy-to-env" job is successful then 2 jobs are executed in consecutive order - <b>Deploy To Staging</b> -> <b>Deploy To Production</b>. Both jobs are exacly the same except for a different environment (moreover Production environment required manual approve from reviewer(s) before execution).
+
+When all of the jobs end their work then the last job is executed - <b>"Notify Slack (Final CI Result)"</b> that is responsible for sending the message to the Slack channel about the result of the entire workflow. If any of the jobs will fail, be skipped, or be canceled then the end result of the workflow is "Failure" and the message with appropriate content and color is sent.
+
+If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed.
 
 
 # Terraform-related files pipeline
