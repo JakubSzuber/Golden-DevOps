@@ -4,7 +4,7 @@ provider "kubectl" {
   load_config_file       = false
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
-    args        = ["eks", "get-token", "--cluster-name", "${data.terraform_remote_state.eks.outputs.cluster_id}"]
+    args        = ["eks", "get-token", "--cluster-name", "${data.terraform_remote_state.eks.outputs.cluster_name}"]
     command     = "aws"
   }
 }

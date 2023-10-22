@@ -74,6 +74,6 @@ resource "helm_release" "lb" {
 
   set {
     name  = "clusterName"
-    value = module.eks.cluster_id
+    value = module.eks.cluster_name
   }
 }
