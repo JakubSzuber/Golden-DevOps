@@ -20,7 +20,7 @@ provider "registry.terraform.io/gavinbunney/kubectl" {
 
 provider "registry.terraform.io/hashicorp/aws" {
   version     = "5.21.0"
-  constraints = ">= 3.72.0, >= 4.0.0, >= 4.57.0, ~> 5.20"
+  constraints = ">= 5.0.0, ~> 5.20"
   hashes = [
     "h1:N8sP6VZjHbtgmaCU6BKPox51UIypWXQRal7JMecEXQw=",
     "zh:1ba1411e4f8c047950db94c236f146d4590790320c68320b4e56082d8746a507",

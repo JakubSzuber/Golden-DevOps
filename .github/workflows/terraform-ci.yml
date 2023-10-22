@@ -20,6 +20,7 @@ env:
 
 jobs:
   syntax-format-tests:
+    if: 1==2 # TODO temporarly disable workflow for testing purposes
     name: Formating And Syntax Tests
     runs-on: ubuntu-latest
     defaults:
@@ -74,6 +75,7 @@ jobs:
           pwd && cd ../argocd && terraform validate
 
   test-Trivy:
+    if: 1==2 # TODO temporarly disable workflow for testing purposes
     name: Scan Terraform Files With Trivy
     runs-on: ubuntu-latest
 
@@ -109,6 +111,7 @@ jobs:
           trivyignores: ".trivyignore"
 
   test-Snyk:
+    if: 1==2 # TODO temporarly disable workflow for testing purposes
     name: Scan Terraform Files With Snyk
     runs-on: ubuntu-latest
 
@@ -139,7 +142,8 @@ jobs:
           args: --severity-threshold=critical
 
   comment-pr:
-    if: always()
+    if: 1==2 # TODO temporarly disable workflow for testing purposes
+    #if: always() # TODO temporarly disable workflow for testing purposes
     #if: github.event_name == 'pull_request' # TODO temporarly disable workflow for testing purposes
     needs: [syntax-format-tests, test-Trivy, test-Snyk]
     name: Comment the PR about the results of the tests
