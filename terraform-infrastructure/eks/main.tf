@@ -32,7 +32,7 @@ module "eks" {
   vpc_id     = data.terraform_remote_state.vpc.outputs.vpc_id
   subnet_ids = data.terraform_remote_state.vpc.outputs.public_subnets
 
-  #manage_aws_auth_configmap = true
+  manage_aws_auth_configmap = true
 
   aws_auth_users = [
     {
