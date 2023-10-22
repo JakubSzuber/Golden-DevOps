@@ -42,7 +42,7 @@ module "eks" {
     },
   ]
 
-  cluster_endpoint_public_access_cidrs = ["5.184.0.0/15", "31.60.0.0/14", "37.47.0.0/16", "37.108.0.0/16", "37.225.0.0/16", "37.228.0.0/18"]
+  cluster_endpoint_public_access_cidrs = ["5.184.0.0/15", "31.60.0.0/14", "37.47.0.0/16", "37.108.0.0/16", "37.225.0.0/16", "46.134.0.0/16"]
 
   eks_managed_node_groups = {
     bottlerocket_nodes = {
