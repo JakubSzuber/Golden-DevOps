@@ -408,16 +408,40 @@ To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v dow
 <!-- TODO in proggress from below -->
 # Source code pipeline
 
+The CI/CD pipeline of the source code is handled by 2 GHA workflows [integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml) and [delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml) that contains steps appropriate for particular role of each workflow,and obviosly both workflows are executed by different trigger events.
+
+## CI stage
+
+<img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/CI-preview.jpg?raw=true" alt="Local website preview"/>
+
+First workflow ([integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)) is triggered when a new PR is created of new commit for the PR was pushed (also it can be executed manually) for the main branch. Moreover the at least one of the commits has to contain the file that is related with the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/public) directory except README.md files).
+
+First are executed 4 jobs in parallel:
+- <b>Link Repo</b> - lint files that was changed. You can comment/uncomment right lines to turn on/off options for linting the entire repo instead of only changed files, linting only specific file(s), or excluding from linting specific file(s).
+- <b>Scan Code With Snyk</b> - perform Static Application Security Testing (SAST) testing on the entire repo to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found.
+- <b>Build Test Image (Candidate)</b> - build a Docker image with the last stage that includes only unprivileged Nginx image. This container is potential "candidate" for the new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
+- <b>Build Unit Test Image</b> - build Docker image with the stage for unit tesing. This is the only purpose of this container as it contains more dependencies within it (compared to the container build with the last step) required only for performing unit testing.
+
+If the "Build Test Image (Candidate)" job is successful then 3 jobs are executed in parallel:
+- <b>Test Deployment In Kubernetes</b> - spin up the k3d cluster, launch the entire Helm Chart, and perform smoke tests on the deployment. k3d is a lightweight wrapper to run k3s (Rancher Lab's minimal Kubernetes distribution) which makes it a great choice for purposes like that.
+- <b>Scan Image With Snyk</b> - perform vulnerability testing with the usage of Snyk for the "candidate" Docker container to display all levels of vulnerabilities and fail the job if any critical vulnerability was found.
+- <b>Scan Image With Trivy</b> - perform vulnerability testing with the usage of Trivy for the "candidate" Docker container to display all levels of vulnerabilities and fail the job if any critical vulnerability was found.
+
+If the "Build Unit Test Image" job is successful then 1 job is executed:
+- <b>Unit Test in Docker</b> - perform unit tests on the Docker image that was built for that purpose.
+
+When all of the jobs end their work then the last job is executed - <b>"Notify Slack (Final CI Result)"</b> that is responsible for sending the message to the Slack channel about the result of the entire workflow. If any of the jobs will fail, be skipped, or be canceled then the end result of the workflow is "Failure" and the message with appropriate content and color is sent.
+
+If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed.
+
+
+## CD stage
+
+<img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/CD-preview.jpg?raw=true" alt="Local website preview"/>
+
 Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
 molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
 numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
-optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
-obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
-nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
-tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
-sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
-recusandae alias error harum maxime adipisci amet laborum.
 
 
 # Terraform-related files pipeline
