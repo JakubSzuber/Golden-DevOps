@@ -21,7 +21,7 @@ env:
 jobs:
   syntax-format-tests:
     if: 1==2 # TODO temporarly disable workflow for testing purposes
-    name: Formating And Syntax Tests
+    name: Formatting And Syntax Tests
     runs-on: ubuntu-latest
     defaults:
       run:

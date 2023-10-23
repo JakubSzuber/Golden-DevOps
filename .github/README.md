@@ -414,7 +414,7 @@ The CI/CD pipeline of the source code is handled by 2 GHA workflows [integration
 
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/CI-preview.jpg?raw=true" alt="Local website preview"/>
 
-First workflow ([integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)) is triggered when a new PR is created of new commit for the PR was pushed (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related with the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/public) directory except README.md files).
+First workflow ([integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)) is triggered when a new PR is created or new commit for the PR was pushed (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related with the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/public) directory except README.md files).
 
 First are executed 4 jobs in parallel:
 - <b>Link Repo</b> - lint files that was changed. You can comment/uncomment right lines to turn on/off options for linting the entire repo instead of only changed files, linting only specific file(s), or excluding from linting specific file(s).
@@ -430,57 +430,57 @@ If the "Build Test Image (Candidate)" job is successful then 3 jobs are executed
 If the "Build Unit Test Image" job is successful then 1 job is executed:
 - <b>Unit Test in Docker</b> - perform unit tests on the Docker image that was built for that purpose.
 
-When all of the jobs end their work then the last job is executed - <b>"Notify Slack (Final CI Result)"</b> that is responsible for sending the message to the Slack channel about the result of the entire workflow. If any of the jobs will fail, be skipped, or be canceled then the end result of the workflow is "Failure" and the message with appropriate content and color is sent.
+When all of the jobs end their work then the last job is executed - <b>"Notify Slack (Final CI Result)"</b> that is responsible for sending the message to the right Slack channel about the result of the entire workflow. If any of the jobs will fail, be skipped, or be canceled then the end result of the workflow is "Failure" and the message with appropriate content and color is sent.
 
-If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed.
-
+If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed, GHA interface, and badge of the repository.
 
 ## CD stage
 
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/CD-preview.jpg?raw=true" alt="Local website preview"/>
 
-Second workflow ([delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml)) is triggered when a PR is merged or there was a direct push (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related with the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/public) directory except README.md files).
+Second workflow ([delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml)) is triggered when a PR is merged or there was a direct push (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related to the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/public) directory except README.md files).
 
 First are executed 2 jobs in parallel:
 - <b>Build Final Image</b> - build a Docker image with the last stage that includes only unprivileged Nginx image, and push it to both GitHub Registry (the same as "candidate") and DockerHub (where are stored only official images). It is a new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
-- <b>Scan Code With Snyk And Upload Results</b> - perform vulnerability testing with the usage of Snyk for the new Docker container to display all levels of vulnerabilities and upload the test results to Snyk online app and GitHub Code Scanning.
-
-
-
-
-
-<!-- TODO in proggress from below -->
-
-
-
+- <b>Scan Code With Snyk And Upload Results</b> - perform Static Application Security Testing (SAST) testing on the entire repo to print all levels of found vulnerabilities and upload the test results to Snyk online app and GitHub Code Scanning.
 
 If the "Build Final Image" job is successful then 4 jobs are executed in parallel:
-- <b>Deploy To Development / deploy-to-env</b> - XXX
-- <b>Generate SBOM (Software Bill of Materials) For The Final Image</b> - XXX
-- <b>Scan Image With Snyk</b> - perform vulnerability testing with the usage of Snyk for the "candidate" Docker container to display all levels of vulnerabilities and fail the job if any critical vulnerability was found.
-- <b>Scan Image With Trivy</b> - perform vulnerability testing with the usage of Trivy for the "candidate" Docker container to display all levels of vulnerabilities and fail the job if any critical vulnerability was found.
+- <b>Deploy To Development / deploy-to-env</b> - execution of reusable workflow [reusable-change-tag.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-change-tag.yml) with specifying parameters for the development environment. This workflow just changes the tag of the deployment's image in Helm values-\<env>.yaml file so Argo CD running within the dev EKS cluster can notice that change and update the used image for every pod in the development environment.
+- <b>Generate SBOM (Software Bill of Materials) For The Final Image</b> - generate SBOM for the container and upload it to the GitHub Dependency Graph.
+- <b>Scan Image With Snyk And Upload Results</b> - perform vulnerability testing with the usage of Snyk for the new Docker container to display all levels of vulnerabilities and upload the test results to Snyk online app and GitHub Code Scanning.
+- <b>Scan Image With Trivy And Upload Results</b> - perform vulnerability testing using Trivy for the new Docker container to display all levels of vulnerabilities and upload the test results to GitHub Code Scanning.
 
-If the "Deploy To Development / deploy-to-env" job is successful then 2 jobs are executed in consecutive order - <b>Deploy To Staging</b> -> <b>Deploy To Production</b>. Both jobs are exacly the same except for a different environment (moreover Production environment required manual approve from reviewer(s) before execution).
+If the "Deploy To Development / deploy-to-env" job is successful then 2 jobs are executed in consecutive order - <b>Deploy To Staging</b> -> <b>Deploy To Production</b>. Both jobs are exactly the same except for a different environment (different Helm values-\<env>.yaml file) (moreover Production environment required manual approval from reviewer(s) before execution).
 
-When all of the jobs end their work then the last job is executed - <b>"Notify Slack (Final CI Result)"</b> that is responsible for sending the message to the Slack channel about the result of the entire workflow. If any of the jobs will fail, be skipped, or be canceled then the end result of the workflow is "Failure" and the message with appropriate content and color is sent.
+When all of the jobs end their work then the last job is executed - <b>"Notify Slack (Final CD Result)"</b> that is responsible for sending the message to the right Slack channel about the result of the entire workflow. If any of the jobs will fail, be skipped, or be canceled then the end result of the workflow is "Failure" and the message with appropriate content and color is sent.
 
-If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed.
+If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the GHA interface and badge of the repository. In theory, failure of this workflow shouldn't happen because all tests that could raise an error to block the PR should be previously made by CI workflow, but if the workflow was triggered by a direct commit that contains some kind of bug/vulnerability then failure can absolutely happen. That's why branch protection for at least the main branch is important but of course, everything depends on your needs. Of course, if you modify the workflow by introducing some bug then the workflow can also fail.
+
+> **Important**
+> If you suspect a temporary error of the workflow run caused by GHA then re-run failed and skipped jobs of the same workflow!
 
 
 # Terraform-related files pipeline
 
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
-numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
-optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
-obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
-nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
-tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
-sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
-recusandae alias error harum maxime adipisci amet laborum.
+The CI/CD pipeline of the Terraform configuration files is handled by 2 GHA workflows [terraform-ci.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/terraform-ci.yml) and [terraform-cd.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/terraform-cd.yml) that contains steps appropriate for particular role of each workflow, and obviously both workflows are executed by different trigger events.
 
+## CI stage
 
+<img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/Terraform-CI-preview.jpg?raw=true" alt="Local website preview"/>
+
+First workflow ([integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)) is triggered when a new PR is created or a new commit for the PR was pushed (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related to the Terraform-managed infrastructure so any file within [terraform-infrastructure](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure) directory.
+
+First are executed 3 jobs in parallel:
+- <b>Formatting And Syntax Tests</b> - check do Terraform configuration files are formatted using `terraform fmt -check -recursive` command and check the syntax errors by using `terraform validate` command.
+- <b>Scan Terraform Files With Trivy</b> - use Trivy to perform vulnerability testing on every file Terraform-related file (instead of automatically generated install.yaml) to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found.
+- <b>Scan Terraform Files With Snyk</b> - use Snyk to perform vulnerability testing on every file Terraform-related file (counting automatically generated install.yaml) to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found. File install.yaml is tested in this job because Snyk is not that sensitive to vulnerabilities compared to Trivy and allows for those that are in that file.
+
+When the above 3 test jobs end their work then <b>"Comment the PR about the results of the tests"</b> is executed. This job is responsible for adding a comment the the PR about the results of the previous test jobs and attaching the output of them.
+
+If all of the above 3 test jobs are successful then the last job is executed - <b>Deploy To Development / deploy-to-env</b>. This job uses reusable workflow [reusable-terraform.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-terraform.yml) with specifying parameters for the development environment in order to apply/deploy Terraform changes for the development environment.
+
+If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed, GHA interface, and badge of the repository.
+<!-- TODOprogress from below -->
 # Rolling back
 
 To roll back revert the right commit with a change and the GHA pipelines along with Argo CD will take care of...?
