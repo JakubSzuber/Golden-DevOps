@@ -334,7 +334,7 @@ For example there is one of 3 pairs: "dev.yourdomain.com" and traffic routed to 
 
 Now you should be able to enter the main websites and Argo CD Dashboards (login page) for each environment. It doesn't matter if you use http:// or https:// because you will still be redirected to https. If you the error then probably you have to wait for the new domain's records to propagate. If you have a VPN then turning it on, especially on USA, can significantly reduce waiting time ([I](https://github.com/JakubSzuber) personally use and recommend Chrome extension [Urban VPN](https://chrome.google.com/webstore/detail/urban-vpn-proxy/eppiocemhmnlbhjplcgkofciiegomcon?utm_source=ext_sidebar&hl=en-US)).
 
-Websites should be similar to below (but with different domain).
+Websites should be similar to the below ones (but with different domains).
 
 <!-- TODO add here screenshot of the webiste from the internet (link of main website) -->
 <img width="100%" src="https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg" alt="Main website preview"/>
@@ -468,7 +468,7 @@ The CI/CD pipeline of the Terraform configuration files is handled by 2 GHA work
 
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/Terraform-CI-preview.jpg?raw=true" alt="Local website preview"/>
 
-First workflow ([integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)) is triggered when a new PR is created or a new commit for the PR was pushed (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related to the Terraform-managed infrastructure so any file within [terraform-infrastructure](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure) directory.
+First workflow ([terraform-ci.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/terraform-ci.yml)) is triggered when a new PR is created or a new commit for the PR was pushed (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related to the Terraform-managed infrastructure so any file within [terraform-infrastructure](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure) directory.
 
 First are executed 3 jobs in parallel:
 - <b>Formatting And Syntax Tests</b> - check do Terraform configuration files are formatted using `terraform fmt -check -recursive` command and check the syntax errors by using `terraform validate` command.
@@ -481,6 +481,25 @@ If all of the above 3 test jobs are successful then the last job is executed - <
 
 If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed, GHA interface, and badge of the repository.
 <!-- TODOprogress from below -->
+## CD stage
+
+<img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/Terraform-CD-preview.jpg?raw=true" alt="Local website preview"/>
+
+Second workflow ([terraform-cd.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/terraform-cd.yml)) is triggered when a PR is merged or there was a direct push (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related to the Terraform-managed infrastructure so any file within [terraform-infrastructure](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure) directory.
+
+First are executed 3 jobs in parallel:
+- <b>Deploy To Development / Apply Changes Of All 3 Modules (vpc -> eks -> argocd) To A Specific Environment</b> - XXX TODO
+- <b>Scan Image With Trivy And Upload Results</b> - use Trivy to perform vulnerability testing on every file Terraform-related file (instead of automatically generated install.yaml) to print all levels of found vulnerabilities and upload the test results to GitHub Code Scanning.
+- <b>Scan Image With Snyk And Upload Results</b> - use Snyk to perform vulnerability testing on every file Terraform-related file (counting automatically generated install.yaml) to print all levels of found vulnerabilities andand upload the test results to Snyk online app and GitHub Code Scanning. File install.yaml is tested in this job because Snyk is not that sensitive to vulnerabilities compared to Trivy and allows for those that are in that file.
+<!-- TODO !!!!! the name of below jobs are obviosly wrong -->
+
+When the above 3 test jobs end their work then <b>"Comment the PR about the results of the tests"</b> is executed. This job is responsible for adding a comment the the PR about the results of the previous test jobs and attaching the output of them.
+
+If all of the above 3 test jobs are successful then the last job is executed - <b>Deploy To Development / deploy-to-env</b>. This job uses reusable workflow [reusable-terraform.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-terraform.yml) with specifying parameters for the development environment in order to apply/deploy Terraform changes for the development environment.
+
+If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed, GHA interface, and badge of the repository.
+
+
 # Rolling back
 
 To roll back revert the right commit with a change and the GHA pipelines along with Argo CD will take care of...?
