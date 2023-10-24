@@ -531,15 +531,17 @@ TODO Above diagram shows all of the K8s resources that run within the cluster (f
 
 # Clean up
 
+To destroy the entire infrastructure (all 3 environments) and clean up everything related to it follow the below steps in order.
+
+1. Manually execute the [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) workflow to destroy each environment in parallel. The Terraform modules will be destroyed in order: "argocd", "eks", "vpc".
+2. Then you have to manually delete stuff that was created manually by you. Go to AWS Console and remove A records (CNAME also if you want to delete the TLS certificate) of your hosted zone, DynamoDB table, S3 Bucket for the Terraform Remote State, and then you can also delete the TLS certificate.
+
+While deleting the Terraform-managed infrastructure it's good to watch the workflow's logs so in case of a long deletion process of some resource (especially VPC that can take a dozen minutes although deletion timeout of VPC resource is only 5 minutes) go to the AWS Console and manually delete this resource. This will speed up the deletion process and prevent the workflow's errors caused by deletion timeout errors of the Terraform Resources.
+
 > **Warning**
-> TODO XXX
-
-XXXUse the destroy workflow...and then manually destroy A records (CNAME also if you want to delete the TLS certificate) of your hosted zone, DynamoDB table, S3 Bucket for the Terraform Remote State, and then you can delete the TLS certificate, xxx
-
-XXXWhile deleting the Terraform-managed infrastructure it's good to watch the workflow's logs so in case of a long deletion process of some resource (especially VPC that can take a dozen of minutes although deletion timeout of VPC resource is only 5 minutes) go to the AWS Console and manually delete this resource. This will speed up the deletion process and prevent the workflow's errors caused by deletion timeout errors of the Terraform Resources.
-XXXIn case of a timeout failure of workflow responsible for cleaning up the entire Terraform-managed infrastructure (infra-cleanup.yml) you have to comment out the right environment in infra-cleanup.yml and/or comment out the particular lines responsible for planning and destroying specific module(s) in reusable-infra-cleanup.yml.
-
-XXXFor example in case of a timeout error because deletion of production VPC took too long, first go to infra-cleanup.yml and comment out the json values responsible for dev and staging environments, then go to reusable-infra-cleanup.yml and in "Terraform Plan" step delete lines (in this case first 6 lines) are temporarily useless because argocd and eks modules were already deleted and attempt to do a "terraform plan" or "terraform destroy" on those modules will fail among others because the EKS Cluster endpoint is already deleted. Remember to change "cd ../vpc" to "cd vpc"). Then delete the steps responsible for deleting the argocd and eks modules. Now you can finally execute the workflow infra-cleanup.yml once again and then undo the changes that you temporarily made to infra-cleanup.yml and reusable-infra-cleanup.yml.
+> In case of a timeout failure of workflow responsible for cleaning up the entire Terraform-managed infrastructure [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) you have to comment out the right environment in infra-cleanup.yml and/or comment out the particular lines responsible for planning and destroying specific module(s) in reusable-infra-cleanup.yml.
+>
+> For example, in case of a timeout error because the deletion of production VPC took too long, first go to [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml)  and comment out the JSON values responsible for dev and staging environments, then go to [reusable-infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-infra-cleanup.yml) and in "Terraform Plan" step delete lines (in this case first 6 lines) are temporarily useless because "argocd" and "eks" modules were already deleted and attempt to do a "terraform plan" or "terraform destroy" on those modules will fail among others because the EKS Cluster endpoint is already deleted (remember to change "cd ../vpc" to "cd vpc"). Then delete the steps responsible for deleting the "argocd" and "eks modules". Now you can finally execute the workflow [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) once again and then undo the changes that you temporarily made to [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) and [reusable-infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-infra-cleanup.yml)
 
 
 ## Contributing
