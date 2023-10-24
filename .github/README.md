@@ -24,10 +24,10 @@ After the right setup (mostly changing the values for your particular case - mor
 
 - <b>Full scability</b> - This project has implemented the Horizontal Pod Autoscaler (HPA) that ensures the right amount of pod based on the current traffic load. Furthermore, there is Karpeneter that in case of an overwhelm on the EC2 instances can spin up the new ones in the right size depending on the needs. This project is fully scalable but of course, you are able to control the minimum and maximum number of EC2 instances that you want or are able to run. In [eks/main.tf](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure/eks/main.tf) file you can set the "min_size", "max_size", "desired_size" and other configuration of your EC2 instances (EKS managed nodes).
 - <b>High availability</b> - This project places EC2 instances across different VPC Subnets which ensures that in case of a failure of the Availability Zone our app will be still running. Furthermore, full scalability also ensures that our app has no downtime because of the traffic overload.
-- <b>Automated and rapid updates with zero downtime</b> - This project is created along with DevOps practices. In a nutshell application lifecycle ([more here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)) looks like that: developer merge a PR with changes and the [workflow](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml) responsible for CD builds a new container with the newest applied changes and push it to DockerHub Registry, and after that changes the used tag in K8s deployments for each environment so in their configuration is used the newest container's tag with applied changes. Then Argo CD running within each cluster automatical notices that change and deploy the new container gradually - in each pod but not on all of them at the same time, so there is practically no downtime because the traffic is
-continually routed to either the pod with changes or old pod that waits for its turn. This gives us extremely easy and potentially very frequent updates for our app (for both the Development and Operations teams) whenever we want.
+- <b>Automated and rapid updates with zero downtime</b> - This project is created along with DevOps practices. In a nutshell application lifecycle ([more here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)) looks like that: developer merge a PR with changes and the [workflow](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml) responsible for CD builds a new container with the newest applied changes and push it to Docker Hub Registry, and after that changes the used tag in K8s deployments for each environment so in their configuration is used the newest container's tag with applied changes. Then Argo CD running within each cluster automatical notices that change and deploy the new container gradually - in each pod but not on all of them at the same time, so there is practically no downtime because the traffic is continually routed to either the pod with changes or old pod that waits for its turn. This gives us extremely easy and potentially very frequent updates for our app (for both the Development and Operations teams) whenever we want.
 - <b>Ease of replication and short Mean Time to Recovery (MTTR)</b> - This project has defined the entire infrastructure in Terraform files that don't replicate themselves (to manage multiple env Terraform Workspaces is used). This gives us the ability to very easily and rapidly deploy some new environment or spin up the environment that was already created but for some reason failed. We don't have to create anything manually in some cloud provider's console and we don't have to make any new files/directories to spin up a new environment from scratch.
 - <b>Great development experience</b> - This project has a load of features that significantly help the development team by e.g. making the setup process very effortless and rapid, automating repetitive and complicated tasks, helping with configuring IDE. More about development experience ([here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)). Furthermore, a lot of other tasks are completely automated to reduce the work of the developers. See below point.
+- <b>Easy team collaboration</b> - This project has implemented [Kanban Board](https://github.com/users/JakubSzuber/projects/3) as a GitHub Project with 4 columns - Considering, TODO, In Progress, and Done. Moreover, you can define individuals or teams that are responsible for particular code in a repository by [CODEOWNERS](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/CODEOWNERS) file. Basically, entire purpose of [.github](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github) directory is to enhance the experience while using this repo and facilitate team cooperation.
 - <b>Other automations</b> - This project uses a lot of GHA workflow to automate numerous tasks. Examples of automated tasks are - publishing new releases, marking/deleting old PR and Issues, version updates of GHA workflows' actions, Terraform modules and providers, dependencies in package.json and package-lock.json, and obviously lifecycles of source code, Terraform files, and Helm Chart. To insight more about what things are automated through GHA workflows see [.github/workflows](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/workflows).
 - <b>Easy rollbacks</b> - This project has implemented Argo CD and stores everything as a code within Git repo. This gives us very easy rollbacks because it's only a matter of undoing a particular commit by `git revert` or `git remove` and the previous state of everything will be restored, no matter if is it a thing related to Terraform file(s), source code or anything else. For example when you undo a commit that was doing a change in Terraform files then GHA workflows responsible for Terraform CI/CD will apply the changes. Another example is that you want to go back to the previous version of your main application (actually the previous container's tag), then you just have to undo a commit(s) that was pushed automatically by [delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/workflows/delivery.yml) and Argo CD will automatically notice that tags of the main application container changed and apply the changes. So a real state of everything related to the application will reflect the exact state of current files stored within the repo.
 - <b>Low latency</b> - This project uses static content served by Nginx which is later cached by AWS CDN - Amazon CloudFront, so the latency of the application should be minimal (also because the source code in this project is very simple, in order to only showcase how to create React app).
@@ -36,7 +36,7 @@ continually routed to either the pod with changes or old pod that waits for its 
 - <b>Great resource utilization</b> - This project is fully scalable (in terms of both the nodes and containers) to meet the exact needed demand. Moreover, the desired, minimal, maximal number of nodes is based on the [calculator](https://learnk8s.io/kubernetes-instance-calculator) that shows the most efficient configurations (you can also set the EC2 instance types that can be possibly used).
 - <b>And a lot more...</b>
 
-### Development experience
+## Development experience
 
 This project has a load of features that significantly help the development team. First of all, when a developer wants to start the work with that project it's only a matter of cloning a repo and executing a single command (docker compose up) to spin up everything required to run a development environment to work properly. Guide about development [here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#development-setup).
 
@@ -230,21 +230,21 @@ You don't need to have everything from described below "Full usage" point to use
 (Be able to use every functionality from this project)
 
 - Git, Node.js, Docker and Docker Compose (highly recommended to have Docker Desktop) installed on the local computer.
-- GitHub Account, AWS Account, DockerHub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels (guide on how to use Slack GHA step [here](https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook)).
+- GitHub Account, AWS Account, Docker Hub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels (guide on how to use Slack GHA step [here](https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook)).
 - Right configured AWS directory (~/.aws) on your local computer. You can use `aws configure` command to set the default AWS profile's Access Key ID and Access Key Name (data will be saved in file ~/.aws/credentials), and default AWS region (use the same as you use in other files) and format of the output (data will be saved in file ~/.aws/config). Then open ~/.aws/credentials file and create a new AWS profile, that will be used for accesing the EKS cluster from your local computer (in this repo this AWS profile is called "jakubszuber-admin"). This new AWS profile could have the same Access Key's ID and Name as your default profile but don't have to.
 
 ### Have automated pipelines:
 
 (GHA that will automate lifecycle of the source code, Terraform files, Helm Chart, and other less important tasks)
 
-- GitHub Account, AWS Account, DockerHub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels
+- GitHub Account, AWS Account, Docker Hub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels
 (guide on how to use Slack GHA step [here](https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook)).
 
 ### Spin up the infrastructure:
 
 (Deploy 3 environments with main website and Argo CD Dashboard for each one)<br>(Second point if you want to have access to EKS cluster from your local computer)
 
-- GitHub Account, AWS Account, DockerHub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels (guide on how to use Slack GHA step [here](https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook).
+- GitHub Account, AWS Account, Docker Hub Account, Snyk Account (with your integrated repo), Slack Account and Slack App with at least 2 Webhook URLs to channels (guide on how to use Slack GHA step [here](https://github.com/marketplace/actions/slack-send#technique-3-slack-incoming-webhook).
 - Right configured AWS directory (~/.aws) on your local computer. You can use `aws configure` command to set the default AWS profile's Access Key ID and Access Key Name (data will be saved in file ~/.aws/credentials), and default AWS region (use the same as you use in other files) and format of the output (data will be saved in file ~/.aws/config). Then open ~/.aws/credentials file and create a new AWS profile, that will be used for accesing the EKS cluster from your local computer (in this repo this AWS profile is called "jakubszuber-admin"). This new AWS profile could have the same Access Key's ID and Name as your default profile but don't have to.
 
 ### Have development environment for React-Nginx app
@@ -419,7 +419,7 @@ First workflow ([integration.yml](https://github.com/JakubSzuber/Golden-DevOps/b
 First are executed 4 jobs in parallel:
 - <b>Link Repo</b> - lint files that was changed. You can comment/uncomment right lines to turn on/off options for linting the entire repo instead of only changed files, linting only specific file(s), or excluding from linting specific file(s).
 - <b>Scan Code With Snyk</b> - perform Static Application Security Testing (SAST) testing on the entire repo to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found.
-- <b>Build Test Image (Candidate)</b> - build a Docker image with the last stage that includes only unprivileged Nginx image, and push it to the GitHub Registry (which is treated as the playground registry where are stored both testing and official images). This container is a potential "candidate" for the new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
+- <b>Build Test Image (Candidate)</b> - build a Docker image with the last stage that includes only unprivileged Nginx image, and push it to the [GitHub Packages](https://github.com/JakubSzuber?tab=packages&repo_name=Golden-DevOps) (which is treated as the playground registry where are stored both testing and official images). This container is a potential "candidate" for the new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
 - <b>Build Unit Test Image</b> - build Docker image with the stage for unit tesing. This is the only purpose of this container as it contains more dependencies within it (compared to the container build with the last step) required only for performing unit testing.
 
 If the "Build Test Image (Candidate)" job is successful then 3 jobs are executed in parallel:
@@ -441,7 +441,7 @@ If any of the jobs fail or are canceled then the end result of the workflow is "
 Second workflow ([delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml)) is triggered when a PR is merged or there was a direct push (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related to the main React-Nginx container [Dockerfile](https://github.com/JakubSzuber/Golden-DevOps/blob/main/Dockerfile), [package.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/package.json), [package-lock.json](https://github.com/JakubSzuber/Golden-DevOps/blob/main/package-lock.json), or some file within [src](https://github.com/JakubSzuber/Golden-DevOps/blob/main/src) or [public](https://github.com/JakubSzuber/Golden-DevOps/blob/main/public) directory except README.md files).
 
 First are executed 2 jobs in parallel:
-- <b>Build Final Image</b> - build a Docker image with the last stage that includes only unprivileged Nginx image, and push it to both GitHub Registry (the same as "candidate") and DockerHub (where are stored only official images). It is a new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
+- <b>Build Final Image</b> - build a Docker image with the last stage that includes only unprivileged Nginx image, and push it to both [GitHub Packages](https://github.com/JakubSzuber?tab=packages&repo_name=Golden-DevOps) (the same as "candidate") and [Docker Hub](https://hub.docker.com/repository/docker/jakubszuber/react-nginx-image/general) (where are stored only official images). It is a new container responsible for the main React-Nginx website. The "candidate" image contains minimal software required to serve static React website through Nginx which makes it lightweight and secure.
 - <b>Scan Code With Snyk And Upload Results</b> - perform Static Application Security Testing (SAST) testing on the entire repo to print all levels of found vulnerabilities and upload the test results to Snyk online app and GitHub Code Scanning.
 
 If the "Build Final Image" job is successful then 4 jobs are executed in parallel:
@@ -541,7 +541,30 @@ While deleting the Terraform-managed infrastructure it's good to watch the workf
 > **Warning**
 > In case of a timeout failure of workflow responsible for cleaning up the entire Terraform-managed infrastructure [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) you have to comment out the right environment in infra-cleanup.yml and/or comment out the particular lines responsible for planning and destroying specific module(s) in reusable-infra-cleanup.yml.
 >
-> For example, in case of a timeout error because the deletion of production VPC took too long, first go to [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml)  and comment out the JSON values responsible for dev and staging environments, then go to [reusable-infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-infra-cleanup.yml) and in "Terraform Plan" step delete lines (in this case first 6 lines) are temporarily useless because "argocd" and "eks" modules were already deleted and attempt to do a "terraform plan" or "terraform destroy" on those modules will fail among others because the EKS Cluster endpoint is already deleted (remember to change "cd ../vpc" to "cd vpc"). Then delete the steps responsible for deleting the "argocd" and "eks modules". Now you can finally execute the workflow [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) once again and then undo the changes that you temporarily made to [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) and [reusable-infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-infra-cleanup.yml)
+> For example, in case of a timeout error because the deletion of production VPC took too long, first go to [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) and comment out the JSON values responsible for dev and staging environments, then go to [reusable-infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-infra-cleanup.yml) and in "Terraform Plan" step delete lines (in this case first 6 lines) are temporarily useless because "argocd" and "eks" modules were already deleted and attempt to do a "terraform plan" or "terraform destroy" on those modules will fail among others because the EKS Cluster endpoint is already deleted (remember to change "cd ../vpc" to "cd vpc"). Then delete the steps responsible for deleting the "argocd" and "eks modules". Now you can finally execute the workflow [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) once again and then undo the changes that you temporarily made to [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) and [reusable-infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-infra-cleanup.yml)
+
+
+# Golden-DevOps Project Development
+
+Golden-DevOps is still in the early stage of development. Because of this fact, there still could be some bugs that may make it more or less difficult to use some of the repo features. I highly recommend using [version](https://github.com/JakubSzuber/Golden-DevOps/releases) equal to or higher than [1.0.0](https://github.com/JakubSzuber/Golden-DevOps/releases/tag/v1.0.0) so you can be sure that everything is sophisticated to create a real-world application that will be secure on at least basic level.
+
+Remember that you can check out the [Kanban Board](https://github.com/users/JakubSzuber/projects/3) for insight into what is currently under constant development and what is planned to be done in the future. [I](https://github.com/JakubSzuber) continuously update this board so it reflects the real status of the task included in it.
+
+The domains for the websites of the Golden-DevOps project (e.g. https://goldendevops.com) may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to. But every relevant website's appearance should be available to see in this README.md.
+
+
+# Registries
+
+Currently, there are 2 registries used for this project - GitHub Packages <img src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/icon-github-packages.png?raw=true" alt="GitHub Packages Icon" width="35px" style="vertical-align:middle;"> and Docker Hub <img src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/docker-hub.png?raw=true" alt="Docker Hub Icon" width="55px" style="vertical-align:middle;">
+
+<b>GitHub Packages</b> is treated as the playground registry where are stored both testing and official images. Link to this registry for this repo is [here](https://github.com/JakubSzuber?tab=packages&repo_name=Golden-DevOps).
+
+<b>Docker Hub</b> is treated as the main registry where are stored only official images that should have passed the whole CI (unless there was a direct push or manual execution of CD workflow). Link to this registry for this repo is [here](https://hub.docker.com/repository/docker/jakubszuber/react-nginx-image/general).
+
+> **Note**
+> It's also recommended to, in your Docker Hub repository settings, turn new Docker feature - Docker Scout. It will allow you to analyze your images to help you understand their dependencies and potential vulnerabilities.
+>
+> It can among others give you Docker Scout integration directly within your Docker Hub Registry and an entirely separate Docker Scout website for your Docker Hub Account's Docker images under link https://scout.docker.com/ (you have to log in to your Docker Hub Account).
 
 
 ## Contributing
@@ -558,18 +581,22 @@ If you find an issue, please report it on the
 This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blob/main/LICENSE) and was entirely created by myself. If you want to publicly use this repo in any way I would be so thankful to leave a reference to my GitHub profile, thanks!
 
 
+<!--TODO Write somewhere that: Implementation of another service like for instance new Postgres container is very facilitated. To do so uncomment and possibly modify the following files depending on your needs: [docker-compose.dev.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.dev.yml), [docker-compose.test.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.test.yml), [integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)-->
+
+<!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons). Rememeber to write sth like "AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup" https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff-->
+
+<!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
+
+<!--TODO write something about which and how GitOps deployment models ware implemented (push-base and pull-based)-->
+
+<!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
+
+<!--TODO test does every link works right-->
+
+<!--TODO Make sure that real repo file structure is shown at the README in tree-file structure (probably it's not because I have to at least add images in "/images folder")-->
+
+<!--TODO Add more sections-->
+
+<!--TODO Fix the typos-->
 
 <!--TODO check for XXX TODO-->
-<!--TODO give somewhere link to docker hub project-->
-<!--TODO write somewhere that the website for the project may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to ;). But every relevant website's appearance should be available to see in this README.md-->
-<!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
-<!--TODO Write somewhere that: Implementation of another service like for instance new Postgres container is very facilitated. To do so uncomment and possibly modify the following files depending on your needs: [docker-compose.dev.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.dev.yml), [docker-compose.test.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.test.yml), [integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)-->
-<!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons). Rememeber to write sth like "AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup" https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff-->
-<!--TODO write something about which and how Gitops deployment models ware implemented (push-base and pull-based)-->
-<!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
-<!--TODO create github kanban "Project" and write about it on readme-->
-<!--TODO Do all of TODO from every workflow and from my notes-->
-<!--TODO test does every link works right-->
-<!--TODO Make sure that real repo file structure is shown at the README in tree-file structure (probably it's not because I have to at least add images in "/images folder")-->
-<!--TODO Fix the typos-->
-<!--TODO Add more sections-->
