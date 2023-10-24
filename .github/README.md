@@ -472,15 +472,15 @@ First workflow ([terraform-ci.yml](https://github.com/JakubSzuber/Golden-DevOps/
 
 First are executed 3 jobs in parallel:
 - <b>Formatting And Syntax Tests</b> - check do Terraform configuration files are formatted using `terraform fmt -check -recursive` command and check the syntax errors by using `terraform validate` command.
-- <b>Scan Terraform Files With Trivy</b> - use Trivy to perform vulnerability testing on every file Terraform-related file (instead of automatically generated install.yaml) to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found.
-- <b>Scan Terraform Files With Snyk</b> - use Snyk to perform vulnerability testing on every file Terraform-related file (counting automatically generated install.yaml) to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found. File install.yaml is tested in this job because Snyk is not that sensitive to vulnerabilities compared to Trivy and allows for those that are in that file.
+- <b>Scan Terraform Files With Trivy</b> - use Trivy to perform vulnerability testing on every Terraform-related file (instead of automatically generated install.yaml) to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found.
+- <b>Scan Terraform Files With Snyk</b> - use Snyk to perform vulnerability testing on every Terraform-related file (counting automatically generated install.yaml) to print all levels of found vulnerabilities and fail the job if any critical level vulnerability was found. File install.yaml is tested in this job because Snyk is not that sensitive to vulnerabilities compared to Trivy and allows for those that are in that file.
 
 When the above 3 test jobs end their work then <b>"Comment the PR about the results of the tests"</b> is executed. This job is responsible for adding a comment the the PR about the results of the previous test jobs and attaching the output of them.
 
 If all of the above 3 test jobs are successful then the last job is executed - <b>Deploy To Development / deploy-to-env</b>. This job uses reusable workflow [reusable-terraform.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-terraform.yml) with specifying parameters for the development environment in order to apply/deploy Terraform changes for the development environment.
 
 If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed, GHA interface, and badge of the repository.
-<!-- TODOprogress from below -->
+
 ## CD stage
 
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/Terraform-CD-preview.jpg?raw=true" alt="Local website preview"/>
@@ -488,47 +488,45 @@ If any of the jobs fail or are canceled then the end result of the workflow is "
 Second workflow ([terraform-cd.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/terraform-cd.yml)) is triggered when a PR is merged or there was a direct push (also it can be executed manually) for the main branch. Moreover at least one of the commits has to contain the file that is related to the Terraform-managed infrastructure so any file within [terraform-infrastructure](https://github.com/JakubSzuber/Golden-DevOps/blob/main/terraform-infrastructure) directory.
 
 First are executed 3 jobs in parallel:
-- <b>Deploy To Development / Apply Changes Of All 3 Modules (vpc -> eks -> argocd) To A Specific Environment</b> - XXX TODO
-- <b>Scan Image With Trivy And Upload Results</b> - use Trivy to perform vulnerability testing on every file Terraform-related file (instead of automatically generated install.yaml) to print all levels of found vulnerabilities and upload the test results to GitHub Code Scanning.
-- <b>Scan Image With Snyk And Upload Results</b> - use Snyk to perform vulnerability testing on every file Terraform-related file (counting automatically generated install.yaml) to print all levels of found vulnerabilities andand upload the test results to Snyk online app and GitHub Code Scanning. File install.yaml is tested in this job because Snyk is not that sensitive to vulnerabilities compared to Trivy and allows for those that are in that file.
-<!-- TODO !!!!! the name of below jobs are obviosly wrong -->
+- <b>Deploy To Development / Apply Changes Of All 3 Modules (vpc -> eks -> argocd) To A Specific Environment</b> - execution of reusable workflow [reusable-terraform.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-terraform.yml) with specifying parameters for the development environment in order to apply/deploy Terraform changes for the development environment.
+- <b>Scan Terraform Files With Trivy And Upload Results</b> - use Trivy to perform vulnerability testing on every Terraform-related file (instead of automatically generated install.yaml) to print all levels of found vulnerabilities and upload the test results to GitHub Code Scanning.
+- <b>Scan Terraform Files With Trivy And Upload Results</b> - use Snyk to perform vulnerability testing on every file Terraform-related file (counting automatically generated install.yaml) to print all levels of found vulnerabilities and upload the test results to Snyk online app and GitHub Code Scanning. File install.yaml is tested in this job because Snyk is not that sensitive to vulnerabilities compared to Trivy and allows for those that are in that file.
 
-When the above 3 test jobs end their work then <b>"Comment the PR about the results of the tests"</b> is executed. This job is responsible for adding a comment the the PR about the results of the previous test jobs and attaching the output of them.
+If the "Deploy To Development / Apply Changes Of All 3 Modules (vpc -> eks -> argocd) To A Specific Environment" job is successful then 2 jobs are executed in consecutive order - <b>Deploy To Staging [...]</b> -> <b>Deploy To Production [...]</b>. Both jobs are exactly the same except for a different environment (different Terraform terraform-\<env>.tfvars file) (moreover Production environment required manual approval from reviewer(s) before execution).
 
-If all of the above 3 test jobs are successful then the last job is executed - <b>Deploy To Development / deploy-to-env</b>. This job uses reusable workflow [reusable-terraform.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-terraform.yml) with specifying parameters for the development environment in order to apply/deploy Terraform changes for the development environment.
-
-If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the interface of the PR for which the workflow was executed, GHA interface, and badge of the repository.
-
-
-# Rolling back
-
-To roll back revert the right commit with a change and the GHA pipelines along with Argo CD will take care of...?
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
-numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
-optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
-obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
-nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
-tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
-sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
-recusandae alias error harum maxime adipisci amet laborum.
+If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the GHA interface and badge of the repository. In theory, failure of this workflow shouldn't happen because all tests that could raise an error to block the PR should be previously made by Terraform CI workflow, but if the workflow was triggered by a direct commit that contains some kind of bug/vulnerability then failure can absolutely happen. That's why branch protection for at least the main branch is important but of course, everything depends on your needs. Of course, if you modify the workflow by introducing some bug then the workflow can also fail.
 
 
 # Infrastructure
 
+The entire infrastructure used in this project is placed in AWS and is managed through Terraform.
+
+Below diagrams show every component of the infrastructure for a particular number of environments and where is it placed and how is it related to other components. Moreover, the diagrams animatedly show network traffic.
+
+Diagram of every component of the infrastructure for 3 environments (each env one is exactly the same):
+
+<!-- TODO Add digram for all 3 envs -->
 ![](https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg)
 
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
-molestiae quas vel sint commodi repudiandae consequuntur voluptatum laborum
-numquam blanditiis harum quisquam eius sed odit fugiat iusto fuga praesentium
-optio, eaque rerum! Provident similique accusantium nemo autem. Veritatis
-obcaecati tenetur iure eius earum ut molestias architecto voluptate aliquam
-nihil, eveniet aliquid culpa officia aut! Impedit sit sunt quaerat, odit,
-tenetur error, harum nesciunt ipsum debitis quas aliquid. Reprehenderit,
-quia. Quo neque error repudiandae fuga? Ipsa laudantium molestias eos
-sapiente officiis modi at sunt excepturi expedita sint? Sed quibusdam
-recusandae alias error harum maxime adipisci amet laborum.
+Diagram of every component of the infrastructure for only a single environment (for a better view):
+
+<!-- TODO Add digram for sonly sigle 1 env -->
+![](https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg)
+
+> **Note**
+> Obviously, the number of EC2 instances (cluster nodes) can be different depending on the traffic load and/or your needs.
+
+
+### Kubernetes resources
+
+K8s resources even though are not strictly part of the infrastructure are still core and probably the most important part of software running within our nodes.
+
+K8s resources in this project are responsible for among others running Argo CD, AWS ALB controller, resources core for the cluster (e.g. kube-proxy, coredns, metrics-server, HPA), and finally serving and running either main React-Nginx Website and Argo CD Dashboard.
+
+<!-- TODO Add some graphic with k8s resources -->
+![](https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg)
+
+TODO Above diagram shows all of the K8s resources that run within the cluster (from all namespaces).
 
 
 # Clean up
@@ -555,10 +553,11 @@ If you find an issue, please report it on the
 
 ## License and Authorship
 
-This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blob/main/LICENSE) and was entirely created by myself. If you want to publically use this repo in any way I would be so thankful to leave a reference to my GitHub profile, thanks!
+This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blob/main/LICENSE) and was entirely created by myself. If you want to publicly use this repo in any way I would be so thankful to leave a reference to my GitHub profile, thanks!
 
 
 
+<!--TODO check for XXX TODO-->
 <!--TODO give somewhere link to docker hub project-->
 <!--TODO write somewhere that the website for the project may not work at the moment because I shut down the entire infrastructure when I do not enhance the project in order to not spend money when I don't have to ;). But every relevant website's appearance should be available to see in this README.md-->
 <!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
