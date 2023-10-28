@@ -516,6 +516,32 @@ Diagram of every component of the infrastructure for only a single environment (
 > **Note**
 > Obviously, the number of EC2 instances (cluster nodes) can be different depending on the traffic load and/or your needs.
 
+### Infrastructure costs
+
+The price of running the entire infrastructure (with 3 environments) can vary depending on your specific setup. Some variables are easy to calculate (e.g. cost of EKS service) but some services can be completely different depending on configuration and traffic load (e.g. cost of EC2 instances). In the below calculations, the biggest unknown is the number and size of EC2 instances that you want to run. This will completely depend on variables like the specification of your app and its popularity.
+
+In our assumptions, we use an overall 50 t3.medium instances. According to [article on concurrencylabs.com](https://www.concurrencylabs.com/blog/5-steps-for-finding-optimal-ec2-infrastructure/#test-4---t3medium---1000-concurrent-users) it's good to have 11 instances in size t3.medium for 1,000 active users at the time. Let's assume our app has a little under 5,000 active users on average, so we will run 50 t3.medium instances (for all 3 clusters) because for dev and staging, we will run on average only 2 instances for each.
+
+> **Note**
+> All calculations below take into account the use of the AWS Free Tier.
+
+Cost of services that will be common among all configurations:
+- Hosted zone for your domain in Amazon Route 53 (if you use this service for your domain) - <b>$0.50</b>
+- 3 running EKS clusters working whole month - <b>$216</b> ($0.10 per hour per cluster)
+- 3 customer-managed Amazon KMS keys - <b>$3</b> ($1/month (prorated hourly) for a single created KMS key)
+
+In summary approximately <b>$222.50</b>
+
+Cost of services that will are impossible to calculate in advance:
+- Cost of nodes that are running within the EKS clusters. Let's assume we overall (in 3 clusters) use 50 t3.medium Linux/UNIX Spot instances in US East (N. Virginia) working the entire month - <b>$1,497.6</b> (approximately~ 0.0416 USD per hour)
+- Cost of services that can easily exceed the Free Tier Limit. Numerous services will for sure exceed their free limits thresholds while used in production, let's assume that will cost is - <b>$20</b>
+
+In summary approximately <b>$1,517.60</b>
+
+Summing up all of the minimal costs (assuming basic, average usage of EC2 service) we got in big approximation <b>$1,740</b>.
+
+It is a very small price for an application with that computing power, scalability, and 3 environments. Of course, there could (and probably will be) other costs related to AWS infrastructure that you will incur depending on your needs (e.g. you don't have a purchased domain for your website, you would want to run nodes in private subnets so you will have to pay for EC2 NatGateway, and so on).
+
 
 ### Kubernetes resources
 
@@ -555,7 +581,7 @@ The domains for the websites of the Golden-DevOps project (e.g. https://goldende
 
 # Registries
 
-Currently, there are 2 registries used for this project - GitHub Packages <img src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/icon-github-packages.png?raw=true" alt="GitHub Packages Icon" width="35px" style="vertical-align:middle;"> and Docker Hub <img src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/docker-hub.png?raw=true" alt="Docker Hub Icon" width="55px" style="vertical-align:middle;">
+<p>Currently, there are 2 registries used for this project - GitHub Packages <img src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/icon-github-packages.png?raw=true" alt="GitHub Packages Icon" width="35px" align="center"> and Docker Hub <img src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/icon-docker-hub.png?raw=true" alt="Docker Hub Icon" width="55px" align="center"></p>
 
 <b>GitHub Packages</b> is treated as the playground registry where are stored both testing and official images. Link to this registry for this repo is [here](https://github.com/JakubSzuber?tab=packages&repo_name=Golden-DevOps).
 
@@ -581,11 +607,7 @@ If you find an issue, please report it on the
 This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blob/main/LICENSE) and was entirely created by myself. If you want to publicly use this repo in any way I would be so thankful to leave a reference to my GitHub profile, thanks!
 
 
-<!--TODO Write somewhere that: Implementation of another service like for instance new Postgres container is very facilitated. To do so uncomment and possibly modify the following files depending on your needs: [docker-compose.dev.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.dev.yml), [docker-compose.test.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/docker-compose.test.yml), [integration.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/integration.yml)-->
-
 <!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons). Rememeber to write sth like "AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup" https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff-->
-
-<!--TODO write somewhere about the costs of the entire infrastructure, and what can cause price fluctuations (will EC2 instances will be placed on public or private subnets, what will be the size, number, and work hours of those instances, do you already have a purchased domain, etc.)-->
 
 <!--TODO write something about which and how GitOps deployment models ware implemented (push-base and pull-based)-->
 

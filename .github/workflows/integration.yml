@@ -202,7 +202,12 @@ jobs:
         run: |
           docker run --rm ghcr.io/jakubszuber/react-nginx-image-unit-test:"$GITHUB_RUN_ID" sh -c "cd /test-app && npm test"
 
-  # You can also do Integration Testing with usage of Docker Compose if you would like to use multiple different containers for the application logic
+  # You can also do Integration Testing with the usage of Docker Compose if you would like to use
+  # multiple different containers for the application logic.
+  # Implementation of another service like for instance, a new Postgres container is very facilitated.
+  # To do so uncomment and possibly modify the commented lines in docker-compose.dev.yml,
+  # docker-compose.test.yml, and in this file uncomment the below job and modify "needs:" in a few jobs
+  #
   #  test-integration:
   #    name: Integration Tests In Compose
   #    needs: [build-test-image]

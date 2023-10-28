@@ -2,24 +2,25 @@ services:
   main-test-service:
     image: "${TESTING_IMAGE}"
 
-  postgres:
-    image: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - ./healthchecks:/healthchecks
-    healthcheck:
-      test: /healthchecks/postgres-healthcheck
-      interval: "5s"
+# Uncomment the lines of code related to Postgres if you want to use it
+  # postgres:
+  #   image: postgres
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #   volumes:
+  #     - ./healthchecks:/healthchecks
+  #   healthcheck:
+  #     test: /healthchecks/postgres-healthcheck
+  #     interval: "5s"
 
   main-end-service:
     image: "${TESTING_IMAGE}"
     depends_on:
       main-test-service:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
+      # postgres:
+      #   condition: service_healthy
     # Run all your tests here against the main-test-service service
     # You can also change the port and/or "http" to "https" depending on your needs
     command: curl --fail http://main-test-service:8080 || exit 1
