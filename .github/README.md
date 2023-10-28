@@ -11,7 +11,7 @@
   [![Helm CI/CD](https://github.com/JakubSzuber/Golden-DevOps/workflows/Helm%20Chart/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/helm-test.yml)
 </div>
 
-Golden-DevOps is a fully open-source project that uses all core DevOps tools and practices. It is a complete example of the repository with the implementation of automation, scalability, containerization, availability, and DevOps/GitOps philosophy. From the perspective of the application logic, it's the simplest React-Nginx app with one static page. Using code from this repo and with help of instructions and tips in this README you can very easily deploy this app in AWS EKS through Terraform.
+Golden-DevOps is a fully open-source project that uses all core DevOps tools and practices. It is a complete example of the repository with the implementation of automation, scalability, containerization, availability, and DevOps philosophy extended to match all of 4 [GitOps Principles](https://opengitops.dev/) and use Pull-Based GitOps deployment model which is generally considered as the best modern deployment strategy. From the perspective of the application logic, it's the simplest React-Nginx app with one static page. Using code from this repo and with the help of instructions and tips in this README, you can very easily deploy this app in AWS EKS through Terraform.
 
 The purpose of this repo is to showcase how to set up an app and everything related to it in the most modern way with usage of DevOps/GitOps tools and best practises, so at the end you will have working 3 separete and practically identical environment (Development, Staging/QA, Production) and each o them will have two domains, one with TLS secured React page and the second one for TLS secured ArgoCD Dashboard.
 
@@ -27,7 +27,7 @@ After the right setup (mostly changing the values for your particular case - mor
 - <b>Automated and rapid updates with zero downtime</b> - This project is created along with DevOps practices. In a nutshell application lifecycle ([more here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)) looks like that: developer merge a PR with changes and the [workflow](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/delivery.yml) responsible for CD builds a new container with the newest applied changes and push it to Docker Hub Registry, and after that changes the used tag in K8s deployments for each environment so in their configuration is used the newest container's tag with applied changes. Then Argo CD running within each cluster automatical notices that change and deploy the new container gradually - in each pod but not on all of them at the same time, so there is practically no downtime because the traffic is continually routed to either the pod with changes or old pod that waits for its turn. This gives us extremely easy and potentially very frequent updates for our app (for both the Development and Operations teams) whenever we want.
 - <b>Ease of replication and short Mean Time to Recovery (MTTR)</b> - This project has defined the entire infrastructure in Terraform files that don't replicate themselves (to manage multiple env Terraform Workspaces is used). This gives us the ability to very easily and rapidly deploy some new environment or spin up the environment that was already created but for some reason failed. We don't have to create anything manually in some cloud provider's console and we don't have to make any new files/directories to spin up a new environment from scratch.
 - <b>Great development experience</b> - This project has a load of features that significantly help the development team by e.g. making the setup process very effortless and rapid, automating repetitive and complicated tasks, helping with configuring IDE. More about development experience ([here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#source-code-pipeline)). Furthermore, a lot of other tasks are completely automated to reduce the work of the developers. See below point.
-- <b>Easy team collaboration</b> - This project has implemented [Kanban Board](https://github.com/users/JakubSzuber/projects/3) as a GitHub Project with 4 columns - Considering, TODO, In Progress, and Done. Moreover, you can define individuals or teams that are responsible for particular code in a repository by [CODEOWNERS](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/CODEOWNERS) file. Basically, entire purpose of [.github](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github) directory is to enhance the experience while using this repo and facilitate team cooperation.
+- <b>Easy team collaboration</b> - This project has implemented a load of features that enhance team collaboration on the repository and allow us to easily implement new updates with potentially very high frequency by making the entire development workflow very efficient. First of all this repository uses [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow) branch-based workflow which promotes simplicity, collaboration, communication, reviews, and continuous integration for fast, incremental updates. Furthermore, this project has created [Kanban Board](https://github.com/users/JakubSzuber/projects/3) as a GitHub Project with 4 columns - Considering, TODO, In Progress, and Done. Moreover, you can define individuals or teams that are responsible for particular code in a repository by [CODEOWNERS](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/CODEOWNERS) file. Basically, the entire purpose of [.github](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github) directory is to enhance the experience while using this repo and facilitate team cooperation.
 - <b>Other automations</b> - This project uses a lot of GHA workflow to automate numerous tasks. Examples of automated tasks are - publishing new releases, marking/deleting old PR and Issues, version updates of GHA workflows' actions, Terraform modules and providers, dependencies in package.json and package-lock.json, and obviously lifecycles of source code, Terraform files, and Helm Chart. To insight more about what things are automated through GHA workflows see [.github/workflows](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/workflows).
 - <b>Easy rollbacks</b> - This project has implemented Argo CD and stores everything as a code within Git repo. This gives us very easy rollbacks because it's only a matter of undoing a particular commit by `git revert` or `git remove` and the previous state of everything will be restored, no matter if is it a thing related to Terraform file(s), source code or anything else. For example when you undo a commit that was doing a change in Terraform files then GHA workflows responsible for Terraform CI/CD will apply the changes. Another example is that you want to go back to the previous version of your main application (actually the previous container's tag), then you just have to undo a commit(s) that was pushed automatically by [delivery.yml](https://github.com/JakubSzuber/Golden-DevOps/tree/main/.github/workflows/delivery.yml) and Argo CD will automatically notice that tags of the main application container changed and apply the changes. So a real state of everything related to the application will reflect the exact state of current files stored within the repo.
 - <b>Low latency</b> - This project uses static content served by Nginx which is later cached by AWS CDN - Amazon CloudFront, so the latency of the application should be minimal (also because the source code in this project is very simple, in order to only showcase how to create React app).
@@ -516,7 +516,7 @@ Diagram of every component of the infrastructure for only a single environment (
 > **Note**
 > Obviously, the number of EC2 instances (cluster nodes) can be different depending on the traffic load and/or your needs.
 
-### Infrastructure costs
+## Infrastructure costs
 
 The price of running the entire infrastructure (with 3 environments) can vary depending on your specific setup. Some variables are easy to calculate (e.g. cost of EKS service) but some services can be completely different depending on configuration and traffic load (e.g. cost of EC2 instances). In the below calculations, the biggest unknown is the number and size of EC2 instances that you want to run. This will completely depend on variables like the specification of your app and its popularity.
 
@@ -542,8 +542,7 @@ Summing up all of the minimal costs (assuming basic, average usage of EC2 servic
 
 It is a very small price for an application with that computing power, scalability, and 3 environments. Of course, there could (and probably will be) other costs related to AWS infrastructure that you will incur depending on your needs (e.g. you don't have a purchased domain for your website, you would want to run nodes in private subnets so you will have to pay for EC2 NatGateway, and so on).
 
-
-### Kubernetes resources
+## Kubernetes resources
 
 K8s resources even though are not strictly part of the infrastructure are still core and probably the most important part of software running within our nodes.
 
@@ -607,15 +606,10 @@ If you find an issue, please report it on the
 This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blob/main/LICENSE) and was entirely created by myself. If you want to publicly use this repo in any way I would be so thankful to leave a reference to my GitHub profile, thanks!
 
 
-<!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons). Rememeber to write sth like "AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup" https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff-->
-
-<!--TODO write something about which and how GitOps deployment models ware implemented (push-base and pull-based)-->
-
-<!--TODO write something about which git branching strategy is used in this repo (probably feature branches and/or forking reporitory....)-->
-
-<!--TODO test does every link works right-->
 
 <!--TODO Make sure that real repo file structure is shown at the README in tree-file structure (probably it's not because I have to at least add images in "/images folder")-->
+
+<!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons). Rememeber to write sth like "AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup" https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff-->
 
 <!--TODO Add more sections-->
 
