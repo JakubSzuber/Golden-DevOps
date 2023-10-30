@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1
+# Tell the BuildKit image builder in Docker to use Dockerfile frontend for support of new features
+
 FROM node:20.8.0-bullseye-slim AS development
 
 # Set working directory
