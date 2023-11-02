@@ -389,7 +389,7 @@ In order to debug code in VSC make sure that you have [.vscode/launch.json](http
 Note that the initial start, compiling and automatic reload of the website's content can take a little more time than usual. If you encounter any problems with dev
 work try to restart the container, your whole Docker and eventually WSL2.
 
-<!-- TODO add here demo of the right project -->
+<!-- TODO add here demo of the right project (REMEMBER TO record a gif for below TODO) -->
 <details>
 <summary><b>Click to see the demo</b></summary>
 
@@ -398,6 +398,7 @@ https://user-images.githubusercontent.com/90647840/213922371-848ff6b3-60a8-4db2-
 
 On the initial run you should see a similar website on either [localhost:80](http://localhost:80) or [localhost:3000](http://localhost:3000):
 
+<!-- TODO Add gif of this react website on localhost -->
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/local-preview.png?raw=true" alt="Local website preview"/>
 
 To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
@@ -525,19 +526,19 @@ In our assumptions, we use an overall 50 t3.medium instances. According to [arti
 > All calculations below take into account the use of the AWS Free Tier.
 
 Cost of services that will be common among all configurations:
-- Hosted zone for your domain in Amazon Route 53 (if you use this service for your domain) - <b>$0.50</b>
-- 3 running EKS clusters working whole month - <b>$216</b> ($0.10 per hour per cluster)
-- 3 customer-managed Amazon KMS keys - <b>$3</b> ($1/month (prorated hourly) for a single created KMS key)
+- Hosted zone for your domain in Amazon Route 53 (if you use this service for your domain) - <t style="color:red">$0.50</t>
+- 3 running EKS clusters working whole month - <t style="color:red">$216</t> ($0.10 per hour per cluster)
+- 3 customer-managed Amazon KMS keys - <t style="color:red">$3</t> ($1/month (prorated hourly) for a single created KMS key)
 
-In summary approximately <b>$222.50</b>
+In summary approximately <t style="color:red">$222.50</t>
 
 Cost of services that will are impossible to calculate in advance:
-- Cost of nodes that are running within the EKS clusters. Let's assume we overall (in 3 clusters) use 50 t3.medium Linux/UNIX Spot instances in US East (N. Virginia) working the entire month - <b>$1,497.6</b> (approximately~ 0.0416 USD per hour)
-- Cost of services that can easily exceed the Free Tier Limit. Numerous services will for sure exceed their free limits thresholds while used in production, let's assume that will cost is - <b>$20</b>
+- Cost of nodes that are running within the EKS clusters. Let's assume we overall (in 3 clusters) use 50 t3.medium Linux/UNIX Spot instances in US East (N. Virginia) working the entire month - <t style="color:red">$1,497.6</t> (approximately~ 0.0416 USD per hour)
+- Cost of services that can easily exceed the Free Tier Limit. Numerous services will for sure exceed their free limits thresholds while used in production, let's assume that will cost is - <t style="color:red">$20</t>
 
-In summary approximately <b>$1,517.60</b>
+In summary approximately <t style="color:red">$1,517.60</t>
 
-Summing up all of the minimal costs (assuming basic, average usage of EC2 service) we got in big approximation <b>$1,740</b>.
+Summing up all of the minimal costs (assuming basic, average usage of EC2 service) we got in big approximation <b style="color:red">$1,740</b>.
 
 It is a very small price for an application with that computing power, scalability, and 3 environments. Of course, there could (and probably will be) other costs related to AWS infrastructure that you will incur depending on your needs (e.g. you don't have a purchased domain for your website, you would want to run nodes in private subnets so you will have to pay for EC2 NatGateway, and so on).
 
