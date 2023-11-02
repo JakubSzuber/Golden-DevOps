@@ -505,8 +505,7 @@ Below diagrams show every component of the infrastructure for a particular numbe
 
 Diagram of every component of the infrastructure for 3 environments (each env one is exactly the same):
 
-<!-- TODO Add digram for all 3 envs -->
-![](https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg)
+<img src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/infra-diagram-3-env.gif?raw=true" alt="Infrastructure diagram with 3 environments">
 
 Diagram of every component of the infrastructure for only a single environment (for a better view):
 
