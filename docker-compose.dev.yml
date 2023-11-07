@@ -11,7 +11,7 @@ services:
 #    healthcheck:
 #      test: /healthchecks/postgres-healthcheck
 #      interval: "5s"
-  frontend:
+  frontend: &dev-react
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
@@ -31,6 +31,13 @@ services:
 #    depends_on:
 #      postgres:
 #        condition: service_healthy
+
+# You can create other services that will reference the "frontend" service to inherit its configuration
+#
+#  example-service:
+#    <<: *dev-react
+#    ports:
+#      - "8081:8081"
 
 #volumes:
 #  db:
