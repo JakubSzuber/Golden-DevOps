@@ -384,6 +384,7 @@ kubectl get secret argocd-initial-admin-secret -n argocd --template={{.data.pass
 
 Now you can log in as "admin" to <b>https://<disable link>argo.\<yourdomain>.com</b> or <b>https://\<environment>.argo.\<yourdomain>.com</b> depends on the cluster and see similar Argo CD Dashboard:
 
+<!-- TODO after implementing Karpenter and cert-manager you have to update that probably -->
 <img width="100%" src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/argocd-dashboard.jpg?raw=true" alt="A type aliases records" alt="Argo CD Dashboard preview"/>
 
 
@@ -616,6 +617,8 @@ This project uses [MIT License](https://github.com/JakubSzuber/Golden-DevOps/blo
 <!--TODO Make sure that real repo file structure is shown at the README in tree-file structure (probably it's not because I have to at least add images in "/images" folder)-->
 
 <!--TODO write what contains each terraform module (remember that "eks" module contains eks itself as well as the eks addons). Rememeber to write sth like "AWS LoadBalancer Controller dynamically deploy a new LB or add new ingress into the same LB based on the setup" https://fewmorewords.com/eks-with-argocd-using-terraform#heading-5-post-deployment-stuff-->
+
+<!--TODO you can change the diagrams of the infrastructure so it will be more accurate (e.g. AZs will be shown as not contains within VPCs)-->
 
 <!--TODO Add more sections-->
 
