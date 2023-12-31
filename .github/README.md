@@ -23,7 +23,7 @@ General infrastructure diagram ([more about infrastructure](https://github.com/J
 
 <img src="https://github.com/JakubSzuber/Golden-DevOps/blob/main/images/infra-diagram-3-env.gif?raw=true" alt="Infrastructure diagram with 3 environments">
 
-> **Important**
+> [!IMPORTANT]
 > Currently, [I](https://github.com/JakubSzuber) am the only one creator and maintainer of the code and ideas for this repo, and I would be so thankful for any feedback and GitHub stars, regards!
 
 ### Characteristics of an app that would use this repo:
@@ -42,7 +42,7 @@ General infrastructure diagram ([more about infrastructure](https://github.com/J
 - <b><t style="font-size:16px;">Great resource utilization</t></b> - This project is fully scalable (in terms of both the nodes and containers) to meet the exact needed demand. Moreover, the desired, minimal, maximal number of nodes is based on the [calculator](https://learnk8s.io/kubernetes-instance-calculator) that shows the most efficient configurations (you can also set the EC2 instance types that can be possibly used).
 - <b><t style="font-size:16px;">And a lot more...</t></b>
 
-> **Note**
+> [!TIP]
 > The source code, Helm chart, Terraform-managed infrastructures files, and all other files related to the project are stored in a single GitHub repo (but stored in a clean structured directory hierarchy) in order to keep all stuff in a single place for easier exploring and insight on all software, but for a real-world usage there is obviously no problem to separate some part of the content of this repo into separate repositories, it's even recommended, especially for larger teams or more complex application. 
 
 ## Development experience
@@ -303,7 +303,7 @@ The files/dirs that contain a lot of those "your-specific" values are:
 
 
 # How to use the repo (spin up everything)
-> **Note**
+> [!TIP]
 > If you encounter any problems using this repo to create your own infrastructure, try deleting everything and starting over. When creating several complex infrastructures sometimes there may be a temporary problem that may be caused by e.g. AWS. However, if that doesn't help feel free to use the [issue](https://github.com/JakubSzuber/Golden-DevOps/issues/new/choose) or [discussions](https://github.com/JakubSzuber/Golden-DevOps/discussions) section.
 
 ### A few initial manual steps
@@ -333,7 +333,7 @@ After successfull run of the worklfow you have to create A type aliases records 
 
 For example there is one of 3 pairs: "dev.yourdomain.com" and traffic routed to AWS ALB "dualstack.k8s-alb-111-222.us-east-1.elb.amazonaws.com." and "dev.argo.yourdomain.com" and traffic routed to the same AWS ALB. Do similar thing for staging and production (production will have pair of domains without env-specific subdomain - "yourdomain.com" and "argo.yourdomain.com").
 
-> **Note**
+> [!NOTE]
 > To find the right AWS ALB for the right pair of domains you can either enter the EC2->Load balancers or VPC interface to insight the infomation about in which VPC the specific AWS ALB is placed (name of the VPC will tell you which environment is that).
 
 <!-- TODO add here screenshot of the finished Route 53 setup -->
@@ -413,7 +413,7 @@ On the initial run you should see a similar website on either [localhost:80](htt
 
 To shut down Docker Compose use `docker compose -f docker-compose.dev.yml -v down`.
 
-> **Note**
+> [!TIP]
 > By the way, if you use VSC then you probably want to have features (highlighting, recommendations, etc) for .tpl files the same as you probably already have for your YAML files. To do so in VSC open e.g. ingress.tpl and in the bottom-right corner click on "plain-text", then scroll down and click on "YAML" so from now you will have .tpl files associated with the YAML files (treated the same as YAML files), what can be very helpful!
 
 
@@ -467,7 +467,7 @@ When all of the jobs end their work then the last job is executed - <b>"Notify S
 
 If any of the jobs fail or are canceled then the end result of the workflow is "Failure" which will be shown in the GHA interface and badge of the repository. In theory, failure of this workflow shouldn't happen because all tests that could raise an error to block the PR should be previously made by CI workflow, but if the workflow was triggered by a direct commit that contains some kind of bug/vulnerability then failure can absolutely happen. That's why branch protection for at least the main branch is important but of course, everything depends on your needs. Of course, if you modify the workflow by introducing some bug then the workflow can also fail.
 
-> **Important**
+> [!IMPORTANT]
 > If you suspect a temporary error of the workflow run caused by GHA then re-run failed and skipped jobs of the same workflow!
 
 
@@ -523,7 +523,7 @@ Diagram of every component of the infrastructure for only a single environment (
 <!-- TODO Add digram for only sigle 1 env -->
 ![](https://img.freepik.com/free-photo/grunge-black-concrete-textured-background_53876-124541.jpg)
 
-> **Note**
+> [!NOTE]
 > Obviously, the number of EC2 instances (cluster nodes) can be different depending on the traffic load and/or your needs.
 
 ## Infrastructure costs
@@ -532,7 +532,7 @@ The price of running the entire infrastructure (with 3 environments) can vary de
 
 In our assumptions, we use an overall 50 t3.medium instances. According to [article on concurrencylabs.com](https://www.concurrencylabs.com/blog/5-steps-for-finding-optimal-ec2-infrastructure/#test-4---t3medium---1000-concurrent-users) it's good to have 11 instances in size t3.medium for 1,000 active users at the time. Let's assume our app has a little under 5,000 active users on average, so we will run 50 t3.medium instances (for all 3 clusters) because for dev and staging, we will run on average only 2 instances for each.
 
-> **Note**
+> [!NOTE]
 > All calculations below take into account the use of the AWS Free Tier.
 
 Cost of services that will be common among all configurations:
@@ -573,7 +573,7 @@ To destroy the entire infrastructure (all 3 environments) and clean up everythin
 
 While deleting the Terraform-managed infrastructure it's good to watch the workflow's logs so in case of a long deletion process of some resource (especially VPC that can take a dozen minutes although deletion timeout of VPC resource is only 5 minutes) go to the AWS Console and manually delete this resource. This will speed up the deletion process and prevent the workflow's errors caused by deletion timeout errors of the Terraform Resources.
 
-> **Warning**
+> [!WARNING]
 > In case of a timeout failure of workflow responsible for cleaning up the entire Terraform-managed infrastructure [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) you have to comment out the right environment in infra-cleanup.yml and/or comment out the particular lines responsible for planning and destroying specific module(s) in reusable-infra-cleanup.yml.
 >
 > For example, in case of a timeout error because the deletion of production VPC took too long, first go to [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) and comment out the JSON values responsible for dev and staging environments, then go to [reusable-infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-infra-cleanup.yml) and in "Terraform Plan" step delete lines (in this case first 6 lines) are temporarily useless because "argocd" and "eks" modules were already deleted and attempt to do a "terraform plan" or "terraform destroy" on those modules will fail among others because the EKS Cluster endpoint is already deleted (remember to change "cd ../vpc" to "cd vpc"). Then delete the steps responsible for deleting the "argocd" and "eks modules". Now you can finally execute the workflow [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) once again and then undo the changes that you temporarily made to [infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/infra-cleanup.yml) and [reusable-infra-cleanup.yml](https://github.com/JakubSzuber/Golden-DevOps/blob/main/.github/workflows/reusable-infra-cleanup.yml)
@@ -596,7 +596,7 @@ The domains for the websites of the Golden-DevOps project (e.g. https://goldende
 
 <b>Docker Hub</b> is treated as the main registry where are stored only official images that should have passed the whole CI (unless there was a direct push or manual execution of CD workflow). Link to this registry for this repo is [here](https://hub.docker.com/repository/docker/jakubszuber/react-nginx-image/general).
 
-> **Note**
+> [!NOTE]
 > It's also recommended to, in your Docker Hub repository settings, turn new Docker feature - Docker Scout. It will allow you to analyze your images to help you understand their dependencies and potential vulnerabilities.
 >
 > It can among others give you Docker Scout integration directly within your Docker Hub Registry and an entirely separate Docker Scout website for your Docker Hub Account's Docker images under link https://scout.docker.com/ (you have to log in to your Docker Hub Account).
