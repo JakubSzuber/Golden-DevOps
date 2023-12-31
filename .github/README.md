@@ -42,6 +42,9 @@ General infrastructure diagram ([more about infrastructure](https://github.com/J
 - <b><t style="font-size:16px;">Great resource utilization</t></b> - This project is fully scalable (in terms of both the nodes and containers) to meet the exact needed demand. Moreover, the desired, minimal, maximal number of nodes is based on the [calculator](https://learnk8s.io/kubernetes-instance-calculator) that shows the most efficient configurations (you can also set the EC2 instance types that can be possibly used).
 - <b><t style="font-size:16px;">And a lot more...</t></b>
 
+> **Note**
+> The source code, Helm chart, Terraform-managed infrastructures files, and all other files related to the project are stored in a single GitHub repo (but stored in a clean structured directory hierarchy) in order to keep all stuff in a single place for easier exploring and insight on all software, but for a real-world usage there is obviously no problem to separate some part of the content of this repo into separate repositories, it's even recommended, especially for larger teams or more complex application. 
+
 ## Development experience
 
 This project has a load of features that significantly help the development team. First of all, when a developer wants to start the work with that project it's only a matter of cloning a repo and executing a single command (docker compose up) to spin up everything required to run a development environment to work properly. Guide about development setup [here](https://github.com/JakubSzuber/Golden-DevOps/tree/main#development-setup).
