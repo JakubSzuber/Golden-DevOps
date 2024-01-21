@@ -11,6 +11,8 @@ Dockerfile.production linguist-language=Dockerfile
 
 # Tell GitHub's Linguist tool to successfully detect file formats that are detected incorrectly or not at all 
 *.sql linguist-detectable=true
-*.tpl linguist-detectable=true
 *.yaml linguist-detectable=true
 *.json linguist-detectable=true
+*.json linguist-detectable=true
+
+nginx.conf linguist-detectable=true
