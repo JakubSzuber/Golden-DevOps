@@ -14,4 +14,5 @@ Dockerfile.production linguist-language=Dockerfile
 *.yaml linguist-detectable=true
 *.json linguist-detectable=true
 *.md linguist-language=Markdown
+README.md linguist-detectable=true
 nginx.conf linguist-detectable=true
