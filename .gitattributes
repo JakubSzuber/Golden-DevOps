@@ -14,5 +14,6 @@ Dockerfile.production linguist-language=Dockerfile
 *.yaml linguist-detectable=true
 *.json linguist-detectable=true
 *.json linguist-detectable=true
+*.tpl linguist-language=Go
 
 nginx.conf linguist-detectable=true
