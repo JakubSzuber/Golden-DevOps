@@ -1,10 +1,16 @@
 # Normalize line endings to avoid spurious failures in the core test suite on Windows
 * text=auto eol=lf
 
-# These lines are telling GitHub's Linguist tool to treat these Dockerfiles as regular, actual Dockerfiles (without extensions) for syntax highlighting and language statistics
+# Tell GitHub's Linguist tool to treat these Dockerfiles as regular, actual Dockerfiles (without extensions) for syntax highlighting and language statistics
 Dockerfile.dev linguist-language=Dockerfile
 Dockerfile.development linguist-language=Dockerfile
 Dockerfile.staging linguist-language=Dockerfile
 Dockerfile.qa linguist-language=Dockerfile
 Dockerfile.prod linguist-language=Dockerfile
 Dockerfile.production linguist-language=Dockerfile
+
+# Tell GitHub's Linguist tool to successfully detect file formats that are detected incorrectly or not at all 
+*.sql linguist-detectable=true
+*.tpl linguist-language=Go
+*.yaml linguist-detectable=true
+*.json linguist-detectable=true
