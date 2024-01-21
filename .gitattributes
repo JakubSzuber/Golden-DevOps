@@ -11,9 +11,8 @@ Dockerfile.production linguist-language=Dockerfile
 
 # Tell GitHub's Linguist tool to successfully detect file formats that are not found by default
 *.sql linguist-detectable=true
-*.yaml linguist-detectable=true
-install.yaml linguist-detectable=false
 *.json linguist-detectable=true
-*.md linguist-language=Markdown
-README.md linguist-detectable=true
+*.yaml linguist-detectable=true
+*.yml linguist-detectable=true
+install.yaml linguist-detectable=false
 nginx.conf linguist-detectable=true
