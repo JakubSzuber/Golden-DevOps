@@ -430,6 +430,10 @@ jobs:
   # is created by the Dependabot and the bump if for a patch update of dependency called "my-dependency").
   # Of course, the PR merge will take place if all of the tests succeed.
   #
+  # Moreover you can create the GitHub environment e.g. called "Review", assign some reviewers to it and assign 
+  # this env to this job to this env with "environment: Review" in order to introduce some manual approval
+  # to this entire dependabot automation process.
+  #
   #  dependabot-auto-merge:
   #    name: Do automatic PR merge (for Dependabot's PR)
   #    needs:  # Add "test-integration" if you use this job
