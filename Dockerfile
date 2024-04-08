@@ -53,7 +53,7 @@ CMD [ "nodemon", "--inspect=0.0.0.0:9229"]
 ### Stage for unit tests
 FROM development AS unit-test
 
-## Update apk and add npm
+## Update apt-get and add npm
 RUN apt-get update; \
     apt-get install -y --no-install-recommends npm=7.5.2+ds-2;
 
