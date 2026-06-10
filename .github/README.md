@@ -7,7 +7,6 @@
   [![Continuous Integration](https://github.com/JakubSzuber/Golden-DevOps/workflows/CI/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/integration.yml)
   [![Continuous Delivery](https://github.com/JakubSzuber/Golden-DevOps/workflows/CD/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/delivery.yml)
   [![Terraform Continuous Integration](https://github.com/JakubSzuber/Golden-DevOps/workflows/Terraform%20CI/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/terraform-ci.yml)
-  [![Terraform Continuous Delivery](https://github.com/JakubSzuber/Golden-DevOps/workflows/Terraform%20CD/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/terraform-cd.yml)
   [![Helm CI/CD](https://github.com/JakubSzuber/Golden-DevOps/workflows/Helm%20Chart/badge.svg)](https://github.com/JakubSzuber/Golden-DevOps/actions/workflows/helm-test.yml)
 </div>
 
