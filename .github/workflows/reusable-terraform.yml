@@ -85,7 +85,7 @@ jobs:
 
       - name: Comment PR about status of Terraform plan
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           PLAN: "terraform\n${{ steps.plan-vpc.outputs.stdout }}"
         with:
@@ -140,7 +140,7 @@ jobs:
 
       - name: Comment PR about status of Terraform plan
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           PLAN: "terraform\n${{ steps.plan-eks.outputs.stdout }}"
         with:
@@ -187,7 +187,7 @@ jobs:
 
       - name: Comment PR about status of Terraform plan
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           PLAN: "terraform\n${{ steps.plan-argocd.outputs.stdout }}"
         with:
